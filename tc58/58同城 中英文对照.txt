@@ -1,0 +1,26 @@
+58同城 中英文对照
+
+
+车型库 149 mongo 58tc 58tc_car
+
+brand_id  = 品牌id
+brandname = 品牌
+country = 所属国家
+familyname = 车系
+family_id = 车系id
+vehicle = 车型
+vehicle_id = 车型id
+year = 年款
+guide_price = 指导价
+grabtime = 抓取时间
+url = 抓取地址
+order = 计数
+status = 去重指纹
+
+估值 149 mongo 58tc 58tc_gz
+
+regDate = 上牌时间
+mile = 公里数
+city = 上牌城市
+low_price = 最低估值
+high_price = 最高估值

@@ -1,0 +1,21 @@
+易车车型库 149mongo yiche yiche_car
+
+grab_time   抓取时间
+brand_id   品牌id
+brand   品牌
+family_id   车系id
+familyname   车系
+vehicle_id   车型id
+vehicle   车型
+makeyear   年款
+guide_price   指导价
+power_type  动力类型
+engine   发动机
+gearbox   变速箱
+environmental_standards    环保标准
+number_of_seats   座位数
+displacement   排量
+drive_way   驱动方式
+maximum_cruising_range  最大续航里程
+url     获取地址
+status   去重：所有信息

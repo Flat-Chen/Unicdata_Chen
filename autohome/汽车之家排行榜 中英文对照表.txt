@@ -1,0 +1,13 @@
+149 mongo autohome autohome_rank_年月
+
+grabtime 抓取日期
+rank_name 榜单名称 共有销量榜、关注榜、降价榜、口碑榜四个榜单
+rank_date   榜单日期 销量榜单特有字段选项
+price   价格区间选项
+factory 国产 合资 进口 不限
+vehicle 车型
+rank 榜单排名
+seriesname  车系名称
+seriesid    车系ID
+Sort 具体数值
+url 获取榜单地址

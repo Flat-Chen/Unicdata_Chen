@@ -1,0 +1,77 @@
+第一电动公告号数据 中英文对照表
+mongo 149 gonggao diyidiandong
+
+grab_time  抓取时间
+url  抓取url
+status  去重：category + batch + serial_number + vehicle_model
+category  动力类型
+batch  批次
+serial_number   序号
+company  企业名称
+type  种类
+vehicle_model   车辆型号
+name  通用名
+mileage  续航里程
+car_quality  整车质量
+battery_quality  电池总质量
+battery_energy  电池总能量
+remarks  备注
+fuel_consumption  燃油消耗量
+engine_displacement  发动机排量
+
+
+
+商车网公告号数据
+mongo 149 gonggao shangche
+change_record  变更(扩展)记录
+name 公告标题
+announcement_model 公告型号
+batch 公告批次
+brand 品牌
+type 类型
+rated_quality   额定质量
+car_quality 总质量
+readiness_quality   整备质量
+fuel_type   燃料种类
+emissions_standards 排放依据标准
+axis    轴数
+wheelbase   轴距
+axle_load   轴荷
+spring_sheet    弹簧片数
+tires   轮胎数
+tire_specifications 轮胎规格
+departure_angle 接近离去角
+overhang    前悬后悬
+front_track 前轮距
+rear_track  后轮距
+identification  识别代号
+vehicle_length  整车长
+vehicle_width   整车宽
+vehicle_height  整车高
+cargo_length    货箱长
+cargo_width     货箱宽
+cargo_height    货箱高
+maximum_speed   最高车速
+rated_capacity  额定载客
+cab_ride        驾驶室准乘人数
+steering_type   转向形式
+totalmass_trailer_quality   准拖挂车总质量
+load_weight_use_factor  载质量利用系数
+maximum_loading_mass_saddle_trailer 半挂车鞍座最大承载质量
+company 企业名称
+company_address 企业地址
+phone   手机号码
+fax     传真号码
+postal  邮政编码
+chassis_1   地盘1
+chassis_2   地盘2
+chassis_3   地盘3
+chassis_4   地盘4
+engine_model    发动机型号
+engine_anufacturer  发动机生产企业
+engine_trademark    发动机商标
+engine_displacement 排量
+engine_power    功率
+remark  备注
+url 抓取url地址
+status 去重 url + batch + announcement_model + change_record
