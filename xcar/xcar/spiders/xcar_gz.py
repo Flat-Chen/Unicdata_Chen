@@ -40,10 +40,11 @@ class XcarGzSpider(scrapy.Spider):
         super(XcarGzSpider, self).__init__(**kwargs)
         self.counts = 0
         self.car_msg_df_new = car_msg_df_new
-        self.city_list = [{'province': '1', 'city_id': '475', 'city_name': '%e5%8c%97%e4%ba%ac%e5%b8%82'},
-                          {'province': '2', 'city_id': '507', 'city_name': '上海市'},
-                          {'province': '30', 'city_id': '347', 'city_name': '广州市'},
-                          {'province': '17', 'city_id': '386', 'city_name': '成都市'}]
+        self.city_list = [
+            {'province': '1', 'city_id': '475', 'city_name': '北京市'},
+            {'province': '2', 'city_id': '507', 'city_name': '上海市'},
+            {'province': '30', 'city_id': '347', 'city_name': '广州市'},
+            {'province': '17', 'city_id': '386', 'city_name': '成都市'}]
 
     is_debug = True
     custom_debug_settings = {
@@ -65,6 +66,7 @@ class XcarGzSpider(scrapy.Spider):
             city_name = city_dict['city_name']
             for index, rows in self.car_msg_df_new.iterrows():
                 vehicle_id = rows['vehicle_id']
+                # vehicle_id = '27491'
                 makeyear = int(rows['makeyear'])
                 if localyears > makeyear:
                     if localyears - makeyear >= 4:
@@ -75,7 +77,7 @@ class XcarGzSpider(scrapy.Spider):
                         if year == localyears:
                             month = localmonth - 1
                             # month = f"0{str(month)}" if month < 10 else month
-                            mile = '0_1'
+                            mile = '0.1'
                             regDate = str(year) + '-' + str(month) + '-' + '1'
                             data = {
                                 'mid': vehicle_id,
@@ -86,14 +88,13 @@ class XcarGzSpider(scrapy.Spider):
                                 'mileage': mile,
                                 'mobile': phoneNORandomGenerator()
                             }
-                            data = json.dumps(data)
-                            print(data)
-                            yield scrapy.Request(url=url, method='POST', body=data,
-                                                 meta={"info": (vehicle_id, regDate, mile, city_name)})
+                            # print(data)
+                            yield scrapy.FormRequest(url=url, formdata=data,
+                                                     meta={"info": (vehicle_id, regDate, mile, city_name)})
                         else:
                             month = localmonth
                             # month = f"0{str(month)}" if month < 10 else month
-                            mile = (localyears - year) * 2
+                            mile = str((localyears - year) * 2)
                             regDate = str(year) + '-' + str(month) + '-' + '1'
                             data = {
                                 'mid': vehicle_id,
@@ -104,16 +105,15 @@ class XcarGzSpider(scrapy.Spider):
                                 'mileage': mile,
                                 'mobile': phoneNORandomGenerator()
                             }
-                            data = json.dumps(data)
-                            print(data)
-                            yield scrapy.Request(url=url, method='POST', body=data,
-                                                 meta={"info": (vehicle_id, regDate, mile, city_name)})
+                            # print(data)
+                            yield scrapy.FormRequest(url=url, formdata=data,
+                                                     meta={"info": (vehicle_id, regDate, mile, city_name)})
                 else:
                     year = localyears
                     month = localmonth - 1
                     # month = f"0{str(month)}" if month < 10 else month
                     regDate = str(year) + '-' + str(month) + '-' + '1'
-                    mile = '0_1'
+                    mile = '0.1'
                     data = {
                         'mid': vehicle_id,
                         'province_id': province,
@@ -123,13 +123,15 @@ class XcarGzSpider(scrapy.Spider):
                         'mileage': mile,
                         'mobile': phoneNORandomGenerator()
                     }
-                    data = json.dumps(data)
-                    print(data)
-                    yield scrapy.Request(url=url, method='POST', body=data,
-                                         meta={"info": (vehicle_id, regDate, mile, city_name)})
-                break
-            break
+                    # print(data)
+                    yield scrapy.FormRequest(url=url, formdata=data,
+                                             meta={"info": (vehicle_id, regDate, mile, city_name)})
+
 
     def parse(self, response):
+        item = {}
+        vehicle_id, regDate, mile, city_name = response.meta.get('info')
         json_data = json.loads(response.text)
-        print(json_data)
+        # print(json_data)
+        eva_price = json_data['info']['eva_price']
+        print(vehicle_id, regDate, mile, city_name, eva_price)
