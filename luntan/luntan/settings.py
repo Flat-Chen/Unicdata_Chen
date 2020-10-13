@@ -33,7 +33,7 @@ ROBOTSTXT_OBEY = False
 COOKIES_ENABLED = True
 
 # Disable Telnet Console (enabled by default)
-# TELNETCONSOLE_ENABLED = False
+TELNETCONSOLE_ENABLED = False
 
 # Override the default request headers:
 # DEFAULT_REQUEST_HEADERS = {
@@ -88,8 +88,8 @@ ITEM_PIPELINES = {
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 # ES = [400, 403, 404, 408]
-RETRY_HTTP_CODES = [400, 403, 404, 408, 503, 301]
+RETRY_HTTP_CODES = [400, 403, 404, 408, 503, 301, 302]
 # 是否开启重试
 RETRY_ENABLED = True
 # 重试次数
-RETRY_TIMES = 5
+RETRY_TIMES = 50

@@ -10,9 +10,12 @@ import logging
 import os
 import pathlib
 from hashlib import md5
+
+import pandas as pd
 import pymongo
 from pybloom_live import ScalableBloomFilter
 from scrapy.exceptions import DropItem
+from sqlalchemy import create_engine
 
 
 class LuntanPipeline:
@@ -21,6 +24,10 @@ class LuntanPipeline:
         return cls(crawler.settings)
 
     def __init__(self, settings):
+        # mysql
+        self.conn = create_engine(
+            f'mysql+pymysql://{settings["MYSQL_USER"]}:{settings["MYSQL_PWD"]}@{settings["MYSQL_SERVER"]}:{settings["MYSQL_PORT"]}/{settings["MYSQL_DB"]}?charset=utf8')
+
         # mongo
         self.connection = pymongo.MongoClient(
             settings['MONGODB_SERVER'],
@@ -33,6 +40,7 @@ class LuntanPipeline:
         #     self.collection = db[settings['MONGODB_COLLECTION'] + '_' + str(local_time)]
         # else:
         self.collection = db[settings['MONGODB_COLLECTION']]
+        self.settings = settings
         # bloom file
         self.CrawlCar_Num = 1000000
         filename = str(pathlib.Path.cwd()) + '/blm/' + settings['MONGODB_DB'] + '/' + settings[
@@ -79,12 +87,16 @@ class LuntanPipeline:
             self.counts += 1
             logging.log(msg="scrapy                    " + str(self.counts) + "                  items",
                         level=logging.INFO)
-        else:
-            self.collection.insert(dict(item))
-            logging.log(msg="Car added to MongoDB database!", level=logging.INFO)
+        elif spider.name in ['autohome_luntan', 'autohome_luntan_lost']:
             self.counts += 1
-            logging.log(msg="scrapy                    " + str(self.counts) + "                  items",
-                        level=logging.INFO)
+            logging.log(msg=f"scrapy              " + str(self.counts) + "               items", level=logging.INFO)
+            # 数据存入mysql
+            items = list()
+            items.append(item)
+            df = pd.DataFrame(items)
+            df.to_sql(name=self.settings['MYSQL_TABLE'], con=self.conn, if_exists="append", index=False)
+            logging.log(msg=f"add data in mysql", level=logging.INFO)
+            return item
 
     def close_spider(self, spider):
         self.connection.close()
