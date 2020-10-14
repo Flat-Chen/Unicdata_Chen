@@ -55,7 +55,7 @@ class XiaozhuGzSpider(scrapy.Spider):
         'MONGODB_PORT': 27017,
         'MONGODB_DB': 'xiaozhu',
         'MONGODB_COLLECTION': 'xiaozhu_gz_update',
-        'CONCURRENT_REQUESTS': 8,
+        'CONCURRENT_REQUESTS': 32,
         'DOWNLOAD_DELAY': 0,
         'LOG_LEVEL': 'DEBUG',
         'DOWNLOAD_TIMEOUT': 15,
@@ -115,11 +115,11 @@ class XiaozhuGzSpider(scrapy.Spider):
         item['commonly_middle'] = data_dict['车况一般'][1]
         item['commonly_high'] = data_dict['车况一般'][0]
         item['good_low'] = data_dict['车况良好'][2]
-        item['good_middle'] = data_dict['车况良好'][2]
-        item['good_high'] = data_dict['车况良好'][2]
+        item['good_middle'] = data_dict['车况良好'][1]
+        item['good_high'] = data_dict['车况良好'][0]
         item['excellent_low'] = data_dict['车况优秀'][2]
-        item['excellent_middle'] = data_dict['车况优秀'][2]
-        item['excellent_high'] = data_dict['车况优秀'][2]
+        item['excellent_middle'] = data_dict['车况优秀'][1]
+        item['excellent_high'] = data_dict['车况优秀'][0]
         item["status"] = response.url + "-" + str(datetime.datetime.now().year) + "-" + str(
             datetime.datetime.now().month)
 
