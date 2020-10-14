@@ -41,7 +41,7 @@ class AutohomeLuntanLostSpider(scrapy.Spider):
     custom_debug_settings = {
         'MYSQL_SERVER': "192.168.1.94",
         'MYSQL_USER': "dataUser94",
-        'MYSQL_PWD': "c",
+        'MYSQL_PWD': "94dataUser@2020",
         'MYSQL_PORT': 3306,
         'MYSQL_DB': "saicnqms",
         'MYSQL_TABLE': "luntan_all_copy_lost",
