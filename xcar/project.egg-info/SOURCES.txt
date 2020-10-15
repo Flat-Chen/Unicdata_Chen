@@ -1,0 +1,14 @@
+setup.py
+project.egg-info/PKG-INFO
+project.egg-info/SOURCES.txt
+project.egg-info/dependency_links.txt
+project.egg-info/entry_points.txt
+project.egg-info/top_level.txt
+xcar/__init__.py
+xcar/items.py
+xcar/middlewares.py
+xcar/pipelines.py
+xcar/settings.py
+xcar/spiders/__init__.py
+xcar/spiders/xcar_car.py
+xcar/spiders/xcar_gz.py
