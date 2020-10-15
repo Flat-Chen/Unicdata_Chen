@@ -127,11 +127,22 @@ class XcarGzSpider(scrapy.Spider):
                     yield scrapy.FormRequest(url=url, formdata=data,
                                              meta={"info": (vehicle_id, regDate, mile, city_name)})
 
-
     def parse(self, response):
         item = {}
         vehicle_id, regDate, mile, city_name = response.meta.get('info')
         json_data = json.loads(response.text)
         # print(json_data)
         eva_price = json_data['info']['eva_price']
-        print(vehicle_id, regDate, mile, city_name, eva_price)
+        if eva_price is not 0:
+            # print(vehicle_id, regDate, mile, city_name, eva_price)
+            item["grabtime"] = time.strftime('%Y-%m-%d %X', time.localtime())
+            item['vehicle_id'] = vehicle_id
+            item['regData'] = regDate
+            item['mile'] = mile
+            item['city_name'] = city_name
+            item['eva_price'] = eva_price
+            item['status'] = vehicle_id + '-' + regDate + '-' + city_name + '-' + \
+                             time.strftime('%Y-%m', time.localtime()) + '-' + str(eva_price)
+            # print(item)
+            # print(json_data)
+            yield item
