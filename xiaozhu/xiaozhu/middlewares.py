@@ -27,7 +27,7 @@ class XiaozhuProxyMiddleware(object):
 
     def process_request(self, request, spider):
         #要使用代理的爬虫名字写进去
-        if spider.name in ['xiaozhu_gz', '']:
+        if spider.name in ['xiaozhu_gz', 'xiaozhu_url']:
             proxy = getProxy()
             request.meta['proxy'] = "http://" + proxy
 

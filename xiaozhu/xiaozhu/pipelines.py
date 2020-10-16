@@ -70,7 +70,7 @@ class XiaozhuPipeline:
 
     def process_item(self, item, spider):
         # mongo要有重字段status的爬虫名字写进去
-        if spider.name in ["", " "]:
+        if spider.name in ["xiaozhu_url", " "]:
             valid = True
             i = md5(item['status'].encode("utf8")).hexdigest()
             returndf = self.df.add(i)
