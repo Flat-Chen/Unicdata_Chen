@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# 逻辑是先运行xiaozhu_url 将所有要爬取的URL存到数据库
+# 该爬虫直接从数据库取URL爬取 对比总量看遗漏
 import scrapy
 import time
 import pymongo
@@ -6,17 +8,24 @@ import pandas as pd
 import datetime
 import re
 
+from pandas import DataFrame
+
 settings = {
-    "MONGODB_SERVER": "192.168.1.94",
+    "MONGODB_SERVER": "192.168.2.149",
     "MONGODB_PORT": 27017,
-    "MONGODB_DB": "residual_value",
-    "MONGODB_COLLECTION": "xiaozhu_modellist",
+    "MONGODB_DB": "xiaozhu",
+    "MONGODB_COLLECTION": "xiaozhu_url_2020-10-16",
 }
 uri = f'mongodb://{settings["MONGODB_SERVER"]}:{settings["MONGODB_PORT"]}/'
 
 connection = pymongo.MongoClient(uri)
 db = connection[settings['MONGODB_DB']]
 collection = db[settings['MONGODB_COLLECTION']]
+model_data = collection.find({}, {"status": 1, "_id": 0})
+
+car_msg_list = list(model_data)
+car_msg_df = DataFrame(car_msg_list)
+car_msg_df_new = car_msg_df.drop_duplicates('status')
 
 
 class XiaozhuGzSpider(scrapy.Spider):
@@ -34,14 +43,7 @@ class XiaozhuGzSpider(scrapy.Spider):
     def __init__(self, **kwargs):
         super(XiaozhuGzSpider, self).__init__(**kwargs)
         self.counts = 0
-        self.city_list = ["beijing", "shanghai", "chengdu", "guangzhou"]
-        data = pd.DataFrame(list(collection.find()))
-        data = data[data["output"].notnull()]
-        self.data = data.loc[:, ["model_id", "year"]]
-        self.data["year"].astype('int')
-        self.now_year = datetime.datetime.now().year
-        now_month = datetime.datetime.now().month
-        self.now_month = f"0{str(now_month)}" if now_month < 10 else now_month
+        self.car_msg_df_new = car_msg_df_new
 
     is_debug = True
     custom_debug_settings = {
@@ -71,25 +73,9 @@ class XiaozhuGzSpider(scrapy.Spider):
     }
 
     def start_requests(self):
-        for index, rows in self.data.iterrows():
-            if rows["year"] < self.now_year - 4:
-                year_list = [i for i in range(rows["year"], rows["year"] + 4)]
-                year_dic = {year: (self.now_year - year) * 20000 for year in year_list}
-                for k, v in year_dic.items():
-                    if v == 0:
-                        v = 1000
-                    for city in self.city_list:
-                        url = f"https://www.xiaozhu2.com/appraisal/w{city}-x{rows['model_id']}-y{k}{self.now_month}-z{v}.html"
-                        yield scrapy.Request(url=url, dont_filter=True)
-            else:
-                year_list = [i for i in range(rows["year"], self.now_year + 1)]
-                year_dic = {year: (self.now_year - year) * 20000 for year in year_list}
-                for k, v in year_dic.items():
-                    if v == 0:
-                        v = 1000
-                    for city in self.city_list:
-                        url = f"https://www.xiaozhu2.com/appraisal/w{city}-x{rows['model_id']}-y{k}{self.now_month}-z{v}.html"
-                        yield scrapy.Request(url=url, dont_filter=True)
+        for index, rows in self.car_msg_df_new.iterrows():
+            url = rows['status']
+            yield scrapy.Request(url=url)
 
     def parse(self, response):
         item = dict()
