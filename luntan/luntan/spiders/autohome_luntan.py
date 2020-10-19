@@ -107,11 +107,11 @@ class AutohomeLuntanSpider(scrapy.Spider):
                 item['tiezi_url'] = url = pinglun_url["url"]
                 yield item
                 # 就是要把这个tiezi_url存起来 进行比对
-        if int(pinglun_url_dict["result"]["list"][-1]['postdate'].split('-')[1]) > 8:
-            url = "https://club.autohome.com.cn/frontapi/topics/getByBbsId?pageindex={}&pagesize=100&bbs=c&bbsid={}&fields=topicid%2Ctitle%2Cpost_memberid%2Cpost_membername%2Cpostdate%2Cispoll%2Cispic%2Cisrefine%2Creplycount%2Cviewcount%2Cvideoid%2Cisvideo%2Cvideoinfo%2Cqainfo%2Ctags%2Ctopictype%2Cimgs%2Cjximgs%2Curl%2Cpiccount%2Cisjingxuan%2Cissolve%2Cliveid%2Clivecover%2Ctopicimgs&orderby=topicid-"
-            response.meta["page"] = response.meta["page"] + 1
-            url = url.format(response.meta["page"], response.meta["id"], )
-            yield scrapy.Request(url=url,
-                                 callback=self.page_turning,
-                                 meta=response.meta, headers=self.headers)
-            print(response.meta["page"])
+            if int(pinglun_url_dict["result"]["list"][-1]['postdate'].split('-')[1]) > 8:
+                url = "https://club.autohome.com.cn/frontapi/topics/getByBbsId?pageindex={}&pagesize=100&bbs=c&bbsid={}&fields=topicid%2Ctitle%2Cpost_memberid%2Cpost_membername%2Cpostdate%2Cispoll%2Cispic%2Cisrefine%2Creplycount%2Cviewcount%2Cvideoid%2Cisvideo%2Cvideoinfo%2Cqainfo%2Ctags%2Ctopictype%2Cimgs%2Cjximgs%2Curl%2Cpiccount%2Cisjingxuan%2Cissolve%2Cliveid%2Clivecover%2Ctopicimgs&orderby=topicid-"
+                response.meta["page"] = response.meta["page"] + 1
+                url = url.format(response.meta["page"], response.meta["id"], )
+                yield scrapy.Request(url=url,
+                                     callback=self.page_turning,
+                                     meta=response.meta, headers=self.headers)
+                print(response.meta["page"])
