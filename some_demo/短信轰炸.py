@@ -105,8 +105,6 @@ def ssjj(phone):
     url = 'http://ptlogin.4399.com/ptlogin/sendPhoneLoginCode.do?phone={}&appId=www_home&v=1&sig=&t={}&v=1'.format \
         (phone, int(time.time() * 1000))
     response = requests.get(url)
-    print(response)
-    print(response.text)
     if '4' in response.text:
         print('4399信息发送成功!')
     else:
