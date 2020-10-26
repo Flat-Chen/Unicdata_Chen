@@ -35,11 +35,11 @@ class LuntanPipeline:
         )
         db = self.connection[settings['MONGODB_DB']]
         website = settings["WEBSITE"]
-        # local_time = time.strftime('%Y-%m-%d', time.localtime())
-        # if website in ["pcauto_price", "yiche_price", "autohome_price"]:
-        #     self.collection = db[settings['MONGODB_COLLECTION'] + '_' + str(local_time)]
-        # else:
         self.collection = db[settings['MONGODB_COLLECTION']]
+        # count
+        self.mysqlcounts = 0
+        self.counts = 0
+
         self.settings = settings
         # bloom file
         self.CrawlCar_Num = 1000000
@@ -66,7 +66,8 @@ class LuntanPipeline:
         self.counts = 0
 
     def process_item(self, item, spider):
-        if spider.name in ["taoche_car", "taoche_gz"]:
+        # mongo要有重字段status的爬虫名字写进去
+        if spider.name in ["xiaozhu_url", " "]:
             valid = True
             i = md5(item['status'].encode("utf8")).hexdigest()
             returndf = self.df.add(i)
@@ -81,15 +82,38 @@ class LuntanPipeline:
                 logging.log(msg="scrapy                    " + str(self.counts) + "                  items",
                             level=logging.INFO)
                 return item
-        elif spider.name in ["autohome_price_new", "yiche_price", "pcauto_price", "58car_price"]:
+        # mongo不需要去重的爬虫名字写进去
+        elif spider.name in ["xiaozhu_gz", " "]:
             self.collection.insert(dict(item))
             logging.log(msg="Car added to MongoDB database!", level=logging.INFO)
             self.counts += 1
             logging.log(msg="scrapy                    " + str(self.counts) + "                  items",
                         level=logging.INFO)
-        elif spider.name in ['autohome_luntan', 'autohome_luntan_lost']:
-            self.counts += 1
-            logging.log(msg=f"scrapy              " + str(self.counts) + "               items", level=logging.INFO)
+            return item
+        # mysql有要去重字段status的爬虫名字写进去
+        elif spider.name in ['autohome_luntan', ' ']:
+            valid = True
+            i = md5(item['status'].encode("utf8")).hexdigest()
+            returndf = self.df.add(i)
+            if returndf:
+                valid = False
+                raise DropItem("Drop data {0}!".format(item["status"]))
+            else:
+                self.fa.flush()
+                self.fa.writelines(i + '\n')
+                self.mysqlcounts += 1
+                logging.log(msg=f"scrapy              {self.mysqlcounts}              items", level=logging.INFO)
+                # 数据存入mysql
+                items = list()
+                items.append(item)
+                df = pd.DataFrame(items)
+                df.to_sql(name=self.settings['MYSQL_TABLE'], con=self.conn, if_exists="append", index=False)
+                logging.log(msg=f"add data in mysql", level=logging.INFO)
+                return item
+        # mysql不需要去重的爬虫名字写进去
+        elif spider.name in ['baidu', '']:
+            self.mysqlcounts += 1
+            logging.log(msg=f"scrapy              {self.mysqlcounts}              items", level=logging.INFO)
             # 数据存入mysql
             items = list()
             items.append(item)
@@ -100,5 +124,4 @@ class LuntanPipeline:
 
     def close_spider(self, spider):
         self.connection.close()
-
         self.fa.close()
