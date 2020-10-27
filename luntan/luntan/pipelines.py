@@ -26,7 +26,7 @@ class LuntanPipeline:
     def __init__(self, settings):
         # mysql
         self.conn = create_engine(
-            f'mysql+pymysql://{settings["MYSQL_USER"]}:{settings["MYSQL_PWD"]}@{settings["MYSQL_SERVER"]}:{settings["MYSQL_PORT"]}/{settings["MYSQL_DB"]}?charset=utf8')
+            f'mysql+pymysql://{settings["MYSQL_USER"]}:{settings["MYSQL_PWD"]}@{settings["MYSQL_SERVER"]}:{settings["MYSQL_PORT"]}/{settings["MYSQL_DB"]}?charset=utf8mb4')
 
         # mongo
         self.connection = pymongo.MongoClient(
@@ -111,7 +111,7 @@ class LuntanPipeline:
                 logging.log(msg=f"add data in mysql", level=logging.INFO)
                 return item
         # mysql不需要去重的爬虫名字写进去
-        elif spider.name in ['baidu', '']:
+        elif spider.name in ['baidu', 'autohome_luntan_lost']:
             self.mysqlcounts += 1
             logging.log(msg=f"scrapy              {self.mysqlcounts}              items", level=logging.INFO)
             # 数据存入mysql

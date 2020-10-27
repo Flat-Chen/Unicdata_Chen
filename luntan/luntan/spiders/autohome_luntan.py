@@ -48,12 +48,12 @@ class AutohomeLuntanSpider(scrapy.Spider):
         'MYSQL_PWD': "94dataUser@2020",
         'MYSQL_PORT': 3306,
         'MYSQL_DB': "saicnqms",
-        'MYSQL_TABLE': "autohome_luntan_all_video_url",
+        'MYSQL_TABLE': "autohome_luntan_allurl",
         'MONGODB_SERVER': '192.168.1.94',
         'MONGODB_PORT': 27017,
         'MONGODB_DB': 'luntan',
         'MONGODB_COLLECTION': 'autohome_luntan_1',
-        'CONCURRENT_REQUESTS': 8,
+        'CONCURRENT_REQUESTS': 128,
         'DOWNLOAD_DELAY': 0,
         'LOG_LEVEL': 'DEBUG',
         # 'DOWNLOAD_TIMEOUT': 5,
@@ -97,32 +97,30 @@ class AutohomeLuntanSpider(scrapy.Spider):
                             car_id)
                         yield scrapy.Request(url=url, callback=self.page_turning,
                                              meta=meta,
-                                             headers=self.headers)
+                                             headers=self.headers,
+                                             dont_filter=True)
 
     def page_turning(self, response):
         # print(response.text)
         meta = response.meta
         item = {}
-        pinglun_url_dict = json.loads(response.text)
+        pinglun_url_dict = json.loads(response.text, encoding=None)
         if pinglun_url_dict["returncode"] != 0:
             return
         else:
             for pinglun_url in pinglun_url_dict["result"]["list"]:
-                if pinglun_url['isvideo'] is not 1:
-                    # 过滤掉视频的帖子
-                    pass
-                else:
-                    item["grabtime"] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-                    item['posted_time'] = pinglun_url['postdate']
-                    item["car_id"] = meta['id']
-                    item['user_car'] = meta['user_car']
-                    item['page'] = meta['page']
-                    item['brand'] = meta['brand']
-                    item['factory'] = meta['factory']
-                    item['tiezi_url'] = pinglun_url["url"]
-                    item['status'] = pinglun_url["url"]
-                    yield item
-                    # 就是要把这个tiezi_url存起来 进行比对
+                item["grabtime"] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+                item['posted_time'] = pinglun_url['postdate']
+                item["isvideo"] = pinglun_url['isvideo']
+                item["car_id"] = meta['id']
+                item['user_car'] = meta['user_car']
+                item['page'] = meta['page']
+                item['brand'] = meta['brand']
+                item['factory'] = meta['factory']
+                item['tiezi_url'] = pinglun_url["url"]
+                item['status'] = pinglun_url["url"]
+                yield item
+                # 就是要把这个tiezi_url存起来 进行比对
             # 只爬当前月份和前一个月份的帖子
             # 如当前页 最后一条的帖子的发帖时间是两个月前的则不再进行翻页
             if int(pinglun_url_dict["result"]["list"][-1]['postdate'].split('-')[1]) > int(
@@ -131,6 +129,6 @@ class AutohomeLuntanSpider(scrapy.Spider):
                 response.meta["page"] = response.meta["page"] + 1
                 url = url.format(response.meta["page"], response.meta["id"], )
                 yield scrapy.Request(url=url,
-                                     callback=self.page_turning,
-                                     meta=response.meta, headers=self.headers)
+                                     callback=self.page_turning, meta=response.meta, headers=self.headers,
+                                     dont_filter=True)
                 print(response.meta["page"])

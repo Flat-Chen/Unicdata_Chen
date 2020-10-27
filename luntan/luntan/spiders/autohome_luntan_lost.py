@@ -4,11 +4,12 @@ import re
 import time
 import pymysql
 import requests
+import pymongo
 import scrapy
+from pandas import DataFrame
 from fontTools.ttLib import TTFont
 from ..proxy import get_Proxy, User_AgentMiddleware
 from ..font import get_be_p1_list, get_map1
-
 from ..items import LuntanItem_Dazhogn
 
 
@@ -44,15 +45,15 @@ class AutohomeLuntanLostSpider(scrapy.Spider):
         'MYSQL_PWD': "94dataUser@2020",
         'MYSQL_PORT': 3306,
         'MYSQL_DB': "saicnqms",
-        'MYSQL_TABLE': "luntan_all_copy_lost",
+        'MYSQL_TABLE': "luntan_autohome_lost",
         'MONGODB_SERVER': '192.168.1.94',
         'MONGODB_PORT': 27017,
         'MONGODB_DB': 'luntan',
         'MONGODB_COLLECTION': 'autohome_luntan_lost',
-        'CONCURRENT_REQUESTS': 64,
+        'CONCURRENT_REQUESTS': 128,
         'DOWNLOAD_DELAY': 0,
         'LOG_LEVEL': 'DEBUG',
-        'DOWNLOAD_TIMEOUT': 6,
+        'DOWNLOAD_TIMEOUT': 30,
         # 'RETRY_ENABLED': True,
         # 'RETRY_TIMES': 1,
         # 'COOKIES_ENABLED': True,
@@ -69,27 +70,27 @@ class AutohomeLuntanLostSpider(scrapy.Spider):
 
     def start_requests(self):
         self.be_p1 = get_be_p1_list()
-        conn = pymysql.connect(
-            host='192.168.1.94',
-            user='dataUser94',
-            password='94dataUser@2020',
-            db='saicnqms',
-            charset='utf8'
-        )
-        cur = conn.cursor()
-        sql_countAll = "select tiezi_url from chaji_url"
-        cur.execute(sql_countAll)
-        # print(cur.fetchall())
-        countAll = cur.fetchall()
-        for urls in countAll:
-            yield scrapy.Request(url=urls[0], headers=self.headers, meta={'url': urls[0]})
+        connection = pymongo.MongoClient('192.168.2.149', 27017)
+        db = connection["luntan"]
+        collection = db["autohome_luntan_lost"]
+        lost_urls = collection.find({"isvideo": "0"}, {"url": 1, "brand": 1, "factory": 1, "_id": 0})
+        lost_urls_list = list(lost_urls)
+        for lost_url in lost_urls_list:
+            url = lost_url['url']
+            url = url.replace('http', 'https')
+            meta = {'brand': lost_url['brand'], 'factory': lost_url['factory'], 'url': url}
+            yield scrapy.Request(url=url, meta=meta, headers=self.headers, dont_filter=True)
 
     def parse(self, response):
+        brand = response.meta['brand']
+        factory = response.meta['factory']
         if 'safety' in response.url:
             print('！！！！！！！！！！！！出现了验证码！！！！！！！！！！')
             print('！！！！！！！！！！！！重试这个url！！！！！！！！！！！')
-            retry_url = response.meta.get('url')
-            yield scrapy.Request(url=retry_url, headers=self.headers, meta={'url': retry_url}, callback=self.parse)
+            retry_url = response.meta['url']
+            yield scrapy.Request(url=retry_url, headers=self.headers,
+                                 meta={'url': retry_url, 'brand': brand, 'factory': factory}, callback=self.parse,
+                                 dont_filter=True)
         TFF_text_url = response.xpath("//style[@type='text/css']/text()").extract_first()
         url = re.findall(r"format\('embedded-opentype'\),url\('(.*?)'\) format\('woff'\)", TFF_text_url)
         if url == []:
@@ -102,8 +103,8 @@ class AutohomeLuntanLostSpider(scrapy.Spider):
             return
         item = LuntanItem_Dazhogn()
         item["information_source"] = 'autohome'
-        item["brand"] = None
-        item["factory"] = None
+        item["brand"] = brand
+        item["factory"] = factory
         item["title"] = response.xpath("//div[@id='consnav']/span[4]/text()").extract_first()
         item["grabtime"] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         item["parsetime"] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
