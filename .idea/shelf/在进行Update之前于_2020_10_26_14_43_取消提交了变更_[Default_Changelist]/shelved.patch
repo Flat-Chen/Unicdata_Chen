@@ -1,0 +1,111 @@
+Index: some_demo/str2unicode.ipynb
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- some_demo/str2unicode.ipynb	(date 1603369521762)
++++ some_demo/str2unicode.ipynb	(date 1603369521762)
+@@ -0,0 +1,36 @@
++{
++ "cells": [
++  {
++   "cell_type": "code",
++   "execution_count": null,
++   "metadata": {
++    "collapsed": true
++   },
++   "outputs": [],
++   "source": [
++    ""
++   ]
++  }
++ ],
++ "metadata": {
++  "kernelspec": {
++   "display_name": "Python 3",
++   "language": "python",
++   "name": "python3"
++  },
++  "language_info": {
++   "codemirror_mode": {
++    "name": "ipython",
++    "version": 2
++   },
++   "file_extension": ".py",
++   "mimetype": "text/x-python",
++   "name": "python",
++   "nbconvert_exporter": "python",
++   "pygments_lexer": "ipython2",
++   "version": "2.7.6"
++  }
++ },
++ "nbformat": 4,
++ "nbformat_minor": 0
++}
+\ No newline at end of file
+Index: some_demo/str2unicode.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- some_demo/str2unicode.py	(date 1603370492733)
++++ some_demo/str2unicode.py	(date 1603370492733)
+@@ -0,0 +1,14 @@
++# str1 = r'\u7701\u4efd\u4e2d\u6587\u540d'
++# str2 = str1.encode('utf-8').decode('unicode_escape')
++# print(str1)
++# print(str2)
++
++import json
++
++dict1 = {'value': '省份中文名'}
++dict2 = json.dumps(dict1)
++dict3 = json.loads(dict2)
++
++print(dict1, type(dict1))
++print(dict2, type(dict2))
++print(dict3, type(dict3))
+Index: .idea/misc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"JavaScriptSettings\">\r\n    <option name=\"languageLevel\" value=\"ES6\" />\r\n  </component>\r\n  <component name=\"ProjectRootManager\" version=\"2\" project-jdk-name=\"Python 3.7\" project-jdk-type=\"Python SDK\" />\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- .idea/misc.xml	(revision 17ddcb6ba66cef768016d10c8ce4a8a414d9ca48)
++++ .idea/misc.xml	(date 1603639169279)
+@@ -3,5 +3,5 @@
+   <component name="JavaScriptSettings">
+     <option name="languageLevel" value="ES6" />
+   </component>
+-  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.7" project-jdk-type="Python SDK" />
++  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.9" project-jdk-type="Python SDK" />
+ </project>
+\ No newline at end of file
+Index: .idea/Unicdata_Chen.iml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<module type=\"PYTHON_MODULE\" version=\"4\">\r\n  <component name=\"NewModuleRootManager\">\r\n    <content url=\"file://$MODULE_DIR$\" />\r\n    <orderEntry type=\"inheritedJdk\" />\r\n    <orderEntry type=\"sourceFolder\" forTests=\"false\" />\r\n  </component>\r\n  <component name=\"TestRunnerService\">\r\n    <option name=\"projectConfiguration\" value=\"Twisted Trial\" />\r\n    <option name=\"PROJECT_TEST_RUNNER\" value=\"Twisted Trial\" />\r\n  </component>\r\n</module>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- .idea/Unicdata_Chen.iml	(revision 17ddcb6ba66cef768016d10c8ce4a8a414d9ca48)
++++ .idea/Unicdata_Chen.iml	(date 1603639169112)
+@@ -1,12 +1,13 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <module type="PYTHON_MODULE" version="4">
+   <component name="NewModuleRootManager">
+-    <content url="file://$MODULE_DIR$" />
+-    <orderEntry type="inheritedJdk" />
++    <content url="file://$MODULE_DIR$">
++      <excludeFolder url="file://$MODULE_DIR$/venv" />
++    </content>
++    <orderEntry type="jdk" jdkName="Python 3.9" jdkType="Python SDK" />
+     <orderEntry type="sourceFolder" forTests="false" />
+   </component>
+   <component name="TestRunnerService">
+-    <option name="projectConfiguration" value="Twisted Trial" />
+     <option name="PROJECT_TEST_RUNNER" value="Twisted Trial" />
+   </component>
+ </module>
+\ No newline at end of file
