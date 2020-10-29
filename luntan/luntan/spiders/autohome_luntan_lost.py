@@ -27,7 +27,7 @@ class AutohomeLuntanLostSpider(scrapy.Spider):
 
     def __init__(self, **kwargs):
         super(AutohomeLuntanLostSpider, self).__init__(**kwargs)
-        self.num = 0
+        self.num = 1
         self.counts = 0
         self.word_list = ['呢', '近', '八', '着', '更', '短', '三', '少', '是', '大', '好', '上', '十', '低', '不', '的', '六', '很', '坏',
                           '长',
@@ -37,6 +37,10 @@ class AutohomeLuntanLostSpider(scrapy.Spider):
         self.font_map = {}
         self.headers = {'Referer': 'https://club.autohome.com.cn/',
                         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36"}
+        connection = pymongo.MongoClient('192.168.2.149', 27017)
+        db = connection["luntan"]
+        collection = db["autohome_luntan_lost2"]
+        self.collection = collection
 
     is_debug = True
     custom_debug_settings = {
@@ -50,10 +54,10 @@ class AutohomeLuntanLostSpider(scrapy.Spider):
         'MONGODB_PORT': 27017,
         'MONGODB_DB': 'luntan',
         'MONGODB_COLLECTION': 'autohome_luntan_lost',
-        'CONCURRENT_REQUESTS': 128,
+        'CONCURRENT_REQUESTS': 8,
         'DOWNLOAD_DELAY': 0,
         'LOG_LEVEL': 'DEBUG',
-        'DOWNLOAD_TIMEOUT': 30,
+        'DOWNLOAD_TIMEOUT': 20,
         # 'RETRY_ENABLED': True,
         # 'RETRY_TIMES': 1,
         # 'COOKIES_ENABLED': True,
@@ -70,86 +74,97 @@ class AutohomeLuntanLostSpider(scrapy.Spider):
 
     def start_requests(self):
         self.be_p1 = get_be_p1_list()
-        connection = pymongo.MongoClient('192.168.2.149', 27017)
-        db = connection["luntan"]
-        collection = db["autohome_luntan_lost"]
-        lost_urls = collection.find({"isvideo": "0"}, {"url": 1, "brand": 1, "factory": 1, "_id": 0})
+        lost_urls = self.collection.find({"isvideo": "0"}, {"url": 1, "brand": 1, "factory": 1, "_id": 1})
         lost_urls_list = list(lost_urls)
         for lost_url in lost_urls_list:
             url = lost_url['url']
-            url = url.replace('http', 'https')
-            meta = {'brand': lost_url['brand'], 'factory': lost_url['factory'], 'url': url}
-            yield scrapy.Request(url=url, meta=meta, headers=self.headers, dont_filter=True)
+            # url = 'https://club.autohome.com.cn/bbs/thread/63ba261ee071a64f/90667009-1.html'
+            meta = {'brand': lost_url['brand'], 'factory': lost_url['factory'], 'url': url, '_id': lost_url['_id']}
+            # meta = {'brand': '荣威', 'factory': '上汽乘用车', 'url': url}
+            yield scrapy.Request(url=url, meta=meta, headers=self.headers)
+            # break
 
     def parse(self, response):
         brand = response.meta['brand']
         factory = response.meta['factory']
+        _id = response.meta['_id']
         if 'safety' in response.url:
             print('！！！！！！！！！！！！出现了验证码！！！！！！！！！！')
             print('！！！！！！！！！！！！重试这个url！！！！！！！！！！！')
             retry_url = response.meta['url']
             yield scrapy.Request(url=retry_url, headers=self.headers,
-                                 meta={'url': retry_url, 'brand': brand, 'factory': factory}, callback=self.parse,
-                                 dont_filter=True)
-        TFF_text_url = response.xpath("//style[@type='text/css']/text()").extract_first()
-        url = re.findall(r"format\('embedded-opentype'\),url\('(.*?)'\) format\('woff'\)", TFF_text_url)
-        if url == []:
-            return
-        if "k3.autoimg.cn" in url[0]:
-            font_map = self.text_ttf("https:" + url[0])
+                                 meta={'url': retry_url, 'brand': brand, 'factory': factory, '_id': _id},
+                                 callback=self.parse, dont_filter=True)
         else:
-            font_map = self.text_ttf("https://k3.autoimg.cn" + url[0])
-        if font_map == 0:
-            return
-        item = LuntanItem_Dazhogn()
-        item["information_source"] = 'autohome'
-        item["brand"] = brand
-        item["factory"] = factory
-        item["title"] = response.xpath("//div[@id='consnav']/span[4]/text()").extract_first()
-        item["grabtime"] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-        item["parsetime"] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-        # 处理content
-        content_list = response.xpath("//div[@class='conttxt']")
-        content_list = content_list.xpath("string(.)").extract()
-        # print(content_list)
-        item["content"] = ""
-        for content in content_list:
-            if content == '':
-                continue
+            # print(response.text)
+            TFF_text_url = response.xpath("//style[@type='text/css']/text()").extract_first()
+            url = re.findall(r"format\('embedded-opentype'\),url\('(.*?)'\) format\('woff'\)", TFF_text_url)
+            if url == []:
+                return
+            if "k3.autoimg.cn" in url[0]:
+                font_map = self.text_ttf("https:" + url[0])
             else:
-                item["content"] += content.strip("\n").strip()
-        for font in font_map:
-            old = (r"\u" + font["key"].strip("uni").lower())
-            item["content"] = re.sub(old, font["value"], item["content"])
-        # print(item["content"])
-        item["url"] = response.url
-        item["user_name"] = response.xpath("//ul[@class='maxw']/li/a/@title").extract_first()
-        item["posted_time"] = response.xpath(
-            "//span[contains(text(),'发表于')]/following-sibling::span[1]/text()").extract_first()
-        item["user_car"] = response.xpath("//div[@class='consnav']/span[2]/a/text()").extract_first().strip("论坛")
-        province = response.xpath("//a[@title='查看该地区论坛']/text()").extract_first().split()
-        if len(province) == 2:
-            item["province"] = province[0]
-            item["region"] = province[1]
-        else:
-            item["province"] = province[0]
-            item["region"] = None
-        try:
-            tieziid = re.findall(r"/(\d*)-1.html", response.url)[0]
-        except:
-            item["click_num"] = 0
-        else:
-            item["click_num"] = self.get_click_num(tieziid)
-        item["reply_num"] = response.xpath("//font[@id='x-replys']/text()").extract_first()
-        item["statusplus"] = str(item["user_name"]) + str(item["title"]) + str(item["posted_time"]) + str(
-            item["province"]) + str(item["brand"]) + str(item["click_num"]) + str(item["reply_num"]) + str(17)
-        item["content_num"] = response.xpath("//a[@title='查看']/text()").extract_first().split("帖")[0]
-        if item["content"] == "":
-            return
-        else:
-            print('````````````````````````' + str(self.num) + '``````````````````````')
-            self.num = self.num + 1
-            yield item
+                font_map = self.text_ttf("https://k3.autoimg.cn" + url[0])
+            if font_map == 0:
+                return
+            item = LuntanItem_Dazhogn()
+            item["information_source"] = 'autohome'
+            item["brand"] = brand
+            item["factory"] = factory
+            item["title"] = response.xpath("//div[@id='consnav']/span[4]/text()").extract_first()
+            item["grabtime"] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+            item["parsetime"] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+            # 处理content
+            content_list = response.xpath("//div[@class='conttxt']")
+            content_list = content_list.xpath("string(.)").extract()
+            # print(content_list)
+            item["content"] = ""
+            for content in content_list:
+                if content == '':
+                    continue
+                else:
+                    item["content"] += content.strip("\n").strip()
+            for font in font_map:
+                old = (r"\u" + font["key"].strip("uni").lower())
+                item["content"] = re.sub(old, font["value"], item["content"])
+            # print(item["content"])
+            item["url"] = response.url
+            item["user_name"] = response.xpath("//ul[@class='maxw']/li/a/@title").extract_first()
+            item["posted_time"] = response.xpath(
+                "//span[contains(text(),'发表于')]/following-sibling::span[1]/text()").extract_first()
+            item["user_car"] = response.xpath("//div[@class='consnav']/span[2]/a/text()").extract_first().strip("论坛")
+            province = response.xpath("//a[@title='查看该地区论坛']/text()").extract_first().split()
+            if len(province) == 2:
+                try:
+                    item["province"] = province[0]
+                except:
+                    item["province"] = None
+                item["region"] = province[1]
+            else:
+                try:
+                    item["province"] = province[0]
+                except:
+                    item["province"] = None
+                item["region"] = None
+            try:
+                tieziid = re.findall(r"/(\d*)-1.html", response.url)[0]
+            except:
+                item["click_num"] = 0
+            else:
+                item["click_num"] = self.get_click_num(tieziid)
+            item["reply_num"] = response.xpath("//font[@id='x-replys']/text()").extract_first()
+            item["statusplus"] = str(item["user_name"]) + str(item["title"]) + str(item["posted_time"]) + str(
+                item["province"]) + str(item["brand"]) + str(item["click_num"]) + str(item["reply_num"]) + str(17)
+            item["content_num"] = response.xpath("//a[@title='查看']/text()").extract_first().split("帖")[0]
+            # print(item)
+            if item["content"] == "":
+                print('------------------------------------------内容为空，pass-----------------------------------')
+                self.collection.update({"_id": _id}, {"$set": {'content': 'isNone'}})
+                
+            else:
+                print('````````````````````````' + str(self.num) + '``````````````````````')
+                self.num = self.num + 1
+                yield item
 
     def text_ttf(self, url):
         # print(os.listdir())
@@ -185,7 +200,6 @@ class AutohomeLuntanLostSpider(scrapy.Spider):
 
     def get_click_num(self, data):
         url = "https://clubajax.autohome.com.cn/Detail/LoadX_Mini?topicId={}".format(data)
-
         text = requests.get(url=url, headers=self.headers).json()
         try:
             a = text["topicClicks"]["Views"]
