@@ -22,9 +22,12 @@ class GuaziCarSpider(scrapy.Spider):
 
     is_debug = True
     custom_debug_settings = {
-        'MYSQL_SERVER': '192.168.1.94',
-        'MYSQL_DB': 'chexiu',
-        'MYSQL_TABLE': 'chexiu',
+        'MYSQL_SERVER': '81.68.214.148',
+        'MYSQL_USER': "root",
+        'MYSQL_PWD': "1999",
+        'MYSQL_PORT': 3306,
+        'MYSQL_DB': "guazi",
+        'MYSQL_TABLE': "guazi_car",
         'MONGODB_SERVER': '192.168.2.149',
         'MONGODB_DB': 'guazi',
         'MONGODB_COLLECTION': 'guazi_car',
@@ -48,7 +51,6 @@ class GuaziCarSpider(scrapy.Spider):
                     url = f'https://api.guazi.com/clientUc/brand/type?seriesId={family_id}'
                     yield scrapy.Request(url=url, callback=self.vehicle_parse,
                                          meta={"info": (brand_id, brandname, family_id, familyname)})
-
 
     def vehicle_parse(self, response):
         brand_id, brandname, family_id, familyname = response.meta.get('info')
@@ -76,4 +78,4 @@ class GuaziCarSpider(scrapy.Spider):
                 item['seats'] = seats
                 item['url'] = response.url + str(vehicle_id)
                 item['status'] = item['url'] + '-' + str(vehicle_id) + '-' + str(vehicle)
-                print(item)
+                yield item

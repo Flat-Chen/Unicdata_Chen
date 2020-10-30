@@ -83,7 +83,7 @@ class LuntanPipeline:
                             level=logging.INFO)
                 return item
         # mongo不需要去重的爬虫名字写进去
-        elif spider.name in ["xiaozhu_gz", " "]:
+        elif spider.name in ["autohome_luntan_lost", " "]:
             self.collection.insert(dict(item))
             logging.log(msg="Car added to MongoDB database!", level=logging.INFO)
             self.counts += 1
@@ -111,7 +111,7 @@ class LuntanPipeline:
                 logging.log(msg=f"add data in mysql", level=logging.INFO)
                 return item
         # mysql不需要去重的爬虫名字写进去
-        elif spider.name in ['baidu', 'autohome_luntan_lost', 'autohome_luntan_video']:
+        elif spider.name in ['baidu', '', 'autohome_luntan_video']:
             self.mysqlcounts += 1
             logging.log(msg=f"scrapy              {self.mysqlcounts}              items", level=logging.INFO)
             # 数据存入mysql

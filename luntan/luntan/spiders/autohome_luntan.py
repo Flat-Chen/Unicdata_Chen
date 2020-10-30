@@ -54,7 +54,7 @@ class AutohomeLuntanSpider(scrapy.Spider):
         'MONGODB_DB': 'luntan',
         'MONGODB_COLLECTION': 'autohome_luntan_1',
         'CONCURRENT_REQUESTS': 8,
-        'DOWNLOAD_DELAY': 0.5,
+        'DOWNLOAD_DELAY': 0,
         'LOG_LEVEL': 'DEBUG',
         # 'DOWNLOAD_TIMEOUT': 5,
         # 'RETRY_ENABLED': False,
@@ -124,7 +124,7 @@ class AutohomeLuntanSpider(scrapy.Spider):
             # 只爬当前月份和前一个月份的帖子
             # 如当前页 最后一条的帖子的发帖时间是两个月前的则不再进行翻页
             if int(pinglun_url_dict["result"]["list"][-1]['postdate'].split('-')[1]) > int(
-                    datetime.datetime.now().month) - 2:
+                    datetime.datetime.now().month) - 3:
                 url = "https://club.autohome.com.cn/frontapi/topics/getByBbsId?pageindex={}&pagesize=100&bbs=c&bbsid={}&fields=topicid%2Ctitle%2Cpost_memberid%2Cpost_membername%2Cpostdate%2Cispoll%2Cispic%2Cisrefine%2Creplycount%2Cviewcount%2Cvideoid%2Cisvideo%2Cvideoinfo%2Cqainfo%2Ctags%2Ctopictype%2Cimgs%2Cjximgs%2Curl%2Cpiccount%2Cisjingxuan%2Cissolve%2Cliveid%2Clivecover%2Ctopicimgs&orderby=topicid-"
                 response.meta["page"] = response.meta["page"] + 1
                 url = url.format(response.meta["page"], response.meta["id"], )
