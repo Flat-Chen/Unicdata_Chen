@@ -5,6 +5,7 @@ import logging
 import random
 import time
 
+import pymongo
 import requests
 import scrapy
 
@@ -40,6 +41,10 @@ class AutohomeLuntanSpider(scrapy.Spider):
                         '五菱汽车': '上汽通用五菱',
                         '依维柯': '南京依维柯'}
         self.brand_lsit = ["斯柯达", '名爵', '荣威', '上海', '大众', '上汽MAXUS', '别克', '凯迪拉克', '雪佛兰', '宝骏', '新宝骏', '五菱汽车', '依维柯']
+        connection = pymongo.MongoClient('192.168.2.149', 27017)
+        db = connection["luntan"]
+        collection = db["autohome_luntan_family_lost"]
+        self.collection = collection
 
     is_debug = True
     custom_debug_settings = {
@@ -56,9 +61,9 @@ class AutohomeLuntanSpider(scrapy.Spider):
         'CONCURRENT_REQUESTS': 8,
         'DOWNLOAD_DELAY': 0,
         'LOG_LEVEL': 'DEBUG',
-        # 'DOWNLOAD_TIMEOUT': 5,
+        'DOWNLOAD_TIMEOUT': 15,
         # 'RETRY_ENABLED': False,
-        # 'RETRY_TIMES': 1,
+        'RETRY_TIMES': 30,
         # 'COOKIES_ENABLED': True,
         # 'REDIS_URL': 'redis://192.168.1.241:6379/14',
         # 'DOWNLOADER_MIDDLEWARES': {
@@ -104,7 +109,12 @@ class AutohomeLuntanSpider(scrapy.Spider):
         # print(response.text)
         meta = response.meta
         item = {}
-        pinglun_url_dict = json.loads(response.text, encoding=None)
+        try:
+            pinglun_url_dict = json.loads(response.text, encoding=None)
+        except:
+            print('------------------------------------------内容解析失败-----------------------------------')
+            self.collection.insert({'url': response.url, 'brand': meta['brand'], 'factory': meta['factory'],
+                                    'grabtime': time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())})
         if pinglun_url_dict["returncode"] != 0:
             return
         else:

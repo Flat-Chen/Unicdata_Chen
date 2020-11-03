@@ -98,7 +98,9 @@ class AutohomeLuntanLostSpider(scrapy.Spider):
         else:
             # print(response.text)
             TFF_text_url = response.xpath("//style[@type='text/css']/text()").extract_first()
+            print(TFF_text_url)
             url = re.findall(r"format\('embedded-opentype'\),url\('(.*?)'\) format\('woff'\)", TFF_text_url)
+            print(url)
             if url == []:
                 print(response.url)
                 print('url是空列表')
@@ -169,7 +171,7 @@ class AutohomeLuntanLostSpider(scrapy.Spider):
             else:
                 print('````````````````````````' + str(self.num) + '``````````````````````')
                 self.num = self.num + 1
-                yield item
+                # yield item
                 # print(item)
 
     def text_ttf(self, url):

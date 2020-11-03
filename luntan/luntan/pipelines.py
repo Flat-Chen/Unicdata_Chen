@@ -91,7 +91,7 @@ class LuntanPipeline:
                         level=logging.INFO)
             return item
         # mysql有要去重字段status的爬虫名字写进去
-        elif spider.name in ['autohome_luntan', '']:
+        elif spider.name in ['', '']:
             valid = True
             i = md5(item['status'].encode("utf8")).hexdigest()
             returndf = self.df.add(i)
@@ -111,7 +111,7 @@ class LuntanPipeline:
                 logging.log(msg=f"add data in mysql", level=logging.INFO)
                 return item
         # mysql不需要去重的爬虫名字写进去
-        elif spider.name in ['baidu', '', 'autohome_luntan_video']:
+        elif spider.name in ['baidu', 'autohome_luntan', 'autohome_luntan_video']:
             self.mysqlcounts += 1
             logging.log(msg=f"scrapy              {self.mysqlcounts}              items", level=logging.INFO)
             # 数据存入mysql
