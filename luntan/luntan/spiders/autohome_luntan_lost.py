@@ -39,7 +39,7 @@ class AutohomeLuntanLostSpider(scrapy.Spider):
                         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36"}
         connection = pymongo.MongoClient('192.168.2.149', 27017)
         db = connection["luntan"]
-        collection = db["autohome_luntan_lost3"]
+        collection = db["autohome_luntan_lost4"]
         self.collection = collection
 
     is_debug = True
@@ -53,9 +53,9 @@ class AutohomeLuntanLostSpider(scrapy.Spider):
         'MONGODB_SERVER': '192.168.2.149',
         'MONGODB_PORT': 27017,
         'MONGODB_DB': 'luntan',
-        'MONGODB_COLLECTION': 'luntan_autohome_lost',
-        'CONCURRENT_REQUESTS': 1,
-        'DOWNLOAD_DELAY': 0.5,
+        'MONGODB_COLLECTION': 'luntan_autohome_lost4',
+        'CONCURRENT_REQUESTS': 8,
+        'DOWNLOAD_DELAY': 0,
         'LOG_LEVEL': 'DEBUG',
         'DOWNLOAD_TIMEOUT': 20,
         # 'RETRY_ENABLED': True,
@@ -78,7 +78,6 @@ class AutohomeLuntanLostSpider(scrapy.Spider):
         lost_urls_list = list(lost_urls)
         for lost_url in lost_urls_list:
             url = lost_url['url']
-            # url = 'https://club.autohome.com.cn/bbs/thread/63ba261ee071a64f/90667009-1.html'
             meta = {'brand': lost_url['brand'], 'factory': lost_url['factory'], 'url': url, '_id': lost_url['_id']}
             # meta = {'brand': '荣威', 'factory': '上汽乘用车', 'url': url}
             yield scrapy.Request(url=url, meta=meta, headers=self.headers, dont_filter=True)
@@ -98,9 +97,9 @@ class AutohomeLuntanLostSpider(scrapy.Spider):
         else:
             # print(response.text)
             TFF_text_url = response.xpath("//style[@type='text/css']/text()").extract_first()
-            print(TFF_text_url)
+            # print(TFF_text_url)
             url = re.findall(r"format\('embedded-opentype'\),url\('(.*?)'\) format\('woff'\)", TFF_text_url)
-            print(url)
+            # print(url)
             if url == []:
                 print(response.url)
                 print('url是空列表')
@@ -171,7 +170,7 @@ class AutohomeLuntanLostSpider(scrapy.Spider):
             else:
                 print('````````````````````````' + str(self.num) + '``````````````````````')
                 self.num = self.num + 1
-                # yield item
+                yield item
                 # print(item)
 
     def text_ttf(self, url):
