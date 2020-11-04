@@ -96,9 +96,9 @@ class AutohomeLuntanLostSpider(scrapy.Spider):
                                  callback=self.parse, dont_filter=True)
         else:
             # print(response.text)
-            TFF_text_url = response.xpath("//style[@type='text/css']/text()").extract_first()
+            # TFF_text_url = response.xpath("//style[@type='text/css']/text()").extract_first()
             # print(TFF_text_url)
-            url = re.findall(r"format\('embedded-opentype'\),url\('(.*?)'\) format\('woff'\)", TFF_text_url)
+            url = re.findall(r"format\('embedded-opentype'\),url\('(.*?)'\) format\('woff'\)", response.text)
             # print(url)
             if url == []:
                 print(response.url)
