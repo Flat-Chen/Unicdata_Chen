@@ -52,7 +52,7 @@ class AutohomeSpiderProxyMiddleware(object):
             return request
 
     def process_request(self, request, spider):
-        if spider.name in ['autohome_rank', 'a16888', 'chexiang', 'iecity']:
+        if spider.name in ['autohome_rank', 'a16888', 'chexiang', 'iecity', 'nantong_16888']:
             # if self.count < 2:
             #     request.meta['proxy'] = self.proxy
             #     self.count += 1

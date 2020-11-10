@@ -134,21 +134,18 @@ def jiancebaogao2(url):
     return item
 
 
-url_list = ['https://m.chaboshi.cn/wap/findShareDetection?orderno=709c4319f5c543e4a45760721942864b',
-            'https://m.chaboshi.cn/wap/findShareDetection?orderno=371274f31db142d3be83caf7d5ee144f',
-            'https://m.chaboshi.cn/wap/findShareDetection?orderno=7d4ba984454748448d51b4353e210017',
-            'https://m.chaboshi.cn/wap/findShareDetection?orderno=849bb7abb7394d7985a0c5c6d73e695a',
-            'https://m.chaboshi.cn/wap/findShareDetection?orderno=2666e18b46a343e48f0a56bdd9b6670d',
-            'https://m.chaboshi.cn/wap/findShareDetection?orderno=d58ab6fca707488388f27930b6c0a78f',
-            'https://m.chaboshi.cn/wap/findShareDetection?orderno=6795e8c6c7394f209c4e31aac48f95df']
+url_list = ['https://m.chaboshi.cn/wap/findShareDetection?orderno=4338692e26d94172b5948f119d238784',
+            'https://m.chaboshi.cn/wap/findShareDetection?orderno=802f43443a5e462baceb8500f34aac65',
+            'https://m.chaboshi.cn/wap/findShareDetection?orderno=c506fdf1ef974ff4ab5a759539e16ea3',
+            ]
 
 connection = pymongo.MongoClient("192.168.2.149", 27017)
 db = connection['chaboshi']
-collection = db['report2.0']
+collection = db['report3.0']
 for url in url_list:
     item = {}
     meta = jiancebaogao2(url)
     item['url'] = url
     item['grab_time'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     item['meta'] = meta
-    collection.insert(dict(item))
+    collection.insert_one(dict(item))

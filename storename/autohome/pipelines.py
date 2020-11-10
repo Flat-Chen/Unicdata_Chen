@@ -61,7 +61,7 @@ class AutohomePipeline(object):
         self.counts = 0
 
     def process_item(self, item, spider):
-        if spider.name in ["111", 'a16888', 'chexiang', 'iecity']:
+        if spider.name in ["111", 'a16888', 'chexiang', 'iecity', '']:
             valid = True
             i = md5(item['status'].encode("utf8")).hexdigest()
             returndf = self.df.add(i)
@@ -76,7 +76,7 @@ class AutohomePipeline(object):
                 logging.log(msg="scrapy                    " + str(self.counts) + "                  items",
                             level=logging.INFO)
                 # return item
-        elif spider.name in ["autohome_rank", "yiche_price", "pcauto_price", "58car_price"]:
+        elif spider.name in ["autohome_rank", "yiche_price", "pcauto_price", "58car_price", 'nantong_16888']:
             self.collection.insert(dict(item))
             logging.log(msg="Car added to MongoDB database!", level=logging.INFO)
             self.counts += 1

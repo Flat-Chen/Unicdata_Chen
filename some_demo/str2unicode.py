@@ -6,8 +6,8 @@
 import json
 
 dict1 = {'value': '省份中文名'}
-dict2 = json.dumps(dict1)
-dict3 = json.loads(dict2)
+dict2 = json.dumps(dict1, ensure_ascii=False)
+dict3 = json.dumps(dict1)
 
 print(dict1, type(dict1))
 print(dict2, type(dict2))
