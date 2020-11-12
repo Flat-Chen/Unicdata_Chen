@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ttFont sfntVersion="\x00\x01\x00\x00" ttLibVersion="4.12">
+
+  <GlyphOrder>
+    <!-- The 'id' attribute is only for humans; it is ignored when parsed. -->
+    <GlyphID id="0" name=".notdef"/>
+    <GlyphID id="1" name="uniECBD"/>
+    <GlyphID id="2" name="uniEDFE"/>
+    <GlyphID id="3" name="uniEC5C"/>
+    <GlyphID id="4" name="uniED9C"/>
+    <GlyphID id="5" name="uniECE9"/>
+    <GlyphID id="6" name="uniED3B"/>
+    <GlyphID id="7" name="uniEC87"/>
+    <GlyphID id="8" name="uniECD9"/>
+    <GlyphID id="9" name="uniEC26"/>
+    <GlyphID id="10" name="uniED66"/>
+    <GlyphID id="11" name="uniEDB8"/>
+    <GlyphID id="12" name="uniED05"/>
+    <GlyphID id="13" name="uniEC51"/>
+    <GlyphID id="14" name="uniECA3"/>
+    <GlyphID id="15" name="uniEDE4"/>
+    <GlyphID id="16" name="uniEC41"/>
+    <GlyphID id="17" name="uniED82"/>
+    <GlyphID id="18" name="uniECCF"/>
+    <GlyphID id="19" name="uniED20"/>
+    <GlyphID id="20" name="uniEC6D"/>
+    <GlyphID id="21" name="uniEDAE"/>
+    <GlyphID id="22" name="uniEDFF"/>
+    <GlyphID id="23" name="uniED4C"/>
+    <GlyphID id="24" name="uniED9E"/>
+    <GlyphID id="25" name="uniECEA"/>
+    <GlyphID id="26" name="uniEC37"/>
+    <GlyphID id="27" name="uniEC89"/>
+    <GlyphID id="28" name="uniEDC9"/>
+    <GlyphID id="29" name="uniED16"/>
+    <GlyphID id="30" name="uniED68"/>
+    <GlyphID id="31" name="uniECB4"/>
+    <GlyphID id="32" name="uniED06"/>
+    <GlyphID id="33" name="uniEC53"/>
+    <GlyphID id="34" name="uniED93"/>
+    <GlyphID id="35" name="uniEDE5"/>
+    <GlyphID id="36" name="uniED32"/>
+    <GlyphID id="37" name="uniEC7E"/>
+    <GlyphID id="38" name="uniECD0"/>
+  </GlyphOrder>
+
+  <head>
+    <!-- Most of this table will be recalculated by the compiler -->
+    <tableVersion value="1.0"/>
+    <fontRevision value="6.21"/>
+    <checkSumAdjustment value="0x8d120768"/>
+    <magicNumber value="0x5f0f3cf5"/>
+    <flags value="00100000 00011001"/>
+    <unitsPerEm value="2048"/>
+    <created value="Fri Jul 18 15:30:55 1997"/>
+    <modified value="Mon Jun  4 02:43:17 2018"/>
+    <xMin value="3"/>
+    <yMin value="-293"/>
+    <xMax value="2048"/>
+    <yMax value="1734"/>
+    <macStyle value="00000000 00000000"/>
+    <lowestRecPPEM value="9"/>
+    <fontDirectionHint value="1"/>
+    <indexToLocFormat value="0"/>
+    <glyphDataFormat value="0"/>
+  </head>
+
+  <hhea>
+    <tableVersion value="0x00010000"/>
+    <ascent value="2167"/>
+    <descent value="-536"/>
+    <lineGap value="0"/>
+    <advanceWidthMax value="2048"/>
+    <minLeftSideBearing value="12"/>
+    <minRightSideBearing value="-9"/>
+    <xMaxExtent value="2057"/>
+    <caretSlopeRise value="1"/>
+    <caretSlopeRun value="0"/>
+    <caretOffset value="0"/>
+    <reserved0 value="0"/>
+    <reserved1 value="0"/>
+    <reserved2 value="0"/>
+    <reserved3 value="0"/>
+    <metricDataFormat value="0"/>
+    <numberOfHMetrics value="2"/>
+  </hhea>
+
+  <maxp>
+    <!-- Most of this table will be recalculated by the compiler -->
+    <tableVersion value="0x10000"/>
+    <numGlyphs value="39"/>
+    <maxPoints value="103"/>
+    <maxContours value="7"/>
+    <maxCompositePoints value="0"/>
+    <maxCompositeContours value="0"/>
+    <maxZones value="2"/>
+    <maxTwilightPoints value="16"/>
+    <maxStorage value="47"/>
+    <maxFunctionDefs value="92"/>
+    <maxInstructionDefs value="0"/>
+    <maxStackElements value="2225"/>
+    <maxSizeOfInstructions value="2566"/>
+    <maxComponentElements value="0"/>
+    <maxComponentDepth value="0"/>
+  </maxp>
+
+  <OS_2>
+    <!-- The fields 'usFirstCharIndex' and 'usLastCharIndex'
+         will be recalculated by the compiler -->
+    <version value="3"/>
+    <xAvgCharWidth value="987"/>
+    <usWeightClass value="400"/>
+    <usWidthClass value="5"/>
+    <fsType value="00000000 00001000"/>
+    <ySubscriptXSize value="1434"/>
+    <ySubscriptYSize value="1331"/>
+    <ySubscriptXOffset value="0"/>
+    <ySubscriptYOffset value="182"/>
+    <ySuperscriptXSize value="1434"/>
+    <ySuperscriptYSize value="1331"/>
+    <ySuperscriptXOffset value="0"/>
+    <ySuperscriptYOffset value="581"/>
+    <yStrikeoutSize value="102"/>
+    <yStrikeoutPosition value="655"/>
+    <sFamilyClass value="2053"/>
+    <panose>
+      <bFamilyType value="2"/>
+      <bSerifStyle value="11"/>
+      <bWeight value="5"/>
+      <bProportion value="3"/>
+      <bContrast value="2"/>
+      <bStrokeVariation value="2"/>
+      <bArmStyle value="4"/>
+      <bLetterForm value="2"/>
+      <bMidline value="2"/>
+      <bXHeight value="4"/>
+    </panose>
+    <ulUnicodeRange1 value="10000000 00000000 00000010 10000111"/>
+    <ulUnicodeRange2 value="00101000 11001111 00111100 01010010"/>
+    <ulUnicodeRange3 value="00000000 00000000 00000000 00010110"/>
+    <ulUnicodeRange4 value="00000000 00000000 00000000 00000000"/>
+    <achVendID value="MS  "/>
+    <fsSelection value="00000000 01000000"/>
+    <usFirstCharIndex value="60454"/>
+    <usLastCharIndex value="60927"/>
+    <sTypoAscender value="1663"/>
+    <sTypoDescender value="-519"/>
+    <sTypoLineGap value="9"/>
+    <usWinAscent value="2167"/>
+    <usWinDescent value="536"/>
+    <ulCodePageRange1 value="00000000 00000100 00000000 00011111"/>
+    <ulCodePageRange2 value="00000000 00000000 00000000 00000000"/>
+    <sxHeight value="1106"/>
+    <sCapHeight value="1549"/>
+    <usDefaultChar value="0"/>
+    <usBreakChar value="32"/>
+    <usMaxContext value="2"/>
+  </OS_2>
+
+  <hmtx>
+    <mtx name=".notdef" width="1428" lsb="179"/>
+    <mtx name="uniEC26" width="2048" lsb="60"/>
+    <mtx name="uniEC37" width="2048" lsb="20"/>
+    <mtx name="uniEC41" width="2048" lsb="24"/>
+    <mtx name="uniEC51" width="2048" lsb="52"/>
+    <mtx name="uniEC53" width="2048" lsb="14"/>
+    <mtx name="uniEC5C" width="2048" lsb="40"/>
+    <mtx name="uniEC6D" width="2048" lsb="24"/>
+    <mtx name="uniEC7E" width="2048" lsb="132"/>
+    <mtx name="uniEC87" width="2048" lsb="38"/>
+    <mtx name="uniEC89" width="2048" lsb="34"/>
+    <mtx name="uniECA3" width="2048" lsb="32"/>
+    <mtx name="uniECB4" width="2048" lsb="14"/>
+    <mtx name="uniECBD" width="2048" lsb="36"/>
+    <mtx name="uniECCF" width="2048" lsb="50"/>
+    <mtx name="uniECD0" width="2048" lsb="38"/>
+    <mtx name="uniECD9" width="2048" lsb="32"/>
+    <mtx name="uniECE9" width="2048" lsb="54"/>
+    <mtx name="uniECEA" width="2048" lsb="114"/>
+    <mtx name="uniED05" width="2048" lsb="26"/>
+    <mtx name="uniED06" width="2048" lsb="52"/>
+    <mtx name="uniED16" width="2048" lsb="62"/>
+    <mtx name="uniED20" width="2048" lsb="36"/>
+    <mtx name="uniED32" width="2048" lsb="28"/>
+    <mtx name="uniED3B" width="2048" lsb="54"/>
+    <mtx name="uniED4C" width="2048" lsb="40"/>
+    <mtx name="uniED66" width="2048" lsb="52"/>
+    <mtx name="uniED68" width="2048" lsb="36"/>
+    <mtx name="uniED82" width="2048" lsb="12"/>
+    <mtx name="uniED93" width="2048" lsb="60"/>
+    <mtx name="uniED9C" width="2048" lsb="32"/>
+    <mtx name="uniED9E" width="2048" lsb="22"/>
+    <mtx name="uniEDAE" width="2048" lsb="24"/>
+    <mtx name="uniEDB8" width="2048" lsb="186"/>
+    <mtx name="uniEDC9" width="2048" lsb="18"/>
+    <mtx name="uniEDE4" width="2048" lsb="32"/>
+    <mtx name="uniEDE5" width="2048" lsb="22"/>
+    <mtx name="uniEDFE" width="2048" lsb="12"/>
+    <mtx name="uniEDFF" width="2048" lsb="106"/>
+  </hmtx>
+
+  <cmap>
+    <tableVersion version="0"/>
+    <cmap_format_4 platformID="0" platEncID="3" language="0">
+      <map code="0xec26" name="uniEC26"/><!-- ???? -->
+      <map code="0xec37" name="uniEC37"/><!-- ???? -->
+      <map code="0xec41" name="uniEC41"/><!-- ???? -->
+      <map code="0xec51" name="uniEC51"/><!-- ???? -->
+      <map code="0xec53" name="uniEC53"/><!-- ???? -->
+      <map code="0xec5c" name="uniEC5C"/><!-- ???? -->
+      <map code="0xec6d" name="uniEC6D"/><!-- ???? -->
+      <map code="0xec7e" name="uniEC7E"/><!-- ???? -->
+      <map code="0xec87" name="uniEC87"/><!-- ???? -->
+      <map code="0xec89" name="uniEC89"/><!-- ???? -->
+      

@@ -1,0 +1,14 @@
+setup.py
+project.egg-info/PKG-INFO
+project.egg-info/SOURCES.txt
+project.egg-info/dependency_links.txt
+project.egg-info/entry_points.txt
+project.egg-info/top_level.txt
+xiaozhu/__init__.py
+xiaozhu/items.py
+xiaozhu/middlewares.py
+xiaozhu/pipelines.py
+xiaozhu/settings.py
+xiaozhu/spiders/__init__.py
+xiaozhu/spiders/xiaozhu_gz.py
+xiaozhu/spiders/xiaozhu_url.py
