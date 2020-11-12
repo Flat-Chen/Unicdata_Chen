@@ -42,23 +42,22 @@ class AutohomeDealerSpider(scrapy.Spider):
         for Values in AreaInfoGroups:
             for provinces in Values['Values']:
                 procince = provinces['Name']
-                all_counts = provinces['Count']
                 for citys in provinces['Cities']:
                     city_id = citys['Id']
                     city_count = citys['Count']
                     city = citys['Name']
                     city_pinyin = citys['Pinyin']
-                    for i in range(1, int(all_counts / 15) + 2):
+                    for i in range(1, int(city_count / 15) + 2):
                         url = f'https://dealer.autohome.com.cn/{city_pinyin}/0/0/0/0/{i}/1/0/0.html'
                         yield scrapy.Request(url=url, callback=self.parse_dealer,
                                              meta={'info': (procince, city, city_pinyin, city_id, city_count)})
 
     def parse_dealer(self, response):
+        item = {}
         procince, city, city_pinyin, city_id, city_count = response.meta.get('info')
-        print(procince, city, city_pinyin, city_id, city_count)
+        # print(procince, city, city_pinyin, city_id, city_count)
         lis = response.xpath('//li[@class="list-item"]')
         for li in lis:
-            item = {}
             shopname = li.xpath('.//li[@class="tit-row"]/a/span/text()').extract_first()
             shop_id = li.xpath('./@id').extract_first()
             shop_type = li.xpath('.//span[@class="green"]/text()').extract_first()
@@ -70,9 +69,10 @@ class AutohomeDealerSpider(scrapy.Spider):
                 .replace(' ', '').replace('\n', '').replace('\r', '')
             location = li.xpath('.//span[@class="info-addr"]/text()').extract_first()
             promotion = li.xpath('.//li[5]/a[@class="link"]/text()').extract_first()
-            print(shopname, shop_id, shop_type, mainbrand, sell_online, tel, business_hours, sales_regions, location,
-                  promotion)
+            # print(shopname, shop_id, shop_type, mainbrand, sell_online, tel, business_hours, sales_regions, location,promotion)
             item['grabtime'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+            item['procince'] = procince
+            item['city'] = city
             item['shopname'] = shopname
             item['shop_id'] = shop_id
             item['shop_type'] = shop_type
@@ -83,5 +83,6 @@ class AutohomeDealerSpider(scrapy.Spider):
             item['sales_regions'] = sales_regions
             item['location'] = location
             item['promotion'] = promotion
-            item['status'] = shopname + str(shop_id) + location + tel
+            item['status'] = city + shopname + str(shop_id) + location + str(tel)
+            # print(item)
             yield item
