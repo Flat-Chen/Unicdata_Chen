@@ -59,6 +59,7 @@ class AutohomeDealerSpider(scrapy.Spider):
         lis = response.xpath('//li[@class="list-item"]')
         for li in lis:
             shopname = li.xpath('.//li[@class="tit-row"]/a/span/text()').extract_first()
+            shop_url = 'https' + li.xpath('.//li[@class="tit-row"]/a/@href').extract_first()
             shop_id = li.xpath('./@id').extract_first()
             shop_type = li.xpath('.//span[@class="green"]/text()').extract_first()
             mainbrand = li.xpath('.//ul[@class="info-wrap"]/li[2]/span/em/text()').extract_first()
@@ -83,6 +84,7 @@ class AutohomeDealerSpider(scrapy.Spider):
             item['sales_regions'] = sales_regions
             item['location'] = location
             item['promotion'] = promotion
-            item['status'] = city + shopname + str(shop_id) + location + str(tel)
+            item['url'] = shop_url
+            item['status'] = city + shopname + str(shop_id) + location + str(tel) + shop_url
             # print(item)
             yield item
