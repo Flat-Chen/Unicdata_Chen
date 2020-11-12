@@ -59,7 +59,10 @@ class AutohomeDealerSpider(scrapy.Spider):
         lis = response.xpath('//li[@class="list-item"]')
         for li in lis:
             shopname = li.xpath('.//li[@class="tit-row"]/a/span/text()').extract_first()
-            shop_url = 'https' + li.xpath('.//li[@class="tit-row"]/a/@href').extract_first()
+            try:
+                shop_url = 'https' + li.xpath('.//li[@class="tit-row"]/a/@href').extract_first()
+            except:
+                shop_url = None
             shop_id = li.xpath('./@id').extract_first()
             shop_type = li.xpath('.//span[@class="green"]/text()').extract_first()
             mainbrand = li.xpath('.//ul[@class="info-wrap"]/li[2]/span/em/text()').extract_first()
@@ -76,15 +79,15 @@ class AutohomeDealerSpider(scrapy.Spider):
             item['city'] = city
             item['shopname'] = shopname
             item['shop_id'] = shop_id
-            item['shop_type'] = shop_type
+            item['shoptype'] = shop_type
             item['mainbrand'] = mainbrand
             item['sell_online'] = sell_online
             item['tel'] = tel
             item['business_hours'] = business_hours
-            item['sales_regions'] = sales_regions
+            item['salesregions'] = sales_regions
             item['location'] = location
             item['promotion'] = promotion
             item['url'] = shop_url
-            item['status'] = city + shopname + str(shop_id) + location + str(tel) + shop_url
+            item['status'] = city + shopname + str(shop_id) + location + str(tel)
             # print(item)
             yield item
