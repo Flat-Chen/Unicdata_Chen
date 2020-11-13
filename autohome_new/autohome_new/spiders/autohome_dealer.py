@@ -64,7 +64,7 @@ class AutohomeDealerSpider(scrapy.Spider):
             except:
                 shop_url = None
             shop_id = li.xpath('./@id').extract_first()
-            shop_type = li.xpath('.//span[@class="green"]/text()').extract_first()
+            shop_type = li.xpath('.//li[@class="tit-row"]/span[1]/text()').extract_first()
             mainbrand = li.xpath('.//ul[@class="info-wrap"]/li[2]/span/em/text()').extract_first()
             sell_online = li.xpath('.//a[@class="link link-spacing"]/text()').extract_first()
             tel = li.xpath('.//span[@class="tel"]/text()').extract_first()

@@ -31,7 +31,8 @@ class LuntanProxyMiddleware(object):
             return request
 
     def process_request(self, request, spider):
-        if spider.name in ['pcauto_luntan', 'autohome_luntan_lost', 'autohome_luntan', 'autohome_luntan_video']:
+        if spider.name in ['pcauto_luntan', 'autohome_luntan_lost', 'autohome_luntan', 'autohome_luntan_video',
+                           'autohome_luntan_20201111']:
             # if self.count < 2:
             #     request.meta['proxy'] = self.proxy
             #     self.count += 1

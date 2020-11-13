@@ -118,11 +118,11 @@ class AutohomeLuntan20201111Spider(scrapy.Spider):
             item["information_source"] = 'autohome'
             item["brand"] = brand
             item["factory"] = factory
-            item["title"] = response.xpath("//div[@id='consnav']/span[4]/text()").extract_first()
+            item["title"] = response.xpath('//div[@class="post-title"]/text()').extract_first().strip()
             item["grabtime"] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
             item["parsetime"] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
             # 处理content
-            content_list = response.xpath("//div[@class='conttxt']")
+            content_list = response.xpath("//div[@class='tz-paragraph']")
             content_list = content_list.xpath("string(.)").extract()
             # print(content_list)
             item["content"] = ""
@@ -137,48 +137,75 @@ class AutohomeLuntan20201111Spider(scrapy.Spider):
                 item["content"] = re.sub(old, font["value"], item["content"])
             # print(item["content"])
             item["url"] = response.url
-            item["user_name"] = response.xpath("//ul[@class='maxw']/li/a/@title").extract_first()
-            item["posted_time"] = response.xpath(
-                "//span[contains(text(),'发表于')]/following-sibling::span[1]/text()").extract_first()
+            # username改为AJAX加载了
+            # item["user_name"] = response.xpath("//ul[@class='maxw']/li/a/@title").extract_first()
+            item["posted_time"] = response.xpath('//span[@class="post-handle-publish"]/strong/text()').extract_first()
             try:
                 item["user_car"] = response.xpath("//div[@class='consnav']/span[2]/a/text()").extract_first().strip(
                     "论坛")
             except:
                 item["user_car"] = response.xpath(
-                    '//div[@class="toolbar-left-bbs fn-fl"]/a/@title').extract_first().strip(
+                    '//div[@class="toolbar-left-bbs fn-fl"]/a/text()').extract_first().strip(
                     "论坛")
-            try:
-                province = response.xpath("//a[@title='查看该地区论坛']/text()").extract_first().split()
-            except:
-                province = response.xpath('//a[@class="profile-text"]/text()').extract_first().split()
-            if len(province) == 2:
-                item["province"] = province[0]
-                item["region"] = province[1]
-            else:
-                item["province"] = province[0]
-                item["region"] = None
-            try:
-                tieziid = re.findall(r"/(\d*)-1.html", response.url)[0]
-            except:
-                item["click_num"] = 0
-            else:
-                item["click_num"] = self.get_click_num(tieziid)
-            item["reply_num"] = response.xpath("//font[@id='x-replys']/text()").extract_first()
-            item["statusplus"] = str(item["user_name"]) + str(item["title"]) + str(item["posted_time"]) + str(
-                item["province"]) + str(item["brand"]) + str(item["click_num"]) + str(item["reply_num"]) + str(17)
-            item["content_num"] = response.xpath("//a[@title='查看']/text()").extract_first().split("帖")[0]
+            # 地区改为AJAX加载了
+            # try:
+            #     province = response.xpath("//a[@title='查看该地区论坛']/text()").extract_first().split()
+            # except:
+            #     province = response.xpath('//a[@class="profile-text"]/text()').extract_first().split()
+            # if len(province) == 2:
+            #     item["province"] = province[0]
+            #     item["region"] = province[1]
+            # else:
+            #     item["province"] = province[0]
+            #     item["region"] = None
+
+            # click_num 抓不了 改为空值
+            # try:
+            #     tieziid = re.findall(r"/(\d*)-1.html", response.url)[0]
+            # except:
+            #     item["click_num"] = 0
+            # else:
+            #     item["click_num"] = self.get_click_num(tieziid)
+
+            item["reply_num"] = response.xpath('//span[@class="post-handle-reply"]//text()').extract_first()
+
+            item["content_num"] = response.xpath('//span[@class="post-handle-view"]//text()').extract_first()
+            item["click_num"] = item["content_num"]
             # print(item)
+            topicMemberId = re.findall(r'topicMemberId:(.\d*),', response.text)
+
             if item["content"] == "":
                 print('------------------------------------------内容为空，pass-----------------------------------')
                 self.collection.update({"_id": _id}, {"$set": {'content': 'Content is None'}})
-
             else:
-                print('````````````````````````' + str(self.num) + '``````````````````````')
-                self.num = self.num + 1
-                # yield item
-                print(item)
-                self.collection.update({"_id": _id}, {"$set": {'content': 'success'}})
-                # print(item)
+                try:
+                    topicMemberId = topicMemberId[0].strip()
+                    uesr_url = f'https://club.autohome.com.cn/frontnc/user/getdetailusertpl/{topicMemberId}-0'
+                    yield scrapy.Request(url=uesr_url, callback=self.username, meta={'item': item, '_id': _id})
+                except:
+                    print('------------------------------------------用户信息非AJAX，pass-----------------------------------')
+                    self.collection.update({"_id": _id}, {"$set": {'content': 'UserName not AJAX'}})
+
+    def username(self, response):
+        item = response.meta.get('item')
+        _id = response.meta.get('_id')
+        item["user_name"] = response.xpath('//a[@class="name"]/text()').extract_first()
+        print(item['user_name'])
+        province = response.xpath('//div[@class="user-profile"]/a/text()').extract_first().split()
+        print(province)
+        if len(province) == 2:
+            item["province"] = province[0]
+            item["region"] = province[1]
+        else:
+            item["province"] = province[0]
+            item["region"] = None
+        print('````````````````````````' + str(self.num) + '``````````````````````')
+        self.num = self.num + 1
+        item["statusplus"] = str(item["user_name"]) + str(item["title"]) + str(item["posted_time"]) + str(
+            item["province"]) + str(item["brand"]) + str(item["reply_num"]) + str(17)
+        yield item
+        # print(item)
+        self.collection.update({"_id": _id}, {"$set": {'content': 'success'}})
 
     def text_ttf(self, url):
         # print(os.listdir())
