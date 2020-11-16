@@ -50,7 +50,7 @@ class AutohomeLuntan20201111Spider(scrapy.Spider):
         'MYSQL_PWD': "94dataUser@2020",
         'MYSQL_PORT': 3306,
         'MYSQL_DB': "saicnqms",
-        'MYSQL_TABLE': "luntan_all_cpoy",
+        'MYSQL_TABLE': "luntan_all_copy",
         'MONGODB_SERVER': '192.168.2.149',
         'MONGODB_PORT': 27017,
         'MONGODB_DB': 'luntan',
@@ -75,7 +75,7 @@ class AutohomeLuntan20201111Spider(scrapy.Spider):
 
     def start_requests(self):
         self.be_p1 = get_be_p1_list()
-        lost_urls = self.collection.find(({"posted_time": {'$gte': "2020-11-01"}}))
+        lost_urls = self.collection.find(({"$and": [{"posted_time": {'$gte': "2020-11-01"}}, {"content": None}]}))
         lost_urls_list = list(lost_urls)
         for lost_url in lost_urls_list:
             url = lost_url['url']
@@ -190,9 +190,9 @@ class AutohomeLuntan20201111Spider(scrapy.Spider):
         item = response.meta.get('item')
         _id = response.meta.get('_id')
         item["user_name"] = response.xpath('//a[@class="name"]/text()').extract_first()
-        print(item['user_name'])
+        # print(item['user_name'])
         province = response.xpath('//div[@class="user-profile"]/a/text()').extract_first().split()
-        print(province)
+        # print(province)
         if len(province) == 2:
             item["province"] = province[0]
             item["region"] = province[1]
