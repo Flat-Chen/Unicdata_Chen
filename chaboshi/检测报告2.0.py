@@ -134,14 +134,23 @@ def jiancebaogao2(url):
     return item
 
 
-url_list = ['https://m.chaboshi.cn/wap/findShareDetection?orderno=4338692e26d94172b5948f119d238784',
-            'https://m.chaboshi.cn/wap/findShareDetection?orderno=802f43443a5e462baceb8500f34aac65',
-            'https://m.chaboshi.cn/wap/findShareDetection?orderno=c506fdf1ef974ff4ab5a759539e16ea3',
+url_list = ['https://m.chaboshi.cn/wap/findShareDetection?orderno=c3e375c71f584df89afe8da320b7de2c',
+            'https://m.chaboshi.cn/wap/findShareDetection?orderno=f34974f828a84e9f9e67433ae595c7a9',
+            'https://m.chaboshi.cn/wap/findShareDetection?orderno=4783244775d841a68fbcf33b781bc92e',
+            'https://m.chaboshi.cn/wap/findShareDetection?orderno=21d6b2abf9614b2b957dbd0cb135ba0b',
+            'https://m.chaboshi.cn/wap/findShareDetection?orderno=59e92f8a6d6042a1bcfe788f70834b9c',
+            'https://m.chaboshi.cn/wap/findShareDetection?orderno=02583996add748329d6c7b4a57e7fa8a',
+            'https://m.chaboshi.cn/wap/findShareDetection?orderno=cfa777dc29674430bc13c5688cda5818',
+            'https://m.chaboshi.cn/wap/findShareDetection?orderno=594953fd1bc94855a4849467ef545d0c',
+            'https://m.chaboshi.cn/wap/findShareDetection?orderno=2e56b376fd0b4d1fa10182fec1c3cbac',
+            'https://m.chaboshi.cn/wap/findShareDetection?orderno=b98d99fdb747490fb75a926ea64d4117',
+            'https://m.chaboshi.cn/wap/findShareDetection?orderno=e49a50b988bc431c9664ee6ac97c826a',
+            'https://m.chaboshi.cn/wap/findShareDetection?orderno=6bbf2b6fd02f4c23a864769cb894acef',
             ]
 
 connection = pymongo.MongoClient("192.168.2.149", 27017)
 db = connection['chaboshi']
-collection = db['report3.0']
+collection = db['report5.0']
 for url in url_list:
     item = {}
     meta = jiancebaogao2(url)
