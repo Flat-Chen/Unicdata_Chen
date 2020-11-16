@@ -1,59 +1,89 @@
+import re
+import time
+from multiprocessing import Process
+
 import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+import base64
+import pytesseract
+from PIL import Image
+import random
 
 
 def getProxy():
     s = requests.session()
     s.keep_alive = False
-    url = 'http://120.27.216.150:5000'
+    url = 'http://192.168.2.120:5000'
     headers = {'Connection': 'close'}
     proxy = s.get(url=url, headers=headers, auth=('admin', 'zd123456')).text[0:-6]
     return proxy
 
 
-headers = {
-    # ':authority': 'm.che300.com',
-    # ':method': 'GET',
-    'path': '/estimate/result/3/3/1/1/1168837/2020-3/0.1/1/null/2020/2018?rt=1605251781923',
-    'scheme': 'https',
-    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-    'accept-encoding': 'gzip, deflate, br',
-    'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6',
-    'cookie': 'Hm_lvt_f5ec9aea58f25882d61d31eb4b353550=1595925864,1596005831,1596442514; device_id=h51594-a9a6-13b7-b9e8-8ee0; tel=17059143793; pcim=d6780828fb1ed298ad92484369d3128a6c822d94; PHPSESSID=36bd199f70856d1fba8fa346851054e867947c8f; zg_did=%7B%22did%22%3A%20%22175c0761d5f128-0032fb81608a41-7f677c6f-1fa400-175c0761d607e8%22%7D; zg_db630a48aa614ee784df54cc5d0cdabb=%7B%22sid%22%3A%201605251767656%2C%22updated%22%3A%201605251767656%2C%22info%22%3A%201605251767662%2C%22superProperty%22%3A%20%22%7B%7D%22%2C%22platform%22%3A%20%22%7B%7D%22%2C%22utm%22%3A%20%22%7B%7D%22%2C%22referrerDomain%22%3A%20%22m.che300.com%22%7D; Hm_lvt_12b6a0c74b9c210899f69b3429653ed6=1605251770; Hm_lpvt_12b6a0c74b9c210899f69b3429653ed6=1605251770; _che300=Ouq8dx4EP2piOc72uNIH1to0xcj7jc%2BpQBHIPk68QI%2FHB18lBH0McQEFQpr%2BimerySvr9jbsufi4KA82ox%2BLgOZKz5Jo5rvAA3L0RXw85qb6FpwcwPExf0xnRNg%2BILNwhMtZ3eICU2YCag2ua8LHMLcjxCmyLKayGfNMZ611yRU2jbd%2F0oUMEew35QQlnvZ1lhAH4QY4yik%2BKr5eSuQ8xwX6NPUDTB35wVVHFNstYF7QbXoyIzExtGI4pZjOZtSs%2Fb7JRIENYtiFukidILCFAbItKpyusRrIN4Wzlq8uWrCHXm9FD48b7VtB%2BYRVnQrJJ1JHZHOajL4qp7Mr5maUm80uzYq2%2FKA3Fb4up2CzpZFfiACzRWPyUJ8uFrdW7S3CHlXpziAUniDbM%2BIllDWl5qHFtU45VWiGFU0o4CruboHgP3oQ8t%2F4TWHVDNrpHk5pomwd%2FbVhQyU8%2F7r5fDxbLYgMfMfJWIwdJ0%2Bd8TpGHujKnvwJ9AaK0HGRgYtLwUjd5lyxeRfBU52p4enKyjltOlKUsA7slPB1U4%2B9qB2I5RA%3Ddf9bb4103eaeceb358d6290627955458d5e60a89; spidercooskieXX12=1605251781; spidercodeCI12X3=6f0f7ea02093598ac2c29c170c60bdd7',
-    'referer': 'https://m.che300.com/estimate/result/3/3/1/1/1168837/2020-3/0.1/1/null/2020/2018?rt=1605251766081',
-    'sec-fetch-dest': 'document',
-    'sec-fetch-mode': 'navigate',
-    'sec-fetch-site': 'same-origin',
-    'upgrade-insecure-requests': '1',
-    'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1 Edg/86.0.4240.193',
-}
-# cookies = {
-#     'pcim': 'd6780828fb1ed298ad92484369d3128a6c822d94',
-#     'PHPSESSID': '36bd199f70856d1fba8fa346851054e867947c8f',
-#     'zg_did': '%7B%22did%22%3A%20%22175c0761d5f128-0032fb81608a41-7f677c6f-1fa400-175c0761d607e8%22%7D',
-#     'zg_db630a48aa614ee784df54cc5d0cdabb': '%7B%22sid%22%3A%201605251767656%2C%22updated%22%3A%201605251767656%2C%22info%22%3A%201605251767662%2C%22superProperty%22%3A%20%22%7B%7D%22%2C%22platform%22%3A%20%22%7B%7D%22%2C%22utm%22%3A%20%22%7B%7D%22%2C%22referrerDomain%22%3A%20%22m.che300.com%22%7D',
-#     'Hm_lvt_12b6a0c74b9c210899f69b3429653ed6': '1605251770',
-#     'Hm_lpvt_12b6a0c74b9c210899f69b3429653ed6': '1605251770',
-#     '_che300': 'Ouq8dx4EP2piOc72uNIH1to0xcj7jc%2BpQBHIPk68QI%2FHB18lBH0McQEFQpr%2BimerySvr9jbsufi4KA82ox%2BLgOZKz5Jo5rvAA3L0RXw85qb6FpwcwPExf0xnRNg%2BILNwhMtZ3eICU2YCag2ua8LHMLcjxCmyLKayGfNMZ611yRU2jbd%2F0oUMEew35QQlnvZ1lhAH4QY4yik%2BKr5eSuQ8xwX6NPUDTB35wVVHFNstYF7QbXoyIzExtGI4pZjOZtSs%2Fb7JRIENYtiFukidILCFAbItKpyusRrIN4Wzlq8uWrCHXm9FD48b7VtB%2BYRVnQrJJ1JHZHOajL4qp7Mr5maUm80uzYq2%2FKA3Fb4up2CzpZFfiACzRWPyUJ8uFrdW7S3CHlXpziAUniDbM%2BIllDWl5qHFtU45VWiGFU0o4CruboHgP3oQ8t%2F4TWHVDNrpHk5pomwd%2FbVhQyU8%2F7r5fDxbLYgMfMfJWIwdJ0%2Bd8TpGHujKnvwJ9AaK0HGRgYtLwUjd5lyxeRfBU52p4enKyjltOlKUsA7slPB1U4%2B9qB2I5RA%3Ddf9bb4103eaeceb358d6290627955458d5e60a89',
-#     'spidercooskieXX12': '1605251781',
-#     'spidercodeCI12X3': '6f0f7ea02093598ac2c29c170c60bdd7'
-# }
-chrome_options = Options()
-# chrome_options.add_argument('--headless')
-# chrome_options.add_argument('--proxy-server=' + getProxy())
-chrome_options.add_experimental_option('excludeSwitches', ['enable-automation'])
-chrome_options.add_argument(
-    "–Referer=https://m.che300.com/estimate/result/3/3/1/1/1168837/2020-3/0.1/1/null/2020/2018?rt=1605495553819")
-# driver = webdriver.Chrome(executable_path=r'/estimate/result/3/3/1/1/1168837/2020-3/0.1/1/')
-url = 'https://m.che300.com/estimate/result/3/3/1/1/1168837/2020-3/0.1/1/null/2020/2018?rt=1605495570129'
-browser = webdriver.Chrome(options=chrome_options)
-cookie = "Hm_lvt_f33b83d5b301d5a0c3e722bd9d89acc8=1595817686,1597029703; device_id=h52ac0-418c-a1b7-10b5-b67e; pcim=e8f8f86ec7aba7e90bf67c1cddc7a6c5ef86d292; tel=17059155843; PHPSESSID=9e27a6faeeb6806f211c3270d3fcc8bb2ebf6efd; Hm_lvt_12b6a0c74b9c210899f69b3429653ed6=1605254329; Hm_lvt_f5ec9aea58f25882d61d31eb4b353550=1605254330; _che300=Vu4liT5ZcnXvFhoM8c6Vp01qR4vroa4%2FTQt6Uyb4zZdI9k7%2F8kSftDhn8NRGYFORBYHBgEV3NgZEsjdARcxji4YWHQt65Xhk4eBZ6NI7KtmmwR8pJf7dHTnbekl8K4zRSI5NdmOq4nbxAuNACp9oFbiCxqiijNTi7aIrAv910n8wWpF7%2FHfmy%2BYOfre0Cxl2k5inuLAIjp%2B2tWE5Puceu5VCroY4IKjbTaTzI9Kvcrb%2B1y9ETDEKiyQJcYLsohGsg8u%2BOoX0czcXrpzdDw34%2FOb08TT6W0OSezWK5hANg0G9VN8cGK51oGfV72BUjnV4V9Fsz56Z99GnQnEBLCOrSuS3b2d6psUHaFGkWMmh960yFCrcDgbDvqlc1pzOeuNYX17F%2Beap9cPct7jbayE0YeE7nc13xTBba0kLQM9GFx4fyqoLneo4PVYsUobtb%2BpKcUdGzGzXVPGiB0%2B%2F4ImX6iGbtzDhGDHJnWRrnZ%2BPJ4HUz0LAq%2FZZ1cKp0mF0FplqiLcNXoLBU23S4bMYyX4iLIAVQ4r6UwAROK4jeGW0t1q53XxZOCVZElBqXsOswNAaoU%2BTTkiTYydgqm8KW6OICgL75Aw68jGRSiVIq8mT42x73VRZH5RtOUKk4jcXS8QY04a29ef610789eac2ded27319a209cc01464c59a; zg_did=%7B%22did%22%3A%20%22175c09d367c5d0-057410193f4edd-230346c-1fa400-175c09d367d89%22%7D; zg_db630a48aa614ee784df54cc5d0cdabb=%7B%22sid%22%3A%201605494827354%2C%22updated%22%3A%201605494835828%2C%22info%22%3A%201605254329991%2C%22superProperty%22%3A%20%22%7B%7D%22%2C%22platform%22%3A%20%22%7B%7D%22%2C%22utm%22%3A%20%22%7B%7D%22%2C%22referrerDomain%22%3A%20%22m.che300.com%22%2C%22zs%22%3A%200%2C%22sc%22%3A%200%2C%22firstScreen%22%3A%201605494827354%7D; Hm_lpvt_f5ec9aea58f25882d61d31eb4b353550=1605494836; Hm_lpvt_12b6a0c74b9c210899f69b3429653ed6=1605494836; spidercooskieXX12=1605494848; spidercodeCI12X3=9db87fc95a7e9051fe00f3e34f31c5dc"
-browser.get(url)
-cookie = cookie.split(';')
-for i in cookie:
-    print({'name': i.split('=')[0], 'value': i.split('=')[1]})
-    browser.add_cookie(cookie_dict={'name': i.split('=')[0].strip(), 'value': i.split('=')[1].strip()})
+# 测试用的车型型号
+vehicle_list = ['1147294', '1169769', '1156765', '1147453', '1160536', '1149456', '1156765', '1149708', '1146061',
+                '1145964', '1181444', '1146059', '1146058', '1148862', '1204732', '1146065', '1157899', '1181451',
+                '1146105', '1150809', '1156765', '1146065', '1156765', '1155641', '1147415', '1146242', '1147295',
+                '1149412', '1146242', '1146212', '1149603', '1160536', '1147454', '1146210', '1210141', '1181441',
+                '1147415', '1146061', '1155641', '1204732', '1146064', '1147452', '1169769', '1181441', '1146063',
+                '1204732', '1149602', '1146060', '1148941']
 
-browser.get(url)
-browser.maximize_window()
+
+def main():
+    print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+    count = 0
+    while 1:
+        print(count)
+        try:
+            chrome_options = Options()
+            # chrome_options.add_argument('--headless')
+            chrome_options.add_argument('--proxy-server=' + getProxy())
+            chrome_options.add_experimental_option('excludeSwitches', ['enable-automation'])
+            chrome_options.add_argument(
+                "–Referer=https://m.che300.com/estimate/result/3/3/1/1/1168837/2020-3/0.1/1/null/2020/2018?rt=1605495553819")
+            # driver = webdriver.Chrome(executable_path=r'/estimate/result/3/3/1/1/1168837/2020-3/0.1/1/')
+            url = f'https://m.che300.com/estimate/result/3/3/1/1/{random.choice(vehicle_list)}/2019-3/2/1/null/2020/2018?rt=1605495570129'
+            browser = webdriver.Chrome(options=chrome_options)
+            cookie = "device_id=h51594-a9a6-13b7-b9e8-8ee0; tel=17059143793; pcim=d6780828fb1ed298ad92484369d3128a6c822d94; _dx_uzZo5y=7f687346e5fdd4bf12ca3c4494212c3850b7f2fbb603097f31524246a3d56901c327feaf; _dx_app_f780acccd6e391d352f2076600d5aa16=5fae3c43BXM1tCiabzy6xSgjpckCrSlCcqnQrOG1; PHPSESSID=26b80c0b96c0f24514a037bf43dc19bd454da1a2; Hm_lvt_12b6a0c74b9c210899f69b3429653ed6=1605251770,1605520929; Hm_lvt_f5ec9aea58f25882d61d31eb4b353550=1605251783,1605520929; _che300=xGX1qF%2BixDVqUd2zXUsBLQwsPTeQoUjcGAe%2FL1M3Vn8RwI7aoF%2FFfWi2uRSJ36ZALLZbvzxvU0yT%2FOG5mYY2y9VMvv9mhTmAqeO7FLPjN4hd4nqXfcF9ETiGHtJC%2BEA%2BWvOpoCvVPXGvgoAe4IXML7EPy2WbXKE2yYa%2BNAtmIkLoNc3WS1jj7MPLciQaRkNallIdVIvn9OZ7WYP5Y%2BNZ%2FNRH6WLhFf1DOBLL68mRpA%2FiN0gye3rQe%2BVsdKR9X9RRuSbM9x7k7Zp3mb2G6zjT6OaQ3gTIY3pTxmJaor1w39zP4BE1VNjBCPC%2BUz6b8vAiU1PiD6zy98uPDB5CjRLq1U2jRd0MNziUw0uVuFENyq6GmiZp3eu0cK2CoK0YQfvDlbF%2FoWsEGP4ANEZ%2BNeaJ%2Bqxh8h5S92P7p7jWub6KvAnqjX3CxNoOVdf7OmvAca0i5ey5roWYBJb0wwkgi30xNf2GrCk9Esw1lP3g7Ydv%2Fx7Vw%2FFLa9KNQfZscykoz3LdRVGFiwbniUe7fbgdIJBeqQPjaQDZ%2BxuFvIB%2BoVUPkA24a4jux%2Bk3LBK4YuRR5OFYnkLLYqZ0j2bkmuXESyYcxg%3D%3D5b10e4a8c1108d7ae54d12bea8167022b0d6f91b; zg_did=%7B%22did%22%3A%20%22175c0761d5f128-0032fb81608a41-7f677c6f-1fa400-175c0761d607e8%22%7D; zg_db630a48aa614ee784df54cc5d0cdabb=%7B%22sid%22%3A%201605520928906%2C%22updated%22%3A%201605520934427%2C%22info%22%3A%201605251767662%2C%22superProperty%22%3A%20%22%7B%7D%22%2C%22platform%22%3A%20%22%7B%7D%22%2C%22utm%22%3A%20%22%7B%7D%22%2C%22referrerDomain%22%3A%20%22m.che300.com%22%2C%22zs%22%3A%200%2C%22sc%22%3A%200%2C%22firstScreen%22%3A%201605520928906%7D; Hm_lpvt_f5ec9aea58f25882d61d31eb4b353550=1605520934; Hm_lpvt_12b6a0c74b9c210899f69b3429653ed6=1605520934; spidercooskieXX12=1605520942; spidercodeCI12X3=94fdb56d6ec83714b463d9297b1772f2"
+            browser.get(url)
+            cookie = cookie.split(';')
+            for i in cookie:
+                # print({'name': i.split('=')[0], 'value': i.split('=')[1]})
+                browser.add_cookie(cookie_dict={'name': i.split('=')[0].strip(), 'value': i.split('=')[1].strip()})
+
+            browser.get(url)
+            # time.sleep(8)
+            browser.maximize_window()
+            # print(browser.page_source)
+            if '异常提示' in browser.page_source:
+                print('```````````````````````````````````````````' + count)
+                print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+                break
+            img_base64_urls = re.findall('.html\(\'<img src="data:image/png;base64,(.*?)" style="width',
+                                         browser.page_source)
+            # print(img_base64_urls)
+            for i in img_base64_urls:
+                # print(i)
+                imgdata = base64.b64decode(i.replace('\n', '').replace('\r', ''))
+                file = open('1.jpg', 'wb')
+                file.write(imgdata)
+                file.close()
+                text = pytesseract.image_to_string(Image.open("./1.jpg"), lang="eng").replace(',', '.')
+                print(text)
+            browser.quit()
+            count = count + 1
+        except:
+            continue
+
+
+main()
+# if __name__ == '__main__':
+#     # 多进程
+#     proc = []
+#     for i in range(8):
+#         proce = Process(target=main)
+#         proce.start()
+#         proc.append(proce)
+#
+#     for proce in proc:
+#         proce.join()

@@ -1,0 +1,12 @@
+import base64
+import pytesseract
+from PIL import Image
+import random
+
+yzm = 'iVBORw0KGgoAAAANSUhEUgAAAFAAAAAUCAMAAAAtBkrlAAABOFBMVEX///+j6ZUAAAD8coJi1m90twh14s0YI/a79vd0SbwpelbSo3KtyBXMP0T0A8h9+04GkODW4CVh4LEWCUd//tHxgzXLV+ITCUPuMqvu+hPReTQdzdg2XkS8ye2zTSocjUdxPZlYFIe6cj/ON9UOTJWJC+iSS3rfkIhI6AirgRWugxnMfKCFrShsxp2FZu7r+ZtZ9257olTurBgobomPln+dcgFMyE/D7rbBGuKjGAPmJyHfEnejQCCxlDTGuvh0m9sAXYosjFc64tUPgWZKt+dCacwxUNQtagzqQ7/PAD2iUVSP+j6d9Kq7ZVfeui5pu+nF5BHfMPPheGNvnXN1CouPDKw7c0cAVY5zEfwAZqYzkeJlEsNsTyPVHBWFMukhvRI5EucTKaUTRnc/0FgrrisA4wiBh9oc2mx0El5yAAABVklEQVQ4jZ2UhY7AIAyGV3aanEty7q45d3fNubu+/xscgw4ZMMg1GYXy92sh26LzB2DWwh0Uc/cMupVAoEWbzq0lMVsPIZ0gcEiJdXhyBpKhlE0LXZrIX/rTJygLAj76K73bghRImJXTRTMGCfHTeJYpjNJ0sVcJVWFAe+now7KlyUa529i3AC+T8QlgxeiwIAskN3ptUi8OOPgdx/HirqvDhfQ2ulQgsWmTSJwYwJa4w5EGKWjiHQ5j7Z4d/ciS2MlGZGkaasuZDvmW3g4hRZhyR/0b0lCyRp9u2wGmBbA1exkVP5ANGQD7m1CjvTaNUsybnoB+Zz4PrBpIDnxBwa8QU+YeHKv57KZnReBeq3ALfRJ4CLBta/9/pn/L82ysC08fR3+Gfsrxc7gCqFXXbcq8mo2v+R1eAPTy9VFuQzOn6WxSBtsN4JiyPsgFUpuT0y/01+r+HywGGquUEsnUAAAAAElFTkSuQmCC'
+imgdata = base64.b64decode(yzm)
+file = open('1.png', 'wb')
+file.write(imgdata)
+file.close()
+text = pytesseract.image_to_string(Image.open("1.png"))
+print(text)
