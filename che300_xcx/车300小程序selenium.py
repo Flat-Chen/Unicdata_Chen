@@ -60,4 +60,5 @@ for i in cookie:
 # browser.add_cookie(cookie_dict={'name': '_che300',
 #                                 'value': 'Ouq8dx4EP2piOc72uNIH1to0xcj7jc%2BpQBHIPk68QI%2FHB18lBH0McQEFQpr%2BimerySvr9jbsufi4KA82ox%2BLgOZKz5Jo5rvAA3L0RXw85qb6FpwcwPExf0xnRNg%2BILNwhMtZ3eICU2YCag2ua8LHMLcjxCmyLKayGfNMZ611yRU2jbd%2F0oUMEew35QQlnvZ1lhAH4QY4yik%2BKr5eSuQ8xwX6NPUDTB35wVVHFNstYF7QbXoyIzExtGI4pZjOZtSs%2Fb7JRIENYtiFukidILCFAbItKpyusRrIN4Wzlq8uWrCHXm9FD48b7VtB%2BYRVnQrJJ1JHZHOajL4qp7Mr5maUm80uzYq2%2FKA3Fb4up2CzpZFfiACzRWPyUJ8uFrdW7S3CHlXpziAUniDbM%2BIllDWl5qHFtU45VWiGFU0o4CruboHgP3oQ8t%2F4TWHVDNrpHk5pomwd%2FbVhQyU8%2F7r5fDxbLYgMfMfJWIwdJ0%2Bd8TpGHujKnvwJ9AaK0HGRgYtLwUjd5lyxeRfBU52p4enKyjltOlKUsA7slPB1U4%2B9qB2I5RA%3Ddf9bb4103eaeceb358d6290627955458d5e60a89'}
 #                    )
+browser.get(url)
 browser.maximize_window()
