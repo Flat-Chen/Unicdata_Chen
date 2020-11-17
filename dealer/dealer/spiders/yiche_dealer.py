@@ -387,5 +387,5 @@ class YicheDealerSpider(scrapy.Spider):
         item['location'] = location
         item['salesregions'] = salesregions
         item['url'] = response.url
-        item['status'] = province + brand + shopname + location
+        # item['status'] = province + brand + shopname + location
         yield item

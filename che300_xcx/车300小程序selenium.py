@@ -28,16 +28,18 @@ vehicle_list = ['1147294', '1169769', '1156765', '1147453', '1160536', '1149456'
                 '1147415', '1146061', '1155641', '1204732', '1146064', '1147452', '1169769', '1181441', '1146063',
                 '1204732', '1149602', '1146060', '1148941']
 
-
+count = 0
 def main():
+    global count
     print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
-    count = 0
+
     while 1:
         print(count)
         try:
             chrome_options = Options()
             # chrome_options.add_argument('--headless')
             chrome_options.add_argument('--proxy-server=' + getProxy())
+            chrome_options.add_argument('--proxy-server=' + '81.68.214.148:16128')
             chrome_options.add_experimental_option('excludeSwitches', ['enable-automation'])
             chrome_options.add_argument(
                 "–Referer=https://m.che300.com/estimate/result/3/3/1/1/1168837/2020-3/0.1/1/null/2020/2018?rt=1605495553819")
@@ -53,7 +55,7 @@ def main():
 
             browser.get(url)
             # time.sleep(8)
-            browser.maximize_window()
+            # browser.maximize_window()
             # print(browser.page_source)
             if '异常提示' in browser.page_source:
                 print('```````````````````````````````````````````' + count)
@@ -61,6 +63,8 @@ def main():
                 break
             img_base64_urls = re.findall('.html\(\'<img src="data:image/png;base64,(.*?)" style="width',
                                          browser.page_source)
+            count = count + 1
+            browser.quit()
             # print(img_base64_urls)
             for i in img_base64_urls:
                 # print(i)
@@ -70,8 +74,8 @@ def main():
                 file.close()
                 text = pytesseract.image_to_string(Image.open("./1.jpg"), lang="eng").replace(',', '.')
                 print(text)
-            browser.quit()
-            count = count + 1
+
+
         except:
             continue
 
