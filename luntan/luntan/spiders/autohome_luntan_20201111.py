@@ -75,7 +75,8 @@ class AutohomeLuntan20201111Spider(scrapy.Spider):
 
     def start_requests(self):
         self.be_p1 = get_be_p1_list()
-        lost_urls = self.collection.find(({"$and": [{"posted_time": {'$gte': "2020-11-01"}}, {"content": None}]}))
+        # lost_urls = self.collection.find(({"$and": [{"posted_time": {'$gte': "2020-11-01"}}, {"content": None}]}))
+        lost_urls = self.collection.find({"posted_time": {'$gte': "2020-11-01"}})
         lost_urls_list = list(lost_urls)
         for lost_url in lost_urls_list:
             url = lost_url['url']

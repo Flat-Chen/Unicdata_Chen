@@ -27,7 +27,7 @@ def jiancebaogao2(url):
 
     cheliangmingcheng = text.xpath('//p[@class="detectionCarName"]/text()')[0]
     VIN = xieyi_text.xpath('//ul[@class="insurContract"]/li/input/@value')[0]
-    jianceriqi = xieyi_text.xpath('//ul[@class="insurContract"]/li/input/@value')[1]
+    jianceriqi = xieyi_text.xpath('//ul[@class="    "]/li/input/@value')[1]
     jiancejieguo = xieyi_text.xpath('//ul[@class="insurContract"]/li/input/@value')[2]
     baogaobianhao = text.xpath('//p[@class="detectionCarNo"]/text()')[0]
     baogao = baogaobianhao.split('：')[0]
@@ -134,19 +134,16 @@ def jiancebaogao2(url):
     return item
 
 
-url_list = ['https://m.chaboshi.cn/wap/findShareDetection?orderno=c3e375c71f584df89afe8da320b7de2c',
-            'https://m.chaboshi.cn/wap/findShareDetection?orderno=f34974f828a84e9f9e67433ae595c7a9',
-            'https://m.chaboshi.cn/wap/findShareDetection?orderno=4783244775d841a68fbcf33b781bc92e',
-            'https://m.chaboshi.cn/wap/findShareDetection?orderno=21d6b2abf9614b2b957dbd0cb135ba0b',
-            'https://m.chaboshi.cn/wap/findShareDetection?orderno=59e92f8a6d6042a1bcfe788f70834b9c',
-            'https://m.chaboshi.cn/wap/findShareDetection?orderno=02583996add748329d6c7b4a57e7fa8a',
-            'https://m.chaboshi.cn/wap/findShareDetection?orderno=cfa777dc29674430bc13c5688cda5818',
-            'https://m.chaboshi.cn/wap/findShareDetection?orderno=594953fd1bc94855a4849467ef545d0c',
-            'https://m.chaboshi.cn/wap/findShareDetection?orderno=2e56b376fd0b4d1fa10182fec1c3cbac',
-            'https://m.chaboshi.cn/wap/findShareDetection?orderno=b98d99fdb747490fb75a926ea64d4117',
-            'https://m.chaboshi.cn/wap/findShareDetection?orderno=e49a50b988bc431c9664ee6ac97c826a',
-            'https://m.chaboshi.cn/wap/findShareDetection?orderno=6bbf2b6fd02f4c23a864769cb894acef',
-            ]
+url_list = [
+    # 'https://m.chaboshi.cn/wap/insurance/infoPC?orderno=5cc5cddd6ace4ac7974b4db60edd6969',
+    # 'https://m.chaboshi.cn/wap/insurance/infoPC?orderno=1a74a1313e5c4797b23631467119102e',
+    # 'https://m.chaboshi.cn/wap/insurance/infoPC?orderno=e352ae7ca49a4dcfb227108be917be7f',
+    # 'https://m.chaboshi.cn/wap/insurance/infoPC?orderno=3fa05070a2c7494a99246a7d90a024c0',
+    # 'https://m.chaboshi.cn/wap/findShareDetection?orderno=5cc5cddd6ace4ac7974b4db60edd6969',
+    'https://m.chaboshi.cn/wap/findShareDetection?orderno=1a74a1313e5c4797b23631467119102e',
+    # 'https://m.chaboshi.cn/wap/findShareDetection?orderno=e352ae7ca49a4dcfb227108be917be7f',
+    # 'https://m.chaboshi.cn/wap/findShareDetection?orderno=3fa05070a2c7494a99246a7d90a024c0',
+]
 
 connection = pymongo.MongoClient("192.168.2.149", 27017)
 db = connection['chaboshi']
