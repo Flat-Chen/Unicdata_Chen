@@ -80,11 +80,11 @@ class AutohomeLuntan20201111Spider(scrapy.Spider):
         lost_urls_list = list(lost_urls)
         for lost_url in lost_urls_list:
             url = lost_url['url']
-            url = 'http://club.autohome.com.cn/bbs/thread/3101adb3de85c9c0/91759895-1.html'
+            # url = 'http://club.autohome.com.cn/bbs/thread/3101adb3de85c9c0/91759895-1.html'
             meta = {'brand': lost_url['brand'], 'factory': lost_url['factory'], 'url': url, '_id': lost_url['_id']}
             # meta = {'brand': '荣威', 'factory': '上汽乘用车', 'url': url}
             yield scrapy.Request(url=url, meta=meta, headers=self.headers, dont_filter=True)
-            break
+            # break
 
     def parse(self, response):
         brand = response.meta['brand']
