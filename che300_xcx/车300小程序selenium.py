@@ -77,8 +77,9 @@ def main():
                 file.write(imgdata)
                 file.close()
                 text = pytesseract.image_to_string(Image.open("./1.jpg"), lang="eng").replace(',', '.')
-                print(text)
+                # print(text)
                 price_list.append(text)
+            print(price_list)
             time.sleep(60)
         except:
             pass
