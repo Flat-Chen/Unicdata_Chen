@@ -29,6 +29,8 @@ vehicle_list = ['1147294', '1169769', '1156765', '1147453', '1160536', '1149456'
                 '1204732', '1149602', '1146060', '1148941']
 
 count = 0
+
+
 def main():
     global count
     print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
@@ -77,7 +79,7 @@ def main():
 
 
         except:
-            continue
+            pass
 
 
 main()
