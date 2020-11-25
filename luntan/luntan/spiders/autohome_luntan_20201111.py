@@ -75,8 +75,9 @@ class AutohomeLuntan20201111Spider(scrapy.Spider):
 
     def start_requests(self):
         self.be_p1 = get_be_p1_list()
-        # lost_urls = self.collection.find(({"$and": [{"posted_time": {'$gte': "2020-11-01"}}, {"content": None}]}))
-        lost_urls = self.collection.find({"posted_time": {'$gte': "2020-11-01"}})
+        lost_urls = self.collection.find(
+            ({"$and": [{"posted_time": {'$gte': "2020-11-01"}}, {"content": None}, {"isvideo": 0}]}))
+        # lost_urls = self.collection.find({"posted_time": {'$gte': "2020-11-01"}})
         lost_urls_list = list(lost_urls)
         for lost_url in lost_urls_list:
             url = lost_url['url']
@@ -142,8 +143,6 @@ class AutohomeLuntan20201111Spider(scrapy.Spider):
                 item["content"] = re.sub(old, font["value"], item["content"])
             # print(item["content"])
             item["url"] = response.url
-            # username改为AJAX加载了
-            # item["user_name"] = response.xpath("//ul[@class='maxw']/li/a/@title").extract_first()
             item["posted_time"] = response.xpath('//span[@class="post-handle-publish"]/strong/text()').extract_first()
             try:
                 item["user_car"] = response.xpath("//div[@class='consnav']/span[2]/a/text()").extract_first().strip(
@@ -152,25 +151,6 @@ class AutohomeLuntan20201111Spider(scrapy.Spider):
                 item["user_car"] = response.xpath(
                     '//div[@class="toolbar-left-bbs fn-fl"]/a/text()').extract_first().strip(
                     "论坛")
-            # 地区改为AJAX加载了
-            # try:
-            #     province = response.xpath("//a[@title='查看该地区论坛']/text()").extract_first().split()
-            # except:
-            #     province = response.xpath('//a[@class="profile-text"]/text()').extract_first().split()
-            # if len(province) == 2:
-            #     item["province"] = province[0]
-            #     item["region"] = province[1]
-            # else:
-            #     item["province"] = province[0]
-            #     item["region"] = None
-
-            # click_num 抓不了 改为空值
-            # try:
-            #     tieziid = re.findall(r"/(\d*)-1.html", response.url)[0]
-            # except:
-            #     item["click_num"] = 0
-            # else:
-            #     item["click_num"] = self.get_click_num(tieziid)
 
             item["reply_num"] = response.xpath('//span[@class="post-handle-reply"]//text()').extract_first()
 
@@ -213,12 +193,6 @@ class AutohomeLuntan20201111Spider(scrapy.Spider):
         self.collection.update({"_id": _id}, {"$set": {'content': 'success'}})
 
     def text_ttf(self, url):
-        # print(os.listdir())
-        # proxy = get_Proxy()
-        # proxy = {
-        #     "http": "http://" + proxy,
-        #     "https": "https://" + proxy
-        # }
         User_Agent = {'User-Agent': User_AgentMiddleware.get_ug()}
         try:
             text = requests.get(url=url, headers=User_Agent)
@@ -243,12 +217,3 @@ class AutohomeLuntan20201111Spider(scrapy.Spider):
             font_map = get_map1(self.be_p1, self.word_list)
             # print(font_map, "/\\" * 50)
             return font_map
-
-    def get_click_num(self, data):
-        url = "https://clubajax.autohome.com.cn/Detail/LoadX_Mini?topicId={}".format(data)
-        text = requests.get(url=url, headers=self.headers).json()
-        try:
-            a = text["topicClicks"]["Views"]
-        except:
-            a = 0
-        return a

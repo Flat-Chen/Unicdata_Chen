@@ -1,5 +1,5 @@
 import time
-
+from requests_html import HTMLSession
 import requests
 import json
 import base64
@@ -37,6 +37,7 @@ class Login:
         }
         self.session = session
         self.getProxy = proxy
+        self.getProxy = '81.68.214.148:16128'
         self.phone = phone
         self.cookie_txt = open("che300_cookies.txt", "a")
 
@@ -76,7 +77,7 @@ class Login:
         img = image_obj.convert("L")  # 转灰度
         pixdata = img.load()
         w, h = img.size
-        threshold = 20  # 该阈值不适合所有验证码，具体阈值请根据验证码情况设置
+        threshold = 35  # 该阈值不适合所有验证码，具体阈值请根据验证码情况设置
         # 遍历所有像素，大于阈值的为黑色
         for y in range(h):
             for x in range(w):
@@ -100,7 +101,6 @@ class Login:
         print(response.text)
         if '"msg":"ok"' in response.text:
             print('验证成功')
-            print(response.cookies)
 
     def login_by_code(self):
         yzm_code = 111111
@@ -115,7 +115,7 @@ if __name__ == '__main__':
     for i in range(10):
         try:
             proxy = getProxy()
-            session = requests.session()
+            session = HTMLSession()
             phone = '18876542121'
             login = Login(session, proxy, phone)
             login.check_captcha()

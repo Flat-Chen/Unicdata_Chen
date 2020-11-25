@@ -1,4 +1,7 @@
 import requests
+from requests_html import HTMLSession
+
+session = HTMLSession()
 
 
 def getProxy():
@@ -31,7 +34,9 @@ headers = {
 }
 # url = 'http://m.che300.com/estimate/result/3/3/1/1/1146060/2019-3/2/1/null/2020/2018?rt=1606211387265'
 url = 'http://www.baidu.com'
-response = requests.get(url=url, headers=headers, proxies={'http': proxy})
-
-print(response.cookies.get_dict())
-# print(response.headers)
+response = session.get(url=url, headers=headers, proxies={'http': '81.68.214.148:16128'})
+response.html.render()
+# print(response.cookies.get_dict())
+print(response.headers)
+print(response.cookies)
+print(session)
