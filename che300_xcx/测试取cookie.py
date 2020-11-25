@@ -1,7 +1,8 @@
 import requests
-from requests_html import HTMLSession
 
-session = HTMLSession()
+# from requests_html import HTMLSession
+
+session = requests.session()
 
 
 def getProxy():
@@ -32,11 +33,12 @@ headers = {
     'Upgrade-Insecure-Requests': '1',
     'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1'
 }
-# url = 'http://m.che300.com/estimate/result/3/3/1/1/1146060/2019-3/2/1/null/2020/2018?rt=1606211387265'
-url = 'http://www.baidu.com'
+url = 'http://m.che300.com/estimate/result/3/3/1/1/1146060/2019-3/2/1/null/2020/2018'
+# url = 'http://www.baidu.com'
 response = session.get(url=url, headers=headers, proxies={'http': '81.68.214.148:16128'})
-response.html.render()
+# response.html.render()
 # print(response.cookies.get_dict())
-print(response.headers)
-print(response.cookies)
-print(session)
+print(response.headers['Set-Cookie'])
+
+
+

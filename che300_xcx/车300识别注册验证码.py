@@ -1,28 +1,14 @@
+import re
 import time
-from requests_html import HTMLSession
 import requests
 import json
 import base64
 from PIL import Image
-import matplotlib.pyplot as plt
 import pytesseract
 
 
-def getProxy():
-    # 设置代理
-    s = requests.session()
-    s.keep_alive = False
-
-    url = 'http://192.168.2.120:5000'
-    headers = {
-        'Connection': 'close',
-    }
-    proxy = s.get(url=url, headers=headers, auth=('admin', 'zd123456')).text[0:-6]
-    return proxy
-
-
 class Login:
-    def __init__(self, session, proxy, phone):
+    def __init__(self, **kwargs):
         self.headers = {
             'Host': 'dingjia.che300.com',
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:82.0) Gecko/20100101 Firefox/82.0',
@@ -36,29 +22,24 @@ class Login:
             'TE': 'Trailers',
         }
         self.session = session
-        self.getProxy = proxy
-        self.getProxy = '81.68.214.148:16128'
+        # self.getProxy = '81.68.214.148:16128'
         self.phone = phone
-        self.cookie_txt = open("che300_cookies.txt", "a")
+        # self.cookie_txt = open("che300_cookies.txt", "a")
 
     @classmethod
     def get_Proxy(cls):
-        url = 'http://192.168.2.120:5000'
-        #         url = 'http://120.27.216.150:5000'
+        # url = 'http://192.168.2.120:5000'
+        url = 'http://120.27.216.150:5000'
         headers = {
             'Connection': 'close',
         }
         proxy = requests.get(url, headers=headers, auth=('admin', 'zd123456'), timeout=30).text[0:-6]
         return proxy
 
-    # 程序完成，自动结束程序
-    def __del__(self):
-        self.cookie_txt.close()
-
     def get_captcha(self):
         # 获取验证码及key
         url = 'http://dingjia.che300.com/api/lib/web_verify/get_captcha/'
-        response = self.session.get(url=url, headers=self.headers, proxies={'http': self.getProxy})
+        response = self.session.get(url=url, headers=self.headers, proxies={'http': self.get_Proxy()})
         try:
             json_data = json.loads(response.text)
         except:
@@ -77,7 +58,7 @@ class Login:
         img = image_obj.convert("L")  # 转灰度
         pixdata = img.load()
         w, h = img.size
-        threshold = 35  # 该阈值不适合所有验证码，具体阈值请根据验证码情况设置
+        threshold = 8  # 该阈值不适合所有验证码，具体阈值请根据验证码情况设置
         # 遍历所有像素，大于阈值的为黑色
         for y in range(h):
             for x in range(w):
@@ -89,36 +70,93 @@ class Login:
         return yzm_text, key
 
     def check_captcha(self):
-        yzm_text, key = self.get_captcha()
-        # print(yzm_text, key)
-        url = 'http://dingjia.che300.com/api/lib/web_verify/check_captcha'
-        data = {
-            'tel': self.phone,
-            'captcha': yzm_text,
-            'key': key
-        }
-        response = self.session.post(url=url, data=data, headers=self.headers, proxies={'http': self.getProxy})
-        print(response.text)
-        if '"msg":"ok"' in response.text:
-            print('验证成功')
+        # 验证验证码受否正确 正确即可获得短信验证码
+        while 1:
+            yzm_text, key = self.get_captcha()
+            # print(yzm_text, key)
+            url = 'http://dingjia.che300.com/api/lib/web_verify/check_captcha'
+            data = {
+                'tel': self.phone,
+                'captcha': yzm_text,
+                'key': key
+            }
+            response = self.session.post(url=url, data=data, headers=self.headers, proxies={'http': self.get_Proxy()})
+            print(response.text)
+            if '"msg":"ok"' in response.text:
+                print('验证成功')
+                break
+            else:
+                print('验证失败，重试！')
 
-    def login_by_code(self):
-        yzm_code = 111111
+    def login_by_code(self, code):
         url = 'http://dingjia.che300.com/api/lib/web_verify/login_by_code'
         data = {
             'tel': self.phone,
-            'code': yzm_code
+            'code': code
         }
+        response = self.session.post(url=url, data=data, headers=self.headers, proxies={'http': self.get_Proxy()})
+        print(data)
+        print('注册验证接码平台验证码')
+        print(response.text)
+        print('``````````````````````````````准备开始获取cookie```````````````````````````````')
+        last_url = 'http://m.che300.com/estimate/result/3/3/1/1/1146060/2019-3/2/1/null/2020/2018'
+        response = self.session.get(url=last_url, headers=self.headers, proxies={'https': self.get_Proxy()})
+        print(response.text)
+        print(response.headers['Set-Cookie'])
+        return response.headers['Set-Cookie']
+
+
+class jiema:
+    def __init__(self, **kwargs):
+        pass
+
+    def get_phone(self):
+        # 获取手机号
+        phone_url = 'http://45.125.46.39:8000/api/yh_qh/id=27762&operator=0&Region=0&card=0&phone=&loop=1&filer=&token=404f60e7cb3f47502753c7b627761555'
+        response = requests.get(phone_url)
+        response.encoding = response.apparent_encoding
+        try:
+            print(response.text)
+            phone = response.text.split('|')[1]
+            return phone
+        except Exception as e:
+            print('请检查接码平台...', repr(e))
+
+    def get_code(self, phone):
+        # 获取短信验证码
+        code_url = f'http://45.125.46.39:8000/api/yh_qm/id=27762&phone={phone}&t=zhongd2020&token=404f60e7cb3f47502753c7b627761555'
+        try:
+            for i in range(24):
+                response = requests.get(code_url)
+                response.encoding = response.apparent_encoding
+                text = response.text.split('|')[1]
+                print(text)
+                if '验证码为' in text:
+                    code = re.findall(r'验证码为：(.*?), 本验证码30分钟内有效', text)[0]
+                    return code
+                    break
+                else:
+                    time.sleep(5)
+        except:
+            print('请检查接码平台，取验证码出了问题。。。。')
+
+    def lh_phone(self, phone):
+        # 拉黑手机号
+        lh_url = f'http://45.125.46.39:107/api/yh_lh/id=27762&phone={phone}&token=404f60e7cb3f47502753c7b627761555'
+        response = requests.get(url=lh_url)
+        response.encoding = response.apparent_encoding
+        print(response.text)
 
 
 if __name__ == '__main__':
-    for i in range(10):
-        try:
-            proxy = getProxy()
-            session = HTMLSession()
-            phone = '18876542121'
-            login = Login(session, proxy, phone)
-            login.check_captcha()
-            time.sleep(1)
-        except:
-            continue
+    jiema = jiema()
+    phone = jiema.get_phone()
+    print(phone)
+    session = requests.session()
+    login = Login()
+    login.check_captcha()
+    code = jiema.get_code(phone)
+    print(code)
+    jiema.lh_phone(phone)
+    cookie = login.login_by_code(code)
+    print(cookie)
