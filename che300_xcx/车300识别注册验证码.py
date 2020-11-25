@@ -100,7 +100,7 @@ class Login:
         print(response.text)
         print('``````````````````````````````准备开始获取cookie```````````````````````````````')
         last_url = 'http://m.che300.com/estimate/result/3/3/1/1/1146060/2019-3/2/1/null/2020/2018'
-        response = self.session.get(url=last_url, headers=self.headers, proxies={'http': self.get_Proxy()})
+        response = self.session.get(url=last_url, headers=self.headers, proxies={'https': self.get_Proxy()})
         print(response.text)
         print(response.headers['Set-Cookie'])
         return response.headers['Set-Cookie']
