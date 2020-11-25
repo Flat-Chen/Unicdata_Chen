@@ -39,7 +39,7 @@ def main():
 
         try:
             chrome_options = Options()
-            chrome_options.add_argument('--headless')
+            # chrome_options.add_argument('--headless')
             chrome_options.add_argument('--proxy-server=' + getProxy())
             # chrome_options.add_argument('--proxy-server=' + '81.68.214.148:16128')
             chrome_options.add_experimental_option('excludeSwitches', ['enable-automation'])
@@ -52,7 +52,7 @@ def main():
             cookie2 = '_che300=52lTBBpu15xdlMHkfeL2Y7TAHgMEMy2mHV1j8QqiEvHy36GbMnjMS57gvFlhTaOdCvFSaMXUL1W4Ano5MO%2BLe0OfZ9zoa7rykTxK5f3UmKNkrDW4tsItRcXvBO7lvGBP5DY3PIFfzyPKYXg61wbT6ntAU2Qd92PcXAa9gh%2FC9YWRH69vgJ1A1GlCZzKeScmD4t6YNAgYfeJ6k2N7hofTfmrEfcll5XtFQWJWO5e33w6LFBTb%2BRo0tHpmV%2BvlqavTFJ3GC%2BrmgbSUTFap1A4Y%2B2o6xWLU3yCzeOzOzbbMGXAxgo10aE9jAAHGV0cNjpfWQESJP58tFLmg6Ng3q4%2BxGn6GPpvz%2BUX%2BkkuPjOfzzgJi7kK0Ptx03%2B858lUW0KLOdd2z6uq80ll8v22ExOR4QDymWzuvlDl9OGPyYDORrSSloURB6OiORnXPxO8RMZMzSZsara%2BI0QcUyMvYFQIdK7BvmZl6RkH8OnrHnCnY34ddnfMUn217%2FraPWR%2F4tL%2BnnASyTMiO03aRzMcpGepMp4lleXyX%2B67EdVacnbNaNaaF%2F8MjmpXp%2B4tSZPJHnkqXnOtCVeYh%2BlCBppRyf77jTw%3D%3D6135e9a20559694094d0d04c3e7d74cda214ac05; device_id=h5440d-13b2-2133-c307-46aa; tel=17069135178; pcim=1b3b972a90bc8b3c233e7e524062404f81487462; spidercooskieXX12=1606210998; spidercodeCI12X3=fb0e20806acb7beae6799c2f35409d2b'
             cookie3 = '_che300=SOoVQaNf4%2BsEkXOh6Av%2BbS1FgZNx1OeY%2F8JA77%2B07xEmpi6s5k1uJG1lU5jmXrbTnBcxYCdzlu22CsfL0XQvP9%2BDLX30gtWePrSkTAE6cVBy6U3a%2FC9e%2BpnzfR4KjRmqkQOZNaDyUzNN66dIdP5dPIv63L23pkX9JO%2FGfuNVJogywprwjBv%2Bf9d9S%2BmXxuXUTcNM2km6sFWVu71rIr%2F0aR2vHJ9pBnw4T6NhvtMtiUd2VE96kKXBh%2FYmW7sXyyFhGChNeDsIKdlEQj8LHjyoGas6u9S5bjRnlSXWFGwgNA%2BzwnlqIos2Uyg39kSt1bgVZPbJq2uozTMGIqw7smO9AuokOkMbWFyjutXHyz74%2Ffmc37JzL64MYiWiV5RhJBtocT%2B9VEH0mscO5cIp0f9BkBaV2rNsrOksehWR4T%2BpRIv%2FPWzLn5B1skB64LunzffgfLRy%2BC2jmHIYQ6aRwAGlzwxwZZLflGJr8KQdn7qZJrAPSiP8lWgZuzzd%2FCbYAKnXRm7YlJ59v82iAjJH2lf7Cw9qApOTU3xnuQths11l7w4rTYW4prlnM6AAQHoMVypm578vWH8MAa%2F4W%2F5YPfuk0A%3D%3Dd6d75f981ac3c966f4e66b811fbee19be221018d; device_id=; tel=16534186105; pcim=84ceb450bcd9214ab061669659bac1fc54ba4dde; spidercooskieXX12=1606211385; spidercodeCI12X3=804b84067d9b5ec7daa7a2685890802a'
             browser.get(url)
-            cookie = cookie3.split(';')
+            cookie = cookie2.split(';')
             for i in cookie:
                 # print({'name': i.split('=')[0], 'value': i.split('=')[1]})
                 browser.add_cookie(cookie_dict={'name': i.split('=')[0].strip(), 'value': i.split('=')[1].strip()})
@@ -84,8 +84,9 @@ def main():
                 price_list.append(text)
             print(price_list)
             print(count)
-            time.sleep(5)
+            time.sleep(10)
         except:
+            browser.quit()
             pass
 
 
@@ -99,4 +100,3 @@ main()
 #         proc.append(proce)
 #
 #     for proce in proc:
-#         proce.join()
