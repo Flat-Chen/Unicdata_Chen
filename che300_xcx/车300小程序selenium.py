@@ -50,7 +50,7 @@ def main():
             browser = webdriver.Chrome(options=chrome_options)
             cookie1 = "device_id=h51594-a9a6-13b7-b9e8-8ee0; tel=17059143793; pcim=d6780828fb1ed298ad92484369d3128a6c822d94; _dx_uzZo5y=7f687346e5fdd4bf12ca3c4494212c3850b7f2fbb603097f31524246a3d56901c327feaf; _dx_app_f780acccd6e391d352f2076600d5aa16=5fae3c43BXM1tCiabzy6xSgjpckCrSlCcqnQrOG1; PHPSESSID=26b80c0b96c0f24514a037bf43dc19bd454da1a2; Hm_lvt_12b6a0c74b9c210899f69b3429653ed6=1605251770,1605520929; Hm_lvt_f5ec9aea58f25882d61d31eb4b353550=1605251783,1605520929; _che300=xGX1qF%2BixDVqUd2zXUsBLQwsPTeQoUjcGAe%2FL1M3Vn8RwI7aoF%2FFfWi2uRSJ36ZALLZbvzxvU0yT%2FOG5mYY2y9VMvv9mhTmAqeO7FLPjN4hd4nqXfcF9ETiGHtJC%2BEA%2BWvOpoCvVPXGvgoAe4IXML7EPy2WbXKE2yYa%2BNAtmIkLoNc3WS1jj7MPLciQaRkNallIdVIvn9OZ7WYP5Y%2BNZ%2FNRH6WLhFf1DOBLL68mRpA%2FiN0gye3rQe%2BVsdKR9X9RRuSbM9x7k7Zp3mb2G6zjT6OaQ3gTIY3pTxmJaor1w39zP4BE1VNjBCPC%2BUz6b8vAiU1PiD6zy98uPDB5CjRLq1U2jRd0MNziUw0uVuFENyq6GmiZp3eu0cK2CoK0YQfvDlbF%2FoWsEGP4ANEZ%2BNeaJ%2Bqxh8h5S92P7p7jWub6KvAnqjX3CxNoOVdf7OmvAca0i5ey5roWYBJb0wwkgi30xNf2GrCk9Esw1lP3g7Ydv%2Fx7Vw%2FFLa9KNQfZscykoz3LdRVGFiwbniUe7fbgdIJBeqQPjaQDZ%2BxuFvIB%2BoVUPkA24a4jux%2Bk3LBK4YuRR5OFYnkLLYqZ0j2bkmuXESyYcxg%3D%3D5b10e4a8c1108d7ae54d12bea8167022b0d6f91b; zg_did=%7B%22did%22%3A%20%22175c0761d5f128-0032fb81608a41-7f677c6f-1fa400-175c0761d607e8%22%7D; zg_db630a48aa614ee784df54cc5d0cdabb=%7B%22sid%22%3A%201605520928906%2C%22updated%22%3A%201605520934427%2C%22info%22%3A%201605251767662%2C%22superProperty%22%3A%20%22%7B%7D%22%2C%22platform%22%3A%20%22%7B%7D%22%2C%22utm%22%3A%20%22%7B%7D%22%2C%22referrerDomain%22%3A%20%22m.che300.com%22%2C%22zs%22%3A%200%2C%22sc%22%3A%200%2C%22firstScreen%22%3A%201605520928906%7D; Hm_lpvt_f5ec9aea58f25882d61d31eb4b353550=1605520934; Hm_lpvt_12b6a0c74b9c210899f69b3429653ed6=1605520934; spidercooskieXX12=1605520942; spidercodeCI12X3=94fdb56d6ec83714b463d9297b1772f2"
             browser.get(url)
-            cookie = cookie.split(';')
+            cookie1 = cookie1.split(';')
             for i in cookie1:
                 # print({'name': i.split('=')[0], 'value': i.split('=')[1]})
                 browser.add_cookie(cookie_dict={'name': i.split('=')[0].strip(), 'value': i.split('=')[1].strip()})
@@ -67,8 +67,9 @@ def main():
                                          browser.page_source)
             count = count + 1
             browser.quit()
-            time.sleep(60)
+
             # print(img_base64_urls)
+            price_list = []
             for i in img_base64_urls:
                 # print(i)
                 imgdata = base64.b64decode(i.replace('\n', '').replace('\r', ''))
@@ -77,6 +78,8 @@ def main():
                 file.close()
                 text = pytesseract.image_to_string(Image.open("./1.jpg"), lang="eng").replace(',', '.')
                 print(text)
+                price_list.append(text)
+            time.sleep(60)
         except:
             pass
 
