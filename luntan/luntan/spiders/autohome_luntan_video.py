@@ -39,7 +39,7 @@ class AutohomeLuntanVideoSpider(scrapy.Spider):
                         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36"}
         connection = pymongo.MongoClient('192.168.2.149', 27017)
         db = connection["luntan"]
-        collection = db["autohome_luntan_lost3"]
+        collection = db["autohome_luntan_url_2020_11"]
         self.collection = collection
 
     is_debug = True
@@ -54,7 +54,7 @@ class AutohomeLuntanVideoSpider(scrapy.Spider):
         'MONGODB_PORT': 27017,
         'MONGODB_DB': 'luntan',
         'MONGODB_COLLECTION': 'autohome_luntan_lost',
-        'CONCURRENT_REQUESTS': 1,
+        'CONCURRENT_REQUESTS': 8,
         'DOWNLOAD_DELAY': 0,
         'LOG_LEVEL': 'DEBUG',
         'DOWNLOAD_TIMEOUT': 20,
@@ -76,11 +76,10 @@ class AutohomeLuntanVideoSpider(scrapy.Spider):
         self.be_p1 = get_be_p1_list()
         # url = 'https://club.autohome.com.cn/bbs/thread/40105ae240901847/90761430-1.html'
         # yield scrapy.Request(url=url, headers=self.headers, meta={'url': url})
-        connection = pymongo.MongoClient('192.168.2.149', 27017)
-        db = connection["luntan"]
-        collection = db["autohome_luntan_lost3"]
-        lost_urls = collection.find({"isvideo": "1"}, {"url": 1, "brand": 1, "factory": 1, "_id": 1, "posted_time": 1})
+        lost_urls = self.collection.find(({"$and": [{"posted_time": {'$gte': "2020-11-01"}}, {"isvideo": 1}]}),
+                                         {"url": 1, "brand": 1, "factory": 1, "_id": 1, "posted_time": 1})
         lost_urls_list = list(lost_urls)
+        print(lost_urls_list)
         for lost_url in lost_urls_list:
             url = lost_url['url']
             meta = {'brand': lost_url['brand'], 'factory': lost_url['factory'], 'url': url, '_id': lost_url['_id'],
@@ -120,7 +119,10 @@ class AutohomeLuntanVideoSpider(scrapy.Spider):
             item["information_source"] = 'autohome'
             item["brand"] = brand
             item["factory"] = factory
-            item["title"] = response.xpath("//span[@class='title']/text()").extract_first()
+            try:
+                item["title"] = re.findall(r'<title>(.*?)</title>', response.text)[0]
+            except:
+                self.collection.update({"_id": _id}, {"$set": {'content': 'Title is None'}})
             item["grabtime"] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
             item["parsetime"] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
             # 处理content
@@ -164,6 +166,7 @@ class AutohomeLuntanVideoSpider(scrapy.Spider):
                 self.num = self.num + 1
                 yield item
                 # print(item)
+                self.collection.update({"_id": _id}, {"$set": {'content': 'success'}})
 
     def text_ttf(self, url):
         # print(os.listdir())
