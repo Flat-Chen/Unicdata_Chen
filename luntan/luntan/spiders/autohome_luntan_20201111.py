@@ -66,6 +66,7 @@ class AutohomeLuntan20201111Spider(scrapy.Spider):
         # 'DOWNLOADER_MIDDLEWARES': {
         #     'luntan.middlewares.LuntanProxyMiddleware': 400,
         #     'luntan.middlewares.LuntanUserAgentMiddleware': 100,
+        #     'luntan.middlewares.MyproxiesSpiderMiddleware': 200,
         # },
         # 'ITEM_PIPELINES': {
         'luntan.pipelines.LuntanPipeline': 300,
