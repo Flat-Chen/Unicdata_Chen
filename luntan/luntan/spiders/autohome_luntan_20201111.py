@@ -2,6 +2,7 @@ import logging
 import random
 import re
 import time
+import datetime
 import pymysql
 import requests
 import pymongo
@@ -75,10 +76,17 @@ class AutohomeLuntan20201111Spider(scrapy.Spider):
     }
 
     def start_requests(self):
+        nowyear = datetime.datetime.now().year
+        nowmonth = datetime.datetime.now().month
+        nowdays = datetime.datetime.now().day
+        if nowdays - 10 > 0:
+            riqi = str(nowyear) + '-' + str(nowmonth - 1) + '-' + str(nowdays - 10)
+        else:
+            riqi = str(nowyear) + '-' + str(nowmonth - 2) + '-' + str(nowdays + 20)
         self.be_p1 = get_be_p1_list()
         lost_urls = self.collection.find(
-            ({"$and": [{"posted_time": {'$gte': "2020-11-01"}}, {"content": None}, {"isvideo": 0}]}))
-        # lost_urls = self.collection.find({"posted_time": {'$gte': "2020-11-01"}})
+            ({"$and": [{"posted_time": {'$gte': riqi}}, {"$or": [{"content": 'yzm'}, {"content": None}]},
+                       {"isvideo": 0}]}))
         lost_urls_list = list(lost_urls)
         for lost_url in lost_urls_list:
             url = lost_url['url']
@@ -203,19 +211,19 @@ class AutohomeLuntan20201111Spider(scrapy.Spider):
             return 0
         else:
             # window
-            with open("./luntan/text_dazhong1.ttf", "bw")as f:
-                f.write(text.content)
-            # linux
-            # with open("/home/home/mywork/font/luntan/text_dazhong1.ttf", "bw")as f:
+            # with open("./luntan/text_dazhong1.ttf", "bw")as f:
             #     f.write(text.content)
-            #     window
-            font = TTFont("./luntan/text_dazhong1.ttf")
-            # linxu
-            # font = TTFont("/home/home/mywork/font/luntan/text_dazhong1.ttf")
-            # window
-            font.saveXML("text_dazhong1.xml")
             # linux
-            # font.saveXML("/home/home/mywork/font/luntan/text_dazhong1.xml")
+            with open("/home/tmp_che31126/Unicdata_chen/luntan/luntan/text_dazhong1.ttf", "bw")as f:
+                f.write(text.content)
+            #     window
+            # font = TTFont("./luntan/text_dazhong1.ttf")
+            # linxu
+            font = TTFont("/home/tmp_che31126/Unicdata_chen/luntan/luntan/text_dazhong1.ttf")
+            # window
+            # font.saveXML("text_dazhong1.xml")
+            # linux
+            font.saveXML("/home/tmp_che31126/Unicdata_chen/luntan/luntan/text_dazhong1.xml")
             font_map = get_map1(self.be_p1, self.word_list)
             # print(font_map, "/\\" * 50)
             return font_map
