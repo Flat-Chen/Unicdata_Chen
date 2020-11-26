@@ -214,16 +214,16 @@ class AutohomeLuntan20201111Spider(scrapy.Spider):
             # with open("./luntan/text_dazhong1.ttf", "bw")as f:
             #     f.write(text.content)
             # linux
-            with open("/home/tmp_che31126/Unicdata_chen/luntan/luntan/text_dazhong1.ttf", "bw")as f:
+            with open("./luntan/text_dazhong1.ttf", "bw")as f:
                 f.write(text.content)
             #     window
             # font = TTFont("./luntan/text_dazhong1.ttf")
             # linxu
-            font = TTFont("/home/tmp_che31126/Unicdata_chen/luntan/luntan/text_dazhong1.ttf")
+            font = TTFont("./luntan/text_dazhong1.ttf")
             # window
             # font.saveXML("text_dazhong1.xml")
             # linux
-            font.saveXML("/home/tmp_che31126/Unicdata_chen/luntan/luntan/text_dazhong1.xml")
+            font.saveXML("./luntan/text_dazhong1.xml")
             font_map = get_map1(self.be_p1, self.word_list)
             # print(font_map, "/\\" * 50)
             return font_map
