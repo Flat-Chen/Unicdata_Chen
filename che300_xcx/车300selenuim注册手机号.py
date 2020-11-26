@@ -143,13 +143,13 @@ if __name__ == '__main__':
     for i in range(20):
         Login().start()
         time.sleep(5)
-import re
-from tqdm import tqdm
-from redis import Redis
+# import re
+# from tqdm import tqdm
+# from redis import Redis
 
-redis_cli = Redis(host="192.168.1.248", port=6379, db=3)
-with open('/home/machao/公共的/田泽瑞/田泽瑞--交接/牛牛汽车/cookies', 'r') as f:
-    lines = f.readlines()
-    for line in tqdm(lines):
-        if line != '\n':
-            redis_cli.sadd("niuniu_cookie", line)
+# redis_cli = Redis(host="192.168.1.248", port=6379, db=3)
+# with open('/home/machao/公共的/田泽瑞/田泽瑞--交接/牛牛汽车/cookies', 'r') as f:
+#     lines = f.readlines()
+#     for line in tqdm(lines):
+#         if line != '\n':
+#             redis_cli.sadd("niuniu_cookie", line)
