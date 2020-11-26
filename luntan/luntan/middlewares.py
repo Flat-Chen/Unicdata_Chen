@@ -9,7 +9,10 @@ import random
 import redis
 import requests
 from scrapy import signals
+from scrapy.downloadermiddlewares.retry import RetryMiddleware
 from scrapy.downloadermiddlewares.useragent import UserAgentMiddleware
+from scrapy.utils.python import global_object_name
+from scrapy.utils.response import response_status_message
 
 logger = logging.getLogger(__name__)
 
@@ -84,6 +87,79 @@ user_agent_list = [
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.24 (KHTML, like Gecko) Chrome/19.0.1055.1 Safari/535.24",
     "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/535.24 (KHTML, like Gecko) Chrome/19.0.1055.1 Safari/535.24",
 ]
+
+
+class MyproxiesSpiderMiddleware(RetryMiddleware):
+
+    def __init__(self, name):
+        super(MyproxiesSpiderMiddleware, self).__init__(name)
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        return cls(crawler.settings)
+
+    def process_response(self, request, response, spider):
+        # if request.meta.get('dont_retry', False):
+        #     return response
+        # if response.status in self.retry_http_codes:
+        #     print(response.headers)
+        #     reason = response_status_message(response.status)
+        #     return self._retry(request, reason, spider) or response
+        if '不合法' in response.body.decode("utf-8"):
+            print(response.body.decode("utf-8"))
+            reason = "不合法"
+            return self._retry(request, reason, spider) or response
+        if '未授权' in response.body.decode("utf-8"):
+            print(response.body.decode("utf-8"))
+            reason = "未授权"
+            return self._retry(request, reason, spider) or response
+        if '用户访问安全认证' in response.body.decode("utf-8"):
+            print("出现验证码")
+            reason = "出现验证码"
+            return self._retry(request, reason, spider) or response
+        if 'safety' in response.url:
+            print("出现验证码")
+            reason = "出现验证码"
+            return self._retry(request, reason, spider) or response
+        return response
+
+    def process_exception(self, request, exception, spider):
+        if isinstance(exception, self.EXCEPTIONS_TO_RETRY) \
+                and not request.meta.get('dont_retry', False):
+            return self._retry(request, exception, spider)
+
+    def _retry(self, request, reason, spider):
+        retries = request.meta.get('retry_times', 0) + 1
+
+        retry_times = self.max_retry_times
+
+        if 'max_retry_times' in request.meta:
+            retry_times = request.meta['max_retry_times']
+
+        stats = spider.crawler.stats
+        if retries <= retry_times:
+            logger.debug("Retrying %(request)s (failed %(retries)d times): %(reason)s",
+                         {'request': request, 'retries': retries, 'reason': reason},
+                         extra={'spider': spider})
+            # ua = random.choice(user_agent_list)
+            # request.headers.setdefault('User-Agent', ua)
+            retryreq = request.copy()
+            retryreq.meta['retry_times'] = retries
+            retryreq.dont_filter = True
+            retryreq.priority = request.priority + self.priority_adjust
+            # 重新获取代理,添加代理
+            proxy_ip = "http://" + getProxy()
+            retryreq.meta['proxy'] = proxy_ip
+            # retryreq.meta['headers'] = proxy_ip
+            print(proxy_ip)
+            print("-" * 100)
+
+            if isinstance(reason, Exception):
+                reason = global_object_name(reason.__class__)
+
+            stats.inc_value('retry/count')
+            stats.inc_value('retry/reason_count/%s' % reason)
+            return retryreq
 
 
 class LuntanSpiderMiddleware:

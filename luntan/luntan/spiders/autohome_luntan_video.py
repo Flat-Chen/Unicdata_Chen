@@ -76,8 +76,9 @@ class AutohomeLuntanVideoSpider(scrapy.Spider):
         self.be_p1 = get_be_p1_list()
         # url = 'https://club.autohome.com.cn/bbs/thread/40105ae240901847/90761430-1.html'
         # yield scrapy.Request(url=url, headers=self.headers, meta={'url': url})
-        lost_urls = self.collection.find(({"$and": [{"posted_time": {'$gte': "2020-11-01"}}, {"isvideo": 1}]}),
-                                         {"url": 1, "brand": 1, "factory": 1, "_id": 1, "posted_time": 1})
+        lost_urls = self.collection.find(
+            ({"$and": [{"posted_time": {'$gte': "2020-11-01"}}, {"isvideo": 1}, {"content": None}]}),
+            {"url": 1, "brand": 1, "factory": 1, "_id": 1, "posted_time": 1})
         lost_urls_list = list(lost_urls)
         print(lost_urls_list)
         for lost_url in lost_urls_list:
