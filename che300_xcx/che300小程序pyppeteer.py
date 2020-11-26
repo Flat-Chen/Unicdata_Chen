@@ -19,3 +19,5 @@ url = "http://m.che300.com/estimate/result/3/3/1/1/1146060/2019-3/2/1/null/2020/
 response = session.get(url=url, headers=headers)
 response.html.render()
 print(response.text)
+from datetime import datetime
+print(datetime.date)
