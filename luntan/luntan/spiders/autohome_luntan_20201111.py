@@ -58,7 +58,7 @@ class AutohomeLuntan20201111Spider(scrapy.Spider):
         'CONCURRENT_REQUESTS': 8,
         'DOWNLOAD_DELAY': 0,
         'LOG_LEVEL': 'DEBUG',
-        'DOWNLOAD_TIMEOUT': 20,
+        'DOWNLOAD_TIMEOUT': 10,
         # 'RETRY_ENABLED': True,
         # 'RETRY_TIMES': 1,
         # 'COOKIES_ENABLED': True,
@@ -95,6 +95,7 @@ class AutohomeLuntan20201111Spider(scrapy.Spider):
         if 'safety' in response.url:
             print('！！！！！！！！！！！！出现了验证码！！！！！！！！！！')
             print('！！！！！！！！！！！！重试这个url！！！！！！！！！！！')
+            self.collection.update({"_id": _id}, {"$set": {'content': 'yzm'}})
             retry_url = response.meta['url']
             yield scrapy.Request(url=retry_url, headers=self.headers,
                                  meta={'url': retry_url, 'brand': brand, 'factory': factory, '_id': _id},
