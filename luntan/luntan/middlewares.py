@@ -99,24 +99,6 @@ class MyproxiesSpiderMiddleware(RetryMiddleware):
         return cls(crawler.settings)
 
     def process_response(self, request, response, spider):
-        # if request.meta.get('dont_retry', False):
-        #     return response
-        # if response.status in self.retry_http_codes:
-        #     print(response.headers)
-        #     reason = response_status_message(response.status)
-        #     return self._retry(request, reason, spider) or response
-        if '不合法' in response.body.decode("utf-8"):
-            print(response.body.decode("utf-8"))
-            reason = "不合法"
-            return self._retry(request, reason, spider) or response
-        if '未授权' in response.body.decode("utf-8"):
-            print(response.body.decode("utf-8"))
-            reason = "未授权"
-            return self._retry(request, reason, spider) or response
-        if '用户访问安全认证' in response.body.decode("utf-8"):
-            print("出现验证码")
-            reason = "出现验证码"
-            return self._retry(request, reason, spider) or response
         if 'safety' in response.url:
             print("出现验证码")
             reason = "出现验证码"
