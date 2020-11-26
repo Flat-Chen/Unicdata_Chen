@@ -90,9 +90,7 @@ class AutohomeLuntan20201111Spider(scrapy.Spider):
         lost_urls_list = list(lost_urls)
         for lost_url in lost_urls_list:
             url = lost_url['url']
-            # url = 'http://club.autohome.com.cn/bbs/thread/3101adb3de85c9c0/91759895-1.html'
             meta = {'brand': lost_url['brand'], 'factory': lost_url['factory'], 'url': url, '_id': lost_url['_id']}
-            # meta = {'brand': '荣威', 'factory': '上汽乘用车', 'url': url}
             yield scrapy.Request(url=url, meta=meta, headers=self.headers, dont_filter=True)
             # break
 
@@ -109,9 +107,6 @@ class AutohomeLuntan20201111Spider(scrapy.Spider):
                                  meta={'url': retry_url, 'brand': brand, 'factory': factory, '_id': _id},
                                  callback=self.parse, dont_filter=True)
         else:
-            # print(response.text)
-            # TFF_text_url = response.xpath("//style[@type='text/css']/text()").extract_first()
-            # print(TFF_text_url)
             url = re.findall(r"format\('embedded-opentype'\),url\('(.*?)'\) format\('woff'\)", response.text)
             # print(url)
             if url == []:
