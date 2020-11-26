@@ -27,7 +27,7 @@ class Login:
         # self.cookie_txt = open("che300_cookies.txt", "a")
 
     @classmethod
-    def get_Proxy(cls):
+    def getProxy(cls):
         # url = 'http://192.168.2.120:5000'
         url = 'http://120.27.216.150:5000'
         headers = {
