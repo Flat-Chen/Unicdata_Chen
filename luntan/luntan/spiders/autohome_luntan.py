@@ -43,7 +43,7 @@ class AutohomeLuntanSpider(scrapy.Spider):
         self.brand_lsit = ["斯柯达", '名爵', '荣威', '上海', '大众', '上汽MAXUS', '别克', '凯迪拉克', '雪佛兰', '宝骏', '新宝骏', '五菱汽车', '依维柯']
         connection = pymongo.MongoClient('192.168.2.149', 27017)
         db = connection["luntan"]
-        collection = db["autohome_luntan_family_lost"]
+        collection = db["autohome_luntan_url_2020_11"]
         self.collection = collection
 
     is_debug = True
@@ -54,16 +54,16 @@ class AutohomeLuntanSpider(scrapy.Spider):
         'MYSQL_PORT': 3306,
         'MYSQL_DB': "saicnqms",
         'MYSQL_TABLE': "autohome_luntan_allurl",
-        'MONGODB_SERVER': '192.168.1.94',
+        'MONGODB_SERVER': '192.168.2.149',
         'MONGODB_PORT': 27017,
         'MONGODB_DB': 'luntan',
-        'MONGODB_COLLECTION': 'autohome_luntan_1',
+        'MONGODB_COLLECTION': 'autohome_luntan_url_2020_11',
         'CONCURRENT_REQUESTS': 8,
         'DOWNLOAD_DELAY': 0,
         'LOG_LEVEL': 'DEBUG',
         'DOWNLOAD_TIMEOUT': 15,
         # 'RETRY_ENABLED': False,
-        'RETRY_TIMES': 30,
+        'RETRY_TIMES': 40,
         # 'COOKIES_ENABLED': True,
         # 'REDIS_URL': 'redis://192.168.1.241:6379/14',
         # 'DOWNLOADER_MIDDLEWARES': {
@@ -109,12 +109,12 @@ class AutohomeLuntanSpider(scrapy.Spider):
         # print(response.text)
         meta = response.meta
         item = {}
-        try:
-            pinglun_url_dict = json.loads(response.text, encoding=None)
-        except:
-            print('------------------------------------------内容解析失败-----------------------------------')
-            self.collection.insert({'url': response.url, 'brand': meta['brand'], 'factory': meta['factory'],
-                                    'grabtime': time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())})
+        # try:
+        pinglun_url_dict = json.loads(response.text)
+        # except:
+        #     print('------------------------------------------内容解析失败-----------------------------------')
+        #     self.collection.insert({'url': response.url, 'brand': meta['brand'], 'factory': meta['factory'],
+        #                             'grabtime': time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())})
         if pinglun_url_dict["returncode"] != 0:
             return
         else:
@@ -127,13 +127,14 @@ class AutohomeLuntanSpider(scrapy.Spider):
                 item['page'] = meta['page']
                 item['brand'] = meta['brand']
                 item['factory'] = meta['factory']
-                item['tiezi_url'] = pinglun_url["url"]
+                item['url'] = pinglun_url["url"]
                 item['status'] = pinglun_url["url"]
                 yield item
                 # 就是要把这个tiezi_url存起来 进行比对
             # 只爬当前月份和前一个月份的帖子
             # 如当前页 最后一条的帖子的发帖时间是两个月前的则不再进行翻页
-            if int(pinglun_url_dict["result"]["list"][-1]['postdate'].split('-')[0]) > int(2018):
+            nowmonth = datetime.datetime.now().month
+            if int(pinglun_url_dict["result"]["list"][-1]['postdate'].split('-')[1]) > int(nowmonth - 4):
                 url = "https://club.autohome.com.cn/frontapi/topics/getByBbsId?pageindex={}&pagesize=100&bbs=c&bbsid={}&fields=topicid%2Ctitle%2Cpost_memberid%2Cpost_membername%2Cpostdate%2Cispoll%2Cispic%2Cisrefine%2Creplycount%2Cviewcount%2Cvideoid%2Cisvideo%2Cvideoinfo%2Cqainfo%2Ctags%2Ctopictype%2Cimgs%2Cjximgs%2Curl%2Cpiccount%2Cisjingxuan%2Cissolve%2Cliveid%2Clivecover%2Ctopicimgs&orderby=topicid-"
                 response.meta["page"] = response.meta["page"] + 1
                 url = url.format(response.meta["page"], response.meta["id"], )
