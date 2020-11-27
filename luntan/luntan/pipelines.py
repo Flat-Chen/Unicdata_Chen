@@ -67,7 +67,7 @@ class LuntanPipeline:
 
     def process_item(self, item, spider):
         # mongo要有重字段status的爬虫名字写进去
-        if spider.name in ["xiaozhu_url", " "]:
+        if spider.name in ["xiaozhu_url", "autohome_luntan"]:
             valid = True
             i = md5(item['status'].encode("utf8")).hexdigest()
             returndf = self.df.add(i)
@@ -111,7 +111,7 @@ class LuntanPipeline:
                 logging.log(msg=f"add data in mysql", level=logging.INFO)
                 return item
         # mysql不需要去重的爬虫名字写进去
-        elif spider.name in ['autohome_luntan_20201111', 'autohome_luntan', 'autohome_luntan_video']:
+        elif spider.name in ['autohome_luntan_20201111', '', 'autohome_luntan_video']:
             self.mysqlcounts += 1
             logging.log(msg=f"scrapy              {self.mysqlcounts}              items", level=logging.INFO)
             # 数据存入mysql
