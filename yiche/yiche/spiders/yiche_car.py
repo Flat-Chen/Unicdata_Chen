@@ -112,4 +112,5 @@ class YicheCarSpider(scrapy.Spider):
         item['maximum_cruising_range'] = maximum_cruising_range
         item['url'] = response.url
         item['status'] = str(vehicle_info)
-        yield item
+        # yield item
+        print(item)

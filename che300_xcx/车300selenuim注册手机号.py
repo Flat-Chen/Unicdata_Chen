@@ -7,6 +7,10 @@ from PIL import Image
 import pytesseract
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from redis import Redis
+from tqdm import tqdm
+
+redis_cli = Redis(host="192.168.1.248", port=6379, db=3)
 
 
 class Login:
@@ -23,11 +27,6 @@ class Login:
         self.browser = webdriver.Chrome(options=self.chrome_options)
         self.browser.get(url)
         self.phone = self.get_phone()
-
-    # 程序完成，自动结束程序
-    def __del__(self):
-        self.browser.close()
-        self.cookie_txt.close()
 
     @classmethod
     def getProxy(cls):
@@ -134,7 +133,15 @@ class Login:
                     time.sleep(5)
                     cookie = self.browser.get_cookies()
                     print(cookie)
-                    self.save_cookie(cookie)
+                    lst = []
+                    for item in cookie:
+                        nv = item['name'] + '=' + item['value']
+                        lst.append(nv)
+                    cookie_str = '; '.join(lst)
+                    redis_cli.sadd("che300_xcx_cookie", cookie_str)
+                    print('redis写入成功！！')
+                    print(cookie_str)
+                    # self.save_cookie(cookie)
                     self.browser.quit()
                     break
 
@@ -143,13 +150,3 @@ if __name__ == '__main__':
     for i in range(20):
         Login().start()
         time.sleep(5)
-# import re
-# from tqdm import tqdm
-# from redis import Redis
-
-# redis_cli = Redis(host="192.168.1.248", port=6379, db=3)
-# with open('/home/machao/公共的/田泽瑞/田泽瑞--交接/牛牛汽车/cookies', 'r') as f:
-#     lines = f.readlines()
-#     for line in tqdm(lines):
-#         if line != '\n':
-#             redis_cli.sadd("niuniu_cookie", line)
