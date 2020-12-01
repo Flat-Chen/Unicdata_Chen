@@ -13,6 +13,7 @@ from scrapy.downloadermiddlewares.useragent import UserAgentMiddleware
 
 logger = logging.getLogger(__name__)
 
+
 class DealerProxyMiddleware(object):
     def __init__(self):
         self.count = 0
@@ -26,10 +27,10 @@ class DealerProxyMiddleware(object):
             return request
 
     def process_request(self, request, spider):
-        #要使用代理的爬虫名字写进去
-        #if spider.name in ['', '']:
-            #proxy = getProxy()
-            #request.meta['proxy'] = "http://" + proxy
+        # 要使用代理的爬虫名字写进去
+        # if spider.name in ['', '']:
+        # proxy = getProxy()
+        # request.meta['proxy'] = "http://" + proxy
         proxy = getProxy()
         request.meta['proxy'] = "http://" + proxy
 
