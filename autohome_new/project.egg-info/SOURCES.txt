@@ -1,0 +1,13 @@
+setup.py
+autohome_new/__init__.py
+autohome_new/items.py
+autohome_new/middlewares.py
+autohome_new/pipelines.py
+autohome_new/settings.py
+autohome_new/spiders/__init__.py
+autohome_new/spiders/autohome_dealer.py
+project.egg-info/PKG-INFO
+project.egg-info/SOURCES.txt
+project.egg-info/dependency_links.txt
+project.egg-info/entry_points.txt
+project.egg-info/top_level.txt
