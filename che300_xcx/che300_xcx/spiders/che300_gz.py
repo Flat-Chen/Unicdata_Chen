@@ -42,8 +42,8 @@ class Che300GzSpider(scrapy.Spider):
         'MONGODB_PORT': 27017,
         'MONGODB_DB': 'che300',
         'MONGODB_COLLECTION': 'che300_gz',
-        'CONCURRENT_REQUESTS': 1,
-        'DOWNLOAD_DELAY': 0.5,
+        'CONCURRENT_REQUESTS': 32,
+        'DOWNLOAD_DELAY': 0,
         'LOG_LEVEL': 'DEBUG',
         # 'DOWNLOAD_TIMEOUT': 5,
         # 'RETRY_ENABLED': False,
@@ -63,7 +63,7 @@ class Che300GzSpider(scrapy.Spider):
 
     def start_requests(self):
         url = r.lpop('che300_gz:start_urls')
-        yield PyppeteerRequest(url=url, meta={'url': url}, sleep=2)
+        yield PyppeteerRequest(url=url, meta={'url': url})
 
     def parse(self, response):
         url = response.meta['url']
@@ -106,4 +106,4 @@ class Che300GzSpider(scrapy.Spider):
         next_url = r.blpop('che300_gz:start_urls')
         if next_url:
             start_url = next_url[1]
-            yield PyppeteerRequest(url=start_url, meta={'url': start_url}, callback=self.parse, sleep=2)
+            yield PyppeteerRequest(url=start_url, meta={'url': start_url}, callback=self.parse)
