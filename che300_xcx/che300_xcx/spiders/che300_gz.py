@@ -42,8 +42,8 @@ class Che300GzSpider(scrapy.Spider):
         'MONGODB_PORT': 27017,
         'MONGODB_DB': 'che300',
         'MONGODB_COLLECTION': 'che300_gz',
-        'CONCURRENT_REQUESTS': 32,
-        'DOWNLOAD_DELAY': 0,
+        'CONCURRENT_REQUESTS': 1,
+        'DOWNLOAD_DELAY': 0.5,
         'LOG_LEVEL': 'DEBUG',
         # 'DOWNLOAD_TIMEOUT': 5,
         # 'RETRY_ENABLED': False,
@@ -81,6 +81,7 @@ class Che300GzSpider(scrapy.Spider):
             item['city'] = '上海'
             item['regdate'] = url_data[10]
             item['mile'] = url_data[11]
+            item['group'] = response.xpath('//div[@class="active"]/@id').extract_first()
             item['url'] = url
             price_list = []
             for i in img_base64_urls:
@@ -94,10 +95,10 @@ class Che300GzSpider(scrapy.Spider):
                 # print(text)
                 price_list.append(text)
             # print(price_list)
-
-            for i in range(1, 22):
-                item[f'price{i}'] = price_list[i - 1]
-                # print(item)
+            index_list = [4, 1, 5, 2, 6, 3, 7, 11, 8, 12, 9, 13, 10, 14, 18, 15, 19, 16, 20, 17, 21]
+            for i in index_list:
+                item[f'price{index_list.index(i) + 1}'] = price_list[i - 1]
+            # print(item)
             yield item
         except:
             print('解析数据失败，url重新加到请求队列尾部')
