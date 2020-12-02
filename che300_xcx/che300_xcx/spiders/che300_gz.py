@@ -101,7 +101,7 @@ class Che300GzSpider(scrapy.Spider):
             yield item
         except:
             print('解析数据失败，url重新加到请求队列尾部')
-            r.rpush('che300_gz:start_urls', response.url)
+            r.rpush('che300_gz:start_urls', url)
         next_url = r.blpop('che300_gz:start_urls')
         if next_url:
             start_url = next_url[1]
