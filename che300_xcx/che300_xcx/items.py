@@ -28,6 +28,7 @@ class Che300XcxItem(scrapy.Item):
     price19 = scrapy.Field()
     price20 = scrapy.Field()
     price21 = scrapy.Field()
+    url = scrapy.Field()
 
 
 class Che300CarItem(scrapy.Item):

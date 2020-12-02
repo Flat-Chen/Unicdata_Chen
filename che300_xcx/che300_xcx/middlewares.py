@@ -84,7 +84,8 @@ class Che300XcxUserAgentMiddleware(object):
             self.count = self.count + 1
             print('====================该cookie使用次数:', self.count)
             if self.count >= 50:
-                cookie_dict1 = {"cookie": cookie_dict, "last_use_time": local_time}
+                print('该cookie请求达到50次 换下一个')
+                cookie_dict1 = {"cookie": cookie, "last_use_time": local_time}
                 r.rpush('che300_gz:cookies', str(cookie_dict1).replace("'", '"'))
                 self.count = 0
                 self.cookie_str = r.lpop("che300_gz:cookies")
@@ -92,6 +93,7 @@ class Che300XcxUserAgentMiddleware(object):
             # 间隔小于一小时 重新放入队列尾端
             r.rpush('che300_gz:cookies', self.cookie_str)
             print('该cookie使用间隔小于一小时 重新放入队列尾端！')
+            self.cookie_str = r.lpop("che300_gz:cookies")
 
 
 user_agent_list = [
