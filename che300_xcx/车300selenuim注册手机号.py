@@ -10,7 +10,8 @@ from selenium.webdriver.chrome.options import Options
 from redis import Redis
 from tqdm import tqdm
 
-redis_cli = Redis(host="192.168.1.248", port=6379, db=3)
+redis_url = 'redis://192.168.2.149:6379/8'
+r = Redis.from_url(redis_url, decode_responses=True)
 
 
 class Login:
@@ -138,7 +139,9 @@ class Login:
                         nv = item['name'] + '=' + item['value']
                         lst.append(nv)
                     cookie_str = '; '.join(lst)
-                    redis_cli.sadd("che300_xcx_cookie", cookie_str)
+                    last_use_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+                    cookie_dict = {'cookie': cookie_str, 'last_use_time': last_use_time}
+                    r.rpush('che300_gz:cookies', str(cookie_dict).replace("'", '"'))
                     print('redis写入成功！！')
                     print(cookie_str)
                     # self.save_cookie(cookie)

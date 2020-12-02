@@ -8,6 +8,10 @@ import random
 import scrapy
 from gerapy_pyppeteer import PyppeteerRequest
 from che300_xcx.items import Che300XcxItem
+from redis import Redis
+
+redis_url = 'redis://192.168.2.149:6379/8'
+r = Redis.from_url(redis_url, decode_responses=True)
 
 
 class Che300GzSpider(scrapy.Spider):
@@ -72,21 +76,25 @@ class Che300GzSpider(scrapy.Spider):
     }
 
     def start_requests(self):
-        url = 'https://m.che300.com/estimate/result/3/3/1/1/1146060/2019-3/2/1/null/2020/2018'
-        # url = 'https://www.che300.com/pinggu/v1c1m1128945r2018-3g4?click=homepage&rt=1606388157943'
-        yield PyppeteerRequest(url=url)
-        # yield scrapy.Request(url)
+        url = r.lpop('che300_gz:start_urls')
+        yield PyppeteerRequest(url=url, meta={'url': url})
 
     def parse(self, response):
+        url = response.meta['url']
         item = Che300XcxItem()
         img_base64_urls = re.findall('.html\(\'<img src="data:image/png;base64,(.*?)" style="width', response.text)
         # img_base64_urls = re.findall('data:image/png;base64,(.*?)" style="width: 70px', response.text)
         # print(response.text)
         # print(img_base64_urls)
+        'https://m.che300.com/estimate/result/3/3/15/36132/1527710/2020-11/0.1/1/null/2020/2020?rt=1606872801904'
         item['grabtime'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-        item['vehicle'] = '1146060'
+
+        url_data = response.url.split('/')
+        item['vehicle'] = url_data[9]
         item['city'] = '上海'
-        item['regdate'] = '2019-3'
+        item['regdate'] = url_data[10]
+        item['mile'] = url_data[11]
+        item['url'] = url
         price_list = []
         for i in img_base64_urls:
             # print(i)
@@ -99,6 +107,18 @@ class Che300GzSpider(scrapy.Spider):
             # print(text)
             price_list.append(text)
         # print(price_list)
-        for i in range(1, 22):
-            item[f'price{i}'] = price_list[i - 1]
-        print(item)
+        try:
+            for i in range(1, 22):
+                item[f'price{i}'] = price_list[i - 1]
+                # print(item)
+            yield item
+        except:
+            print('解析数据失败，url重新加到请求队列尾部')
+            r.rpush('che300_gz:start_urls', response.url)
+        next_url = r.blpop('che300_gz:start_urls')
+        if next_url:
+            print('`````````````````````````````````````````````````')
+            print('```````````next_url: ', next_url)
+            print('`````````````````````````````````````````````````')
+            start_url = next_url[1]
+            yield PyppeteerRequest(url=start_url, meta={'url': start_url}, callback=self.parse)

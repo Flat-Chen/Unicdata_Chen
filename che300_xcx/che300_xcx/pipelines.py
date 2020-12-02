@@ -70,7 +70,7 @@ class Che300XcxPipeline:
 
     def process_item(self, item, spider):
         # mongo要有重字段status的爬虫名字写进去
-        if spider.name in ["che300_car", " "]:
+        if spider.name in ["che300_car", ""]:
             valid = True
             i = md5(item['status'].encode("utf8")).hexdigest()
             returndf = self.df.add(i)
@@ -86,7 +86,7 @@ class Che300XcxPipeline:
                             level=logging.INFO)
                 return item
         # mongo不需要去重的爬虫名字写进去
-        elif spider.name in ["", " "]:
+        elif spider.name in ["che300_gz", " "]:
             self.collection.insert(dict(item))
             logging.log(msg="Car added to MongoDB database!", level=logging.INFO)
             self.counts += 1
