@@ -184,7 +184,9 @@ class SeleniumMiddleware(object):
         local_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
         time2 = time.mktime(time.strptime(local_time, "%Y-%m-%d %H:%M:%S"))
         hoursCount = (time2 - time1)
+        # 判断距离最后一次使用是否超过一小时
         if hoursCount >= 3600:
+            # 第一次使用add cookie 后面直接请求不用再add
             if self.cookie_count == 0:
                 proxy, ip, port = self.get_Proxy()
                 self.set_proxy(self.browser, ip=ip, port=port)

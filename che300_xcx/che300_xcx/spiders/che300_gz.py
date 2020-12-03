@@ -1,3 +1,4 @@
+import logging
 import re
 import base64
 import time
@@ -41,7 +42,7 @@ class Che300GzSpider(scrapy.Spider):
         'MONGODB_PORT': 27017,
         'MONGODB_DB': 'che300',
         'MONGODB_COLLECTION': 'che300_price_daily',
-        'CONCURRENT_REQUESTS': 8,
+        'CONCURRENT_REQUESTS': 1,
         'DOWNLOAD_DELAY': 0,
         'LOG_LEVEL': 'DEBUG',
         # 'DOWNLOAD_TIMEOUT': 5,
@@ -50,7 +51,7 @@ class Che300GzSpider(scrapy.Spider):
         # 'COOKIES_ENABLED': True,
         # 'REDIS_URL': 'redis://192.168.1.241:6379/14',
         'DOWNLOADER_MIDDLEWARES': {
-            'che300_xcx.middlewares.Che300XcxProxyMiddleware': 400,
+            # 'che300_xcx.middlewares.Che300XcxProxyMiddleware': 400,
             # 'che300_xcx.middlewares.Che300XcxUserAgentMiddleware': 100,
             'che300_xcx.middlewares.SeleniumMiddleware': 543,
         },
@@ -84,7 +85,6 @@ class Che300GzSpider(scrapy.Spider):
                 image = Image.open(io.BytesIO(img))
                 text = pytesseract.image_to_string(image)
                 price_list.append(text)
-            print(price_list)
 
             index_list = [4, 1, 5, 2, 6, 3, 7, 11, 8, 12, 9, 13, 10, 14, 18, 15, 19, 16, 20, 17, 21]
             for i in index_list:
@@ -92,7 +92,7 @@ class Che300GzSpider(scrapy.Spider):
             # print(item)
             yield item
         except:
-            print('解析数据失败，url重新加到请求队列尾部')
+            logging.warning('~~~~~~~~~~~~~~~~~~~~~~~~~~~~解析数据失败，url重新加到请求队列尾部~~~~~~~~~~~~~~~~~~~')
             r.rpush('che300_gz:start_urls', url)
         next_url = r.blpop('che300_gz:start_urls')
         if next_url:
