@@ -1,7 +1,6 @@
 import re
 import base64
 import time
-
 import pytesseract
 from PIL import Image
 import random
@@ -52,28 +51,21 @@ class Che300GzSpider(scrapy.Spider):
         # 'REDIS_URL': 'redis://192.168.1.241:6379/14',
         'DOWNLOADER_MIDDLEWARES': {
             'che300_xcx.middlewares.Che300XcxProxyMiddleware': 400,
-            'che300_xcx.middlewares.Che300XcxUserAgentMiddleware': 100,
-            'gerapy_pyppeteer.downloadermiddlewares.PyppeteerMiddleware': 543,
+            # 'che300_xcx.middlewares.Che300XcxUserAgentMiddleware': 100,
+            'che300_xcx.middlewares.SeleniumMiddleware': 543,
         },
-        # 'ITEM_PIPELINES': {
-        #       'che300_xcx.pipelines.Che300XcxPipeline': 300,
-        #     'che300_xcx.pipelines.RenameTable': 299
-        # },
     }
 
     def start_requests(self):
         url = r.lpop('che300_gz:start_urls')
-        yield PyppeteerRequest(url=url, meta={'url': url})
+        yield scrapy.Request(url=url, meta={'url': url})
 
     def parse(self, response):
         url = response.meta['url']
         item = Che300XcxItem()
         try:
-            img_base64_urls = re.findall('.html\(\'<img src="data:image/png;base64,(.*?)" style="width', response.text)
-            # img_base64_urls = re.findall('data:image/png;base64,(.*?)" style="width: 70px', response.text)
-            # print(response.text)
-            # print(img_base64_urls)
-            'https://m.che300.com/estimate/result/3/3/15/36132/1527710/2020-11/0.1/1/null/2020/2020?rt=1606872801904'
+            img_base64_urls = re.findall('.html\(\'<img src="data:image/png;base64,(.*?)" style="width',
+                                         response.body.decode())
             item['grabtime'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
             url_data = response.url.split('/')
@@ -106,4 +98,4 @@ class Che300GzSpider(scrapy.Spider):
         next_url = r.blpop('che300_gz:start_urls')
         if next_url:
             start_url = next_url[1]
-            yield PyppeteerRequest(url=start_url, meta={'url': start_url}, callback=self.parse)
+            yield scrapy.Request(url=start_url, meta={'url': start_url}, callback=self.parse)

@@ -104,7 +104,7 @@ class Login:
             img = image_obj.convert("L")  # 转灰度
             pixdata = img.load()
             w, h = img.size
-            threshold = 4  # 该阈值不适合所有验证码，具体阈值请根据验证码情况设置
+            threshold = 6  # 该阈值不适合所有验证码，具体阈值请根据验证码情况设置
             # 遍历所有像素，大于阈值的为黑色
             for y in range(h):
                 for x in range(w):
@@ -141,7 +141,7 @@ class Login:
                     cookie_str = '; '.join(lst)
                     last_use_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
                     cookie_dict = {'cookie': cookie_str, 'last_use_time': last_use_time}
-                    r.rpush('che300_gz:cookies', str(cookie_dict).replace("'", '"'))
+                    r.rpush('che300_gz:cookies', str(cookie_dict).replace("'", '"').replace("\n", ''))
                     print('redis写入成功！！')
                     print(cookie_str)
                     # self.save_cookie(cookie)

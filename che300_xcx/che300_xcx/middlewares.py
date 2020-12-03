@@ -7,13 +7,20 @@ import logging
 import random
 import json
 import time
+import traceback
 
 import redis
 import requests
+from scrapy.http import TextResponse
 from scrapy.http.headers import Headers
 from scrapy import signals
 from scrapy.downloadermiddlewares.useragent import UserAgentMiddleware
 from redis import Redis
+from scrapy import signals
+from twisted.internet.error import TimeoutError
+from selenium import webdriver
+from scrapy.http import HtmlResponse
+from selenium.webdriver import FirefoxProfile
 
 redis_url = 'redis://192.168.2.149:6379/8'
 r = Redis.from_url(redis_url, decode_responses=True)
@@ -116,6 +123,154 @@ user_agent_list = [
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.24 (KHTML, like Gecko) Chrome/19.0.1055.1 Safari/535.24",
     "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/535.24 (KHTML, like Gecko) Chrome/19.0.1055.1 Safari/535.24",
 ]
+
+
+class SeleniumMiddleware(object):
+    """
+    selenium 动态加载代理ip 、 cookie
+    """
+
+    def __init__(self, timeout=30):
+        redis_url = 'redis://192.168.2.149:6379/8'
+        self.r = Redis.from_url(redis_url, decode_responses=True)
+        self.cookie_count = 0
+        self.cookie_str = self.r.lpop("che300_gz:cookies")
+
+        profile = FirefoxProfile()
+        options = webdriver.FirefoxOptions()
+        # options.add_argument('--headless')
+        # 去掉提示：Chrome正收到自动测试软件的控制
+        options.add_argument('disable-infobars')
+        # 禁止加载照片
+        # profile.set_preference('permissions.default.image', 2)
+        # 禁止加载css样式表
+        profile.set_preference('permissions.default.stylesheet', 2)
+        options.set_preference("dom.webnotifications.enabled", False)
+        # 修改页面加载策略
+        # none表示将br.get方法改为非阻塞模式，在页面加载过程中也可以给br发送指令，如获取url，pagesource等资源。
+
+        # self.browser = webdriver.Firefox(firefox_profile=profile, firefox_options=options,
+        #                                  executable_path='/usr/bin/firefox')
+
+        self.browser = webdriver.Firefox(firefox_profile=profile, firefox_options=options)
+        # 首先加载要添加cookie的网站, 然后添加cookie字典
+
+        # self.browser.add_cookie(self.cookie)
+
+        self.timeout = timeout
+        # self.browser.maximize_window()
+        self.browser.set_page_load_timeout(self.timeout)  # 设置页面加载超时
+        self.browser.set_script_timeout(self.timeout)  # 设置页面异步js执行超时
+        # self.wait = WebDriverWait(self.browser, self.timeout, poll_frequency=0.5)
+
+    def close_spider(self, spider):
+        self.r.close()
+        self.browser.quit()
+        self.browser.close()
+
+    def __del__(self):
+        self.r.close()
+        self.browser.quit()
+        self.browser.close()
+
+    def get_cookie(self):
+        cookie_json = json.loads(self.cookie_str)
+        cookie = cookie_json['cookie'].replace('\n', '')
+        last_use_time = cookie_json['last_use_time']
+        time1 = time.mktime(time.strptime(last_use_time, "%Y-%m-%d %H:%M:%S"))
+        local_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+        time2 = time.mktime(time.strptime(local_time, "%Y-%m-%d %H:%M:%S"))
+        hoursCount = (time2 - time1)
+        if hoursCount >= 3600:
+            proxy, ip, port = self.get_Proxy()
+            self.set_proxy(self.browser, ip=ip, port=port)
+            self.browser.get("https://m.che300.com/estimate/result/3/3/9/162/20469/2016-12/8/1/null/2014/2018")
+            cookie_split = cookie.split(';')
+            for i in cookie_split:
+                # print({'name': i.split('=')[0], 'value': i.split('=')[1]})
+                self.browser.add_cookie(cookie_dict={'name': i.split('=')[0].strip(), 'value': i.split('=')[1].strip()})
+            self.cookie_count = self.cookie_count + 1
+            print('====================该cookie使用次数:', self.cookie_count)
+            if self.cookie_count >= 50:
+                print('该cookie请求达到50次 换下一个')
+                cookie_dict1 = {"cookie": cookie, "last_use_time": local_time}
+                r.rpush('che300_gz:cookies', str(cookie_dict1).replace("'", '"'))
+                self.cookie_count = 0
+                self.cookie_str = self.r.lpop("che300_gz:cookies")
+        else:
+            # 间隔小于一小时 重新放入队列尾端
+            self.r.rpush('che300_gz:cookies', self.cookie_str)
+            print('该cookie使用间隔小于一小时 重新放入队列尾端！')
+            self.cookie_str = self.r.lpop("che300_gz:cookies")
+
+    def process_request(self, request, spider):
+        if spider.name in ['che300_gz']:
+            self.get_cookie()
+            proxy, ip, port = self.get_Proxy()
+            self.set_proxy(self.browser, ip=ip, port=port)
+
+            # browser = self.browser
+            # 显示等待
+            # self.wait.until(lambda browser: browser.find_element_by_class_name('tslb_b'))
+            # 隐形等待
+            # browser.implicitly_wait(10)
+            main_win = self.browser.current_window_handle  # 记录当前窗口的句柄
+            all_win = self.browser.window_handles
+            try:
+                if len(all_win) == 1:
+                    logging.info("-------------------弹出保护罩-------------------")
+                    js = 'window.open("https://www.baidu.com");'
+                    self.browser.execute_script(js)
+                    # 还是定位在main_win上的
+                    for win in all_win:
+                        if main_win != win:
+                            print('保护罩WIN', win, 'Main', main_win)
+                            self.browser.switch_to.window(main_win)
+                # 此处访问你需要的URL
+                self.browser.get(request.url)
+                url = self.browser.current_url
+                body = self.browser.page_source
+                return HtmlResponse(url=url, body=body, encoding="utf-8")
+            except:
+                # 超时
+                logging.info("-------------------Time out-------------------")
+                # 切换新的浏览器窗口
+                for win in all_win:
+                    if main_win != win:
+                        logging.info("-------------------切换到保护罩-------------------")
+                        print('WIN', win, 'Main', main_win)
+                        self.browser.close()
+                        self.browser.switch_to.window(win)
+                        main_win = win
+
+                js = 'window.open("https://www.baidu.com");'
+                self.browser.execute_script(js)
+                if 'time' in str(traceback.format_exc()):
+                    # print('页面访问超时')
+                    logging.info("-------------------页面访问超时-------------------")
+
+    def get_Proxy(self):
+        url = 'http://192.168.2.120:5000'
+        proxy = requests.get(url, auth=('admin', 'zd123456')).text[0:-6]
+        ip = proxy.split(":")[0]
+        port = proxy.split(":")[1]
+        return proxy, ip, port
+
+    def set_proxy(self, driver, ip='', port=0):
+        driver.get("about:config")
+        script = '''
+                    var prefs = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefBranch);
+                    prefs.setIntPref("network.proxy.type", 1);
+                    prefs.setCharPref("network.proxy.http", "{ip}");
+                    prefs.setIntPref("network.proxy.http_port", "{port}");
+                    prefs.setCharPref("network.proxy.ssl", "{ip}");
+                    prefs.setIntPref("network.proxy.ssl_port", "{port}");
+                    prefs.setCharPref("network.proxy.ftp", "{ip}");
+                    prefs.setIntPref("network.proxy.ftp_port", "{port}");
+        　　　　　　　 prefs.setBoolPref("general.useragent.site_specific_overrides",true);
+        　　　　　　　 prefs.setBoolPref("general.useragent.updates.enabled",true);
+                    '''.format(ip=ip, port=port)
+        driver.execute_script(script)
 
 
 class Che300XcxSpiderMiddleware:

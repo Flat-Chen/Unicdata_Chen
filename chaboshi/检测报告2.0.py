@@ -27,7 +27,7 @@ def jiancebaogao2(url):
 
     cheliangmingcheng = text.xpath('//p[@class="detectionCarName"]/text()')[0]
     VIN = xieyi_text.xpath('//ul[@class="insurContract"]/li/input/@value')[0]
-    jianceriqi = xieyi_text.xpath('//ul[@class="    "]/li/input/@value')[1]
+    jianceriqi = xieyi_text.xpath('//ul[@class="insurContract"]/li/input/@value')[1]
     jiancejieguo = xieyi_text.xpath('//ul[@class="insurContract"]/li/input/@value')[2]
     baogaobianhao = text.xpath('//p[@class="detectionCarNo"]/text()')[0]
     baogao = baogaobianhao.split('：')[0]
@@ -58,8 +58,10 @@ def jiancebaogao2(url):
             jishu = '0'
         gexiangzongji[leibie] = jishu
 
-    zongshu = text.xpath('//div[@class="detectionCarTxt"]/div/text()')[0]
-
+    try:
+        zongshu = text.xpath('//div[@class="detectionCarTxt"]/div/text()')[0]
+    except:
+        zongshu = "None"
     zonghefen = {'事故车/ 非泡水/ 非火烧': zonghepingfen1, '重要车况评分': zonghepingfen2, '重要部件评级': zonghepingfen3,
                  '检测结果': jiancejieguo, '各项综合计数': gexiangzongji, '车况综述': zongshu}
     print(zonghefen)
@@ -89,7 +91,7 @@ def jiancebaogao2(url):
     # %% 各项检测
     item_gexiangjiance = {}
     all_div = text.xpath('//div[@class="detectionTab detectionTab1"]/div')
-    for div in all_div[1:-4]:
+    for div in all_div[2:-4]:
         jiancemingcheng = div.xpath('./div/div/div/text()')[0]
         zongji = div.xpath('.//label[@class="parameterNo"]/text()')[0]
         lis = div.xpath('.//ul[@class="exterior"]/li')
@@ -135,19 +137,12 @@ def jiancebaogao2(url):
 
 
 url_list = [
-    # 'https://m.chaboshi.cn/wap/insurance/infoPC?orderno=5cc5cddd6ace4ac7974b4db60edd6969',
-    # 'https://m.chaboshi.cn/wap/insurance/infoPC?orderno=1a74a1313e5c4797b23631467119102e',
-    # 'https://m.chaboshi.cn/wap/insurance/infoPC?orderno=e352ae7ca49a4dcfb227108be917be7f',
-    # 'https://m.chaboshi.cn/wap/insurance/infoPC?orderno=3fa05070a2c7494a99246a7d90a024c0',
-    # 'https://m.chaboshi.cn/wap/findShareDetection?orderno=5cc5cddd6ace4ac7974b4db60edd6969',
-    'https://m.chaboshi.cn/wap/findShareDetection?orderno=1a74a1313e5c4797b23631467119102e',
-    # 'https://m.chaboshi.cn/wap/findShareDetection?orderno=e352ae7ca49a4dcfb227108be917be7f',
-    # 'https://m.chaboshi.cn/wap/findShareDetection?orderno=3fa05070a2c7494a99246a7d90a024c0',
+    'https://m.chaboshi.cn/wap/findShareDetection?orderno=ec590488fc4f4187871f1425551d02be'
 ]
 
 connection = pymongo.MongoClient("192.168.2.149", 27017)
 db = connection['chaboshi']
-collection = db['report5.0']
+collection = db['report6.0']
 for url in url_list:
     item = {}
     meta = jiancebaogao2(url)
