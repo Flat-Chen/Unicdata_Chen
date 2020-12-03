@@ -22,6 +22,7 @@ def jiancebaogao2(url):
     images_text = etree.HTML(images_html)
 
     item = {}
+    item['检测结果'] = text.xpath('//p[@class="detectionScoreTitleV"]/text()')[0].strip()
 
     # %% 基本信息
 
@@ -150,3 +151,4 @@ for url in url_list:
     item['grab_time'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     item['meta'] = meta
     collection.insert_one(dict(item))
+    # print(item)
