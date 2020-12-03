@@ -187,7 +187,7 @@ class SeleniumMiddleware(object):
             if self.cookie_count == 0:
                 proxy, ip, port = self.get_Proxy()
                 self.set_proxy(self.browser, ip=ip, port=port)
-                self.browser.get('https://m.che300.com/estimate/result/3/3/12/209/32814/2019-12/2/1/null/2016/2019')
+                self.browser.get('http://m.che300.com/estimate/result/3/3/12/209/32814/2019-12/2/1/null/2016/2019')
                 cookie_split = self.cookie.split('; ')
                 for i in cookie_split:
                     # print({'name': i.split('=')[0], 'value': i.split('=')[1]})
