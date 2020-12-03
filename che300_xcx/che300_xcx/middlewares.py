@@ -154,9 +154,6 @@ class SeleniumMiddleware(object):
 
         self.browser = webdriver.Firefox(firefox_profile=profile, firefox_options=options)
         # 首先加载要添加cookie的网站, 然后添加cookie字典
-        self.get_cookie()
-        # self.browser.add_cookie(self.cookie)
-
         self.timeout = timeout
         # self.browser.maximize_window()
         self.browser.set_page_load_timeout(self.timeout)  # 设置页面加载超时
@@ -190,7 +187,7 @@ class SeleniumMiddleware(object):
             if self.cookie_count == 0:
                 proxy, ip, port = self.get_Proxy()
                 self.set_proxy(self.browser, ip=ip, port=port)
-                self.browser.get("https://m.che300.com/estimate/result/3/3/9/162/20469/2016-12/8/1/null/2014/2018")
+                self.browser.get('https://m.che300.com/estimate/result/3/3/12/209/32814/2019-12/2/1/null/2016/2019')
                 cookie_split = cookie.split(';')
                 for i in cookie_split:
                     # print({'name': i.split('=')[0], 'value': i.split('=')[1]})
@@ -266,6 +263,8 @@ class SeleniumMiddleware(object):
         proxy = requests.get(url, auth=('admin', 'zd123456')).text[0:-6]
         ip = proxy.split(":")[0]
         port = proxy.split(":")[1]
+        ip = '81.68.214.148'
+        port = '16128'
         return proxy, ip, port
 
     def set_proxy(self, driver, ip='', port=0):
