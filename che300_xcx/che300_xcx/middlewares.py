@@ -207,6 +207,8 @@ class SeleniumMiddleware(object):
 
     def process_request(self, request, spider):
         if spider.name in ['che300_gz']:
+            proxy, ip, port = self.get_Proxy()
+            self.set_proxy(self.browser, ip=ip, port=port)
             main_win = self.browser.current_window_handle  # 记录当前窗口的句柄
             all_win = self.browser.window_handles
             try:
