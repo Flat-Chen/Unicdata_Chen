@@ -185,8 +185,6 @@ class SeleniumMiddleware(object):
         if hoursCount >= 3600:
             # 第一次使用add cookie 后面直接请求不用再add
             if self.cookie_count == 0:
-                proxy, ip, port = self.get_Proxy()
-                self.set_proxy(self.browser, ip=ip, port=port)
                 self.browser.get('http://m.che300.com/estimate/result/3/3/12/209/32814/2019-12/2/1/null/2016/2019')
                 cookie_split = self.cookie.split('; ')
                 for i in cookie_split:
@@ -204,9 +202,9 @@ class SeleniumMiddleware(object):
 
     def process_request(self, request, spider):
         if spider.name in ['che300_gz']:
-            self.get_cookie()
             proxy, ip, port = self.get_Proxy()
             self.set_proxy(self.browser, ip=ip, port=port)
+            self.get_cookie()
             # browser = self.browser
             # 显示等待
             # self.wait.until(lambda browser: browser.find_element_by_class_name('tslb_b'))
