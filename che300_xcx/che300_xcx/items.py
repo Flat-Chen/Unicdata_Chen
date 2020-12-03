@@ -3,8 +3,12 @@ import scrapy
 
 class Che300XcxItem(scrapy.Item):
     grabtime = scrapy.Field()
-    vehicle = scrapy.Field()
-    regdate = scrapy.Field()
+    prov = scrapy.Field()
+    cityid = scrapy.Field()
+    brand = scrapy.Field()
+    series = scrapy.Field()
+    salesdescid = scrapy.Field()
+    regDate = scrapy.Field()
     mile = scrapy.Field()
     city = scrapy.Field()
     price1 = scrapy.Field()

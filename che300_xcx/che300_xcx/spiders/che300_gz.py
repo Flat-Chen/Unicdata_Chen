@@ -41,7 +41,7 @@ class Che300GzSpider(scrapy.Spider):
         'MONGODB_SERVER': '192.168.1.94',
         'MONGODB_PORT': 27017,
         'MONGODB_DB': 'che300',
-        'MONGODB_COLLECTION': 'che300_gz',
+        'MONGODB_COLLECTION': 'che300_price_daily',
         'CONCURRENT_REQUESTS': 8,
         'DOWNLOAD_DELAY': 0,
         'LOG_LEVEL': 'DEBUG',
@@ -70,9 +70,12 @@ class Che300GzSpider(scrapy.Spider):
             item['grabtime'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
             url_data = response.url.split('/')
-            item['vehicle'] = url_data[9]
-            item['city'] = '上海'
-            item['regdate'] = url_data[10]
+            item['prov'] = url_data[5]
+            item['cityid'] = url_data[6]
+            item['brand'] = url_data[7]
+            item['series'] = url_data[8]
+            item['salesdescid'] = url_data[9]
+            item['regDate'] = url_data[10]
             item['mile'] = url_data[11]
             item['group'] = response.xpath('//div[@class="active"]/@id').extract_first()
             item['url'] = url
@@ -80,9 +83,7 @@ class Che300GzSpider(scrapy.Spider):
             for i in img_base64_urls:
                 img = base64.urlsafe_b64decode(i)
                 image = Image.open(io.BytesIO(img))
-                text = pytesseract.image_to_string(image).replace(',', '.')
-                if text[-1] is '.':
-                    text = text[:-2]
+                text = pytesseract.image_to_string(image)
                 price_list.append(text)
             print(price_list)
 
