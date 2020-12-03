@@ -166,7 +166,7 @@ class SeleniumMiddleware(object):
     def close_spider(self, spider):
         self.r.close()
         self.browser.quit()
-        self.browser.close()
+        # self.browser.close()
 
     def __del__(self):
         self.r.close()
