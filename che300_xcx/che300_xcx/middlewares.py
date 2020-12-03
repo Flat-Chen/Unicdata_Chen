@@ -175,11 +175,11 @@ class SeleniumMiddleware(object):
 
     def get_cookie(self):
         cookie_json = json.loads(self.cookie_str)
-        cookie = cookie_json['cookie'].replace('\n', '')
+        self.cookie = cookie_json['cookie'].replace('\n', '')
         last_use_time = cookie_json['last_use_time']
         time1 = time.mktime(time.strptime(last_use_time, "%Y-%m-%d %H:%M:%S"))
-        local_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-        time2 = time.mktime(time.strptime(local_time, "%Y-%m-%d %H:%M:%S"))
+        self.local_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+        time2 = time.mktime(time.strptime(self.local_time, "%Y-%m-%d %H:%M:%S"))
         hoursCount = (time2 - time1)
         # 判断距离最后一次使用是否超过一小时
         if hoursCount >= 3600:
@@ -188,24 +188,13 @@ class SeleniumMiddleware(object):
                 proxy, ip, port = self.get_Proxy()
                 self.set_proxy(self.browser, ip=ip, port=port)
                 self.browser.get('https://m.che300.com/estimate/result/3/3/12/209/32814/2019-12/2/1/null/2016/2019')
-                cookie_split = cookie.split(';')
+                cookie_split = self.cookie.split(';')
                 for i in cookie_split:
                     # print({'name': i.split('=')[0], 'value': i.split('=')[1]})
                     self.browser.add_cookie(
                         cookie_dict={'name': i.split('=')[0].strip(), 'value': i.split('=')[1].strip()})
             self.cookie_count = self.cookie_count + 1
             logging.info('========================该cookie使用次数:{}===================='.format(self.cookie_count))
-            try:
-                if '异常提示' in self.browser.page_source:
-                    logging.warning('=====================该cookie以达到最大请求次数 换下一个==============')
-                    cookie_dict1 = {"cookie": cookie, "last_use_time": local_time}
-                    r.rpush('che300_gz:cookies', str(cookie_dict1).replace("'", '"'))
-                    self.cookie_count = 0
-                    self.cookie_str = self.r.lpop("che300_gz:cookies")
-            except:
-                # 也不知道哪不对劲 加个过滤错误
-                logging.error('判断是否达到最大次数时出错')
-                pass
         else:
             # 间隔小于一小时 重新放入队列尾端
             self.r.rpush('che300_gz:cookies', self.cookie_str)
@@ -239,6 +228,12 @@ class SeleniumMiddleware(object):
                 self.browser.get(request.url)
                 url = self.browser.current_url
                 body = self.browser.page_source
+                if '异常提示' in self.browser.page_source:
+                    logging.warning('=====================该cookie以达到最大请求次数 换下一个==============')
+                    cookie_dict1 = {"cookie": self.cookie, "last_use_time": self.local_time}
+                    r.rpush('che300_gz:cookies', str(cookie_dict1).replace("'", '"'))
+                    self.cookie_count = 0
+                    self.cookie_str = self.r.lpop("che300_gz:cookies")
                 return HtmlResponse(url=url, body=body, encoding="utf-8")
             except:
                 # 超时
@@ -263,8 +258,8 @@ class SeleniumMiddleware(object):
         proxy = requests.get(url, auth=('admin', 'zd123456')).text[0:-6]
         ip = proxy.split(":")[0]
         port = proxy.split(":")[1]
-        ip = '81.68.214.148'
-        port = '16128'
+        # ip = '81.68.214.148'
+        # port = '16128'
         return proxy, ip, port
 
     def set_proxy(self, driver, ip='', port=0):
