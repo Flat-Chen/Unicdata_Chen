@@ -5,7 +5,6 @@ import pytesseract
 from PIL import Image
 import random
 import scrapy
-from gerapy_pyppeteer import PyppeteerRequest
 from che300_xcx.items import Che300XcxItem
 from redis import Redis
 import io
