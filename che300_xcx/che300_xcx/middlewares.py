@@ -173,108 +173,76 @@ class SeleniumMiddleware(object):
         except:
             pass
 
-    # def get_cookie(self):
-    #     cookie_json = json.loads(self.cookie_str)
-    #     self.cookie = cookie_json['cookie'].replace('\n', '')
-    #     last_use_time = cookie_json['last_use_time']
-    #     time1 = time.mktime(time.strptime(last_use_time, "%Y-%m-%d %H:%M:%S"))
-    #     self.local_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-    #     time2 = time.mktime(time.strptime(self.local_time, "%Y-%m-%d %H:%M:%S"))
-    #     hoursCount = (time2 - time1)
-    #     # 判断距离最后一次使用是否超过一小时
-    #     if hoursCount >= 3600:
-    #         # 第一次使用add cookie 后面直接请求不用再add
-    #         if self.cookie_count == 0:
-    #             # self.browser.get('http://m.che300.com/estimate/result/3/3/12/209/32814/2019-12/2/1/null/2016/2019')
-    #             cookie_split = self.cookie.split('; ')
-    #             for i in cookie_split:
-    #                 # print({'name': i.split('=')[0], 'value': i.split('=')[1]})
-    #                 self.browser.add_cookie(
-    #                     cookie_dict={'name': i.split('=')[0].strip(), 'value': i.split('=')[1].strip()})
-    #         self.cookie_count = self.cookie_count + 1
-    #         logging.info('========================该cookie使用次数:{}===================='.format(self.cookie_count))
-    #     else:
-    #         # 间隔小于一小时 重新放入队列尾端
-    #         self.r.rpush('che300_gz:cookies', self.cookie_str)
-    #         logging.warning('===================该cookie使用间隔小于一小时 重新放入队列尾端！=================')
-    #         self.cookie_str = self.r.lpop("che300_gz:cookies")
-    #         self.cookie_count = 0
+    def get_cookie(self):
+        cookie_json = json.loads(self.cookie_str)
+        self.cookie = cookie_json['cookie'].replace('\n', '')
+        last_use_time = cookie_json['last_use_time']
+        time1 = time.mktime(time.strptime(last_use_time, "%Y-%m-%d %H:%M:%S"))
+        self.local_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+        time2 = time.mktime(time.strptime(self.local_time, "%Y-%m-%d %H:%M:%S"))
+        hoursCount = (time2 - time1)
+        # 判断距离最后一次使用是否超过一小时
+        if hoursCount >= 3600:
+            # 第一次使用add cookie 后面直接请求不用再add
+            if self.cookie_count == 0:
+                # self.browser.get('http://m.che300.com/estimate/result/3/3/12/209/32814/2019-12/2/1/null/2016/2019')
+                cookie_split = self.cookie.split('; ')
+                for i in cookie_split:
+                    # print({'name': i.split('=')[0], 'value': i.split('=')[1]})
+                    self.browser.add_cookie(cookie_dict={'name': i.split('=')[0].strip(), 'value': i.split('=')[1].strip()})
+            self.cookie_count = self.cookie_count + 1
+            logging.info('========================该cookie使用次数:{}===================='.format(self.cookie_count))
+        else:
+            # 间隔小于一小时 重新放入队列尾端
+            self.r.rpush('che300_gz:cookies', self.cookie_str)
+            logging.warning('===================该cookie使用间隔小于一小时 重新放入队列尾端！=================')
+            self.cookie_str = self.r.lpop("che300_gz:cookies")
+            self.cookie_count = 0
+        if '异常提示' in self.browser.page_source:
+            logging.warning('=====================该cookie以达到最大请求次数 换下一个==============')
+            cookie_dict1 = {"cookie": self.cookie, "last_use_time": self.local_time}
+            r.rpush('che300_gz:cookies', str(cookie_dict1).replace("'", '"'))
+            self.cookie_count = 0
+            self.cookie_str = self.r.lpop("che300_gz:cookies")
 
     def process_request(self, request, spider):
         if spider.name in ['che300_gz']:
-            # browser = self.browser
-            # 显示等待
-            # self.wait.until(lambda browser: browser.find_element_by_class_name('tslb_b'))
-            # 隐形等待
-            # browser.implicitly_wait(10)
             main_win = self.browser.current_window_handle  # 记录当前窗口的句柄
             all_win = self.browser.window_handles
-            # try:
-            if len(all_win) == 1:
-                logging.info("-------------------弹出保护罩-------------------")
-                js = 'window.open("https://www.baidu.com");'
-                self.browser.execute_script(js)
-                # 还是定位在main_win上的
+            try:
+                if len(all_win) == 1:
+                    logging.info("-------------------弹出保护罩-------------------")
+                    js = 'window.open("https://www.baidu.com");'
+                    self.browser.execute_script(js)
+                    # 还是定位在main_win上的
+                    for win in all_win:
+                        if main_win != win:
+                            print('保护罩WIN', win, 'Main', main_win)
+                            self.browser.switch_to.window(main_win)
+
+                # 此处访问要请求的url
+                self.browser.get(request.url)
+                self.get_cookie()
+                url = self.browser.current_url
+                body = self.browser.page_source
+                return HtmlResponse(url=url, body=body, encoding="utf-8")
+            except:
+                # 超时
+                logging.info("-------------------Time out-------------------")
+                # 切换新的浏览器窗口
                 for win in all_win:
                     if main_win != win:
-                        print('保护罩WIN', win, 'Main', main_win)
-                        self.browser.switch_to.window(main_win)
-            # 此处设置cookie
-            proxy, ip, port = self.get_Proxy()
-            self.set_proxy(self.browser, ip=ip, port=port)
-            cookie_json = json.loads(self.cookie_str)
-            cookie = cookie_json['cookie'].replace('\n', '')
-            last_use_time = cookie_json['last_use_time']
-            time1 = time.mktime(time.strptime(last_use_time, "%Y-%m-%d %H:%M:%S"))
-            local_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-            time2 = time.mktime(time.strptime(local_time, "%Y-%m-%d %H:%M:%S"))
-            hoursCount = (time2 - time1)
-            # 判断距离最后一次使用是否超过一小时
-            if hoursCount >= 3600:
-                # 第一次使用add cookie 后面直接请求不用再add
-                if self.cookie_count == 0:
-                    self.browser.get('https://m.che300.com/estimate/result/3/3/12/209/32814/2019-12/2/1/null/2016/2019')
-                    cookie_split = cookie.split('; ')
-                    for i in cookie_split:
-                        # print({'name': i.split('=')[0], 'value': i.split('=')[1]})
-                        self.browser.add_cookie(
-                            cookie_dict={'name': i.split('=')[0].strip(), 'value': i.split('=')[1].strip()})
-                self.cookie_count = self.cookie_count + 1
-                logging.info('========================该cookie使用次数:{}===================='.format(self.cookie_count))
-            else:
-                # 间隔小于一小时 重新放入队列尾端
-                self.r.rpush('che300_gz:cookies', self.cookie_str)
-                logging.warning('===================该cookie使用间隔小于一小时 重新放入队列尾端！=================')
-                self.cookie_str = self.r.lpop("che300_gz:cookies")
-                self.cookie_count = 0
-            # 此处访问要请求的url
-            self.browser.get(request.url)
-            url = self.browser.current_url
-            body = self.browser.page_source
-            if '异常提示' in self.browser.page_source:
-                logging.warning('=====================该cookie以达到最大请求次数 换下一个==============')
-                cookie_dict1 = {"cookie": cookie, "last_use_time": local_time}
-                r.rpush('che300_gz:cookies', str(cookie_dict1).replace("'", '"'))
-                self.cookie_count = 0
-                self.cookie_str = self.r.lpop("che300_gz:cookies")
-            return HtmlResponse(url=url, body=body, encoding="utf-8")
-            # except:
-            #     # 超时
-            #     logging.info("-------------------Time out-------------------")
-            #     # 切换新的浏览器窗口
-            #     for win in all_win:
-            #         if main_win != win:
-            #             logging.info("-------------------切换到保护罩-------------------")
-            #             print('WIN', win, 'Main', main_win)
-            #             self.browser.close()
-            #             self.browser.switch_to.window(win)
-            #             main_win = win
-            #
-            #     js = 'window.open("https://www.baidu.com");'
-            #     self.browser.execute_script(js)
-            #     if 'time' in str(traceback.format_exc()):
-            #         # print('页面访问超时')
-            #         logging.info("-------------------页面访问超时-------------------")
+                        logging.info("-------------------切换到保护罩-------------------")
+                        print('WIN', win, 'Main', main_win)
+                        self.browser.close()
+                        self.browser.switch_to.window(win)
+                        main_win = win
+
+                js = 'window.open("https://www.baidu.com");'
+                self.browser.execute_script(js)
+                if 'time' in str(traceback.format_exc()):
+                    # print('页面访问超时')
+                    logging.info("-------------------页面访问超时-------------------")
 
     def get_Proxy(self):
         url = 'http://192.168.2.120:5000'
@@ -287,8 +255,7 @@ class SeleniumMiddleware(object):
 
     def set_proxy(self, driver, ip='', port=0):
         driver.get("about:config")
-        script = '''
-                    var prefs = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefBranch);
+        script = '''var prefs = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefBranch);
                     prefs.setIntPref("network.proxy.type", 1);
                     prefs.setCharPref("network.proxy.http", "{ip}");
                     prefs.setIntPref("network.proxy.http_port", "{port}");
