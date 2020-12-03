@@ -138,7 +138,7 @@ class SeleniumMiddleware(object):
 
         profile = FirefoxProfile()
         options = webdriver.FirefoxOptions()
-        # options.add_argument('--headless')
+        options.add_argument('--headless')
         # 去掉提示：Chrome正收到自动测试软件的控制
         options.add_argument('disable-infobars')
         # 禁止加载照片
@@ -195,9 +195,9 @@ class SeleniumMiddleware(object):
                     self.browser.add_cookie(
                         cookie_dict={'name': i.split('=')[0].strip(), 'value': i.split('=')[1].strip()})
             self.cookie_count = self.cookie_count + 1
-            logging.info('====================该cookie使用次数:{}'.format(self.cookie_count))
+            logging.info('========================该cookie使用次数:{}===================='.format(self.cookie_count))
             if '异常提示' in self.browser.page_source:
-                logging.warning('该cookie以达到最大请求次数 换下一个')
+                logging.warning('=====================该cookie以达到最大请求次数 换下一个==============')
                 cookie_dict1 = {"cookie": cookie, "last_use_time": local_time}
                 r.rpush('che300_gz:cookies', str(cookie_dict1).replace("'", '"'))
                 self.cookie_count = 0
@@ -205,7 +205,7 @@ class SeleniumMiddleware(object):
         else:
             # 间隔小于一小时 重新放入队列尾端
             self.r.rpush('che300_gz:cookies', self.cookie_str)
-            logging.warning('该cookie使用间隔小于一小时 重新放入队列尾端！')
+            logging.warning('===================该cookie使用间隔小于一小时 重新放入队列尾端！=================')
             self.cookie_str = self.r.lpop("che300_gz:cookies")
             self.cookie_count = 0
 
