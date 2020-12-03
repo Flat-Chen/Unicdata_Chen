@@ -5,11 +5,9 @@
 
 
 # useful for handling different item types with a single interface
-from itemadapter import ItemAdapter
 import pandas as pd
 import pymongo
 import logging
-import pymysql
 import redis
 from pybloom_live import ScalableBloomFilter
 from hashlib import md5
