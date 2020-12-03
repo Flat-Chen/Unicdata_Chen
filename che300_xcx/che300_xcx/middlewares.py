@@ -173,38 +173,35 @@ class SeleniumMiddleware(object):
         except:
             pass
 
-    def get_cookie(self):
-        cookie_json = json.loads(self.cookie_str)
-        self.cookie = cookie_json['cookie'].replace('\n', '')
-        last_use_time = cookie_json['last_use_time']
-        time1 = time.mktime(time.strptime(last_use_time, "%Y-%m-%d %H:%M:%S"))
-        self.local_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-        time2 = time.mktime(time.strptime(self.local_time, "%Y-%m-%d %H:%M:%S"))
-        hoursCount = (time2 - time1)
-        # 判断距离最后一次使用是否超过一小时
-        if hoursCount >= 3600:
-            # 第一次使用add cookie 后面直接请求不用再add
-            if self.cookie_count == 0:
-                self.browser.get('http://m.che300.com/estimate/result/3/3/12/209/32814/2019-12/2/1/null/2016/2019')
-                cookie_split = self.cookie.split('; ')
-                for i in cookie_split:
-                    # print({'name': i.split('=')[0], 'value': i.split('=')[1]})
-                    self.browser.add_cookie(
-                        cookie_dict={'name': i.split('=')[0].strip(), 'value': i.split('=')[1].strip()})
-            self.cookie_count = self.cookie_count + 1
-            logging.info('========================该cookie使用次数:{}===================='.format(self.cookie_count))
-        else:
-            # 间隔小于一小时 重新放入队列尾端
-            self.r.rpush('che300_gz:cookies', self.cookie_str)
-            logging.warning('===================该cookie使用间隔小于一小时 重新放入队列尾端！=================')
-            self.cookie_str = self.r.lpop("che300_gz:cookies")
-            self.cookie_count = 0
+    # def get_cookie(self):
+    #     cookie_json = json.loads(self.cookie_str)
+    #     self.cookie = cookie_json['cookie'].replace('\n', '')
+    #     last_use_time = cookie_json['last_use_time']
+    #     time1 = time.mktime(time.strptime(last_use_time, "%Y-%m-%d %H:%M:%S"))
+    #     self.local_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+    #     time2 = time.mktime(time.strptime(self.local_time, "%Y-%m-%d %H:%M:%S"))
+    #     hoursCount = (time2 - time1)
+    #     # 判断距离最后一次使用是否超过一小时
+    #     if hoursCount >= 3600:
+    #         # 第一次使用add cookie 后面直接请求不用再add
+    #         if self.cookie_count == 0:
+    #             # self.browser.get('http://m.che300.com/estimate/result/3/3/12/209/32814/2019-12/2/1/null/2016/2019')
+    #             cookie_split = self.cookie.split('; ')
+    #             for i in cookie_split:
+    #                 # print({'name': i.split('=')[0], 'value': i.split('=')[1]})
+    #                 self.browser.add_cookie(
+    #                     cookie_dict={'name': i.split('=')[0].strip(), 'value': i.split('=')[1].strip()})
+    #         self.cookie_count = self.cookie_count + 1
+    #         logging.info('========================该cookie使用次数:{}===================='.format(self.cookie_count))
+    #     else:
+    #         # 间隔小于一小时 重新放入队列尾端
+    #         self.r.rpush('che300_gz:cookies', self.cookie_str)
+    #         logging.warning('===================该cookie使用间隔小于一小时 重新放入队列尾端！=================')
+    #         self.cookie_str = self.r.lpop("che300_gz:cookies")
+    #         self.cookie_count = 0
 
     def process_request(self, request, spider):
         if spider.name in ['che300_gz']:
-            proxy, ip, port = self.get_Proxy()
-            self.set_proxy(self.browser, ip=ip, port=port)
-            self.get_cookie()
             # browser = self.browser
             # 显示等待
             # self.wait.until(lambda browser: browser.find_element_by_class_name('tslb_b'))
@@ -222,13 +219,42 @@ class SeleniumMiddleware(object):
                         if main_win != win:
                             print('保护罩WIN', win, 'Main', main_win)
                             self.browser.switch_to.window(main_win)
-                # 此处访问你需要的URL
+                # 此处设置cookie
+                proxy, ip, port = self.get_Proxy()
+                self.set_proxy(self.browser, ip=ip, port=port)
+                cookie_json = json.loads(self.cookie_str)
+                cookie = cookie_json['cookie'].replace('\n', '')
+                last_use_time = cookie_json['last_use_time']
+                time1 = time.mktime(time.strptime(last_use_time, "%Y-%m-%d %H:%M:%S"))
+                local_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+                time2 = time.mktime(time.strptime(local_time, "%Y-%m-%d %H:%M:%S"))
+                hoursCount = (time2 - time1)
+                # 判断距离最后一次使用是否超过一小时
+                if hoursCount >= 3600:
+                    # 第一次使用add cookie 后面直接请求不用再add
+                    if self.cookie_count == 0:
+                        self.browser.get(
+                            'https://m.che300.com/estimate/result/3/3/12/209/32814/2019-12/2/1/null/2016/2019')
+                        cookie_split = cookie.split('; ')
+                        for i in cookie_split:
+                            # print({'name': i.split('=')[0], 'value': i.split('=')[1]})
+                            self.browser.add_cookie(
+                                cookie_dict={'name': i.split('=')[0].strip(), 'value': i.split('=')[1].strip()})
+                    self.cookie_count = self.cookie_count + 1
+                    logging.info('========================该cookie使用次数:{}===================='.format(self.cookie_count))
+                else:
+                    # 间隔小于一小时 重新放入队列尾端
+                    self.r.rpush('che300_gz:cookies', self.cookie_str)
+                    logging.warning('===================该cookie使用间隔小于一小时 重新放入队列尾端！=================')
+                    self.cookie_str = self.r.lpop("che300_gz:cookies")
+                    self.cookie_count = 0
+                # 此处访问要请求的url
                 self.browser.get(request.url)
                 url = self.browser.current_url
                 body = self.browser.page_source
                 if '异常提示' in self.browser.page_source:
                     logging.warning('=====================该cookie以达到最大请求次数 换下一个==============')
-                    cookie_dict1 = {"cookie": self.cookie, "last_use_time": self.local_time}
+                    cookie_dict1 = {"cookie": cookie, "last_use_time": local_time}
                     r.rpush('che300_gz:cookies', str(cookie_dict1).replace("'", '"'))
                     self.cookie_count = 0
                     self.cookie_str = self.r.lpop("che300_gz:cookies")
