@@ -207,6 +207,7 @@ class SeleniumMiddleware(object):
                     self.cookie_str = self.r.lpop("che300_gz:cookies")
             except:
                 # 也不知道哪不对劲 加个过滤错误
+                logging.error('判断是否达到最大次数时出错')
                 pass
         else:
             # 间隔小于一小时 重新放入队列尾端
