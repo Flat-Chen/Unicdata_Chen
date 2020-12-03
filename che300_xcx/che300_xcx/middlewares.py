@@ -233,8 +233,7 @@ class SeleniumMiddleware(object):
             if hoursCount >= 3600:
                 # 第一次使用add cookie 后面直接请求不用再add
                 if self.cookie_count == 0:
-                    self.browser.get(
-                        'https://m.che300.com/estimate/result/3/3/12/209/32814/2019-12/2/1/null/2016/2019')
+                    self.browser.get('https://m.che300.com/estimate/result/3/3/12/209/32814/2019-12/2/1/null/2016/2019')
                     cookie_split = cookie.split('; ')
                     for i in cookie_split:
                         # print({'name': i.split('=')[0], 'value': i.split('=')[1]})
