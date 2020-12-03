@@ -8,6 +8,7 @@ import scrapy
 from gerapy_pyppeteer import PyppeteerRequest
 from che300_xcx.items import Che300XcxItem
 from redis import Redis
+import io
 
 redis_url = 'redis://192.168.2.149:6379/8'
 r = Redis.from_url(redis_url, decode_responses=True)
@@ -41,7 +42,7 @@ class Che300GzSpider(scrapy.Spider):
         'MONGODB_PORT': 27017,
         'MONGODB_DB': 'che300',
         'MONGODB_COLLECTION': 'che300_gz',
-        'CONCURRENT_REQUESTS': 32,
+        'CONCURRENT_REQUESTS': 8,
         'DOWNLOAD_DELAY': 0,
         'LOG_LEVEL': 'DEBUG',
         # 'DOWNLOAD_TIMEOUT': 5,
@@ -77,16 +78,14 @@ class Che300GzSpider(scrapy.Spider):
             item['url'] = url
             price_list = []
             for i in img_base64_urls:
-                # print(i)
-                imgdata = base64.b64decode(i.replace('\n', '').replace('\r', ''))
-                file = open('1.jpg', 'wb')
-                file.write(imgdata)
-                file.close()
-                text = pytesseract.image_to_string(Image.open("./1.jpg"), lang="eng").replace(',', '.').replace(
-                    '\n\x0c', '').strip()
-                # print(text)
+                img = base64.urlsafe_b64decode(i)
+                image = Image.open(io.BytesIO(img))
+                text = pytesseract.image_to_string(image).replace(',', '.')
+                if text[-1] is '.':
+                    text = text[:-2]
                 price_list.append(text)
-            # print(price_list)
+            print(price_list)
+
             index_list = [4, 1, 5, 2, 6, 3, 7, 11, 8, 12, 9, 13, 10, 14, 18, 15, 19, 16, 20, 17, 21]
             for i in index_list:
                 item[f'price{index_list.index(i) + 1}'] = price_list[i - 1]
