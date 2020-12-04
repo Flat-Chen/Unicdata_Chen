@@ -53,7 +53,7 @@ class Che300GzSpider(scrapy.Spider):
         'DOWNLOADER_MIDDLEWARES': {
             # 'che300_xcx.middlewares.Che300XcxProxyMiddleware': 400,
             # 'che300_xcx.middlewares.Che300XcxUserAgentMiddleware': 100,
-            'che300_xcx.middlewares.SeleniumMiddleware': 543,
+            'che300_xcx.middlewares.SeleniumMiddleware': 100,
         },
     }
 
