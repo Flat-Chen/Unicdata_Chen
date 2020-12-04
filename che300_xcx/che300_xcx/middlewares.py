@@ -221,7 +221,11 @@ class SeleniumMiddleware(object):
                             self.browser.switch_to.window(main_win)
 
                 # 此处访问要请求的url
-                self.browser.get(request.url)
+                try:
+                    self.browser.get(request.url)
+                except:
+                    js = 'window.open("{}");'.format(request.url)
+                    self.browser.execute_script(js)
                 self.get_cookie()
                 url = self.browser.current_url
                 body = self.browser.page_source
