@@ -280,6 +280,12 @@ class SeleniumMiddleware(object):
         except Exception as e:
             logging.error('设置动态代理时出错！！！', repr(e))
 
+    def process_exception(self, request, exception, spider):
+        if isinstance(exception, TimeoutError):
+            return request
+        elif isinstance(exception, TCPTimedOutError):
+            return request
+
 
 class Che300XcxSpiderMiddleware:
     # Not all methods need to be defined. If a method is not defined,

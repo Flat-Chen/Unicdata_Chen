@@ -21,6 +21,7 @@ def list_iter(name):
 def get_rest():
     cookie_rest = []
     for item in list_iter('che300_gz:cookies'):  # 遍历这个列表
+        item = item.replace("'", '"')
         cook = json.loads(item)['cookie'].replace("\n", '"')
         cookie_rest.append(cook)
     return cookie_rest
