@@ -3,7 +3,7 @@ import time
 
 from redis import Redis
 
-redis_url = 'redis://192.168.1.248:6379/3'
+redis_url = 'redis://192.168.2.149:6379/8'
 r = Redis.from_url(redis_url, decode_responses=True)
 
 

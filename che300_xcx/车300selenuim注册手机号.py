@@ -8,6 +8,7 @@ import pytesseract
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from redis import Redis
+import io
 from tqdm import tqdm
 
 redis_url = 'redis://192.168.2.149:6379/8'
@@ -67,6 +68,10 @@ class Login:
                     break
                 else:
                     time.sleep(5)
+            if '没有收到短信' in text:
+                print('这个手机号没有收到验证码，遗弃！')
+                self.lh_phone(phone)
+                return 'break'
         except:
             print('请检查接码平台，取验证码出了问题。。。。')
 
@@ -96,11 +101,8 @@ class Login:
                 continue
 
             self.browser.find_element_by_xpath("//input[@name='telnum']").send_keys(self.phone)
-            imgdata = base64.b64decode(img_base64)
-            file = open('yzm.png', 'wb')
-            file.write(imgdata)
-            file.close()
-            image_obj = Image.open('yzm.png')
+            img = base64.urlsafe_b64decode(img_base64)
+            image_obj = Image.open(io.BytesIO(img))
             img = image_obj.convert("L")  # 转灰度
             pixdata = img.load()
             w, h = img.size
@@ -114,7 +116,7 @@ class Login:
                         pixdata[x, y] = 255
             yzm_text = pytesseract.image_to_string(img, lang="eng").strip().replace(' ', '')
             print(yzm_text)
-            if len(yzm_text) < 4:
+            if yzm_text is None or len(yzm_text) < 4:
                 self.browser.find_element_by_xpath('//img[@class="refresh"]').click()
                 continue
             else:
@@ -127,6 +129,9 @@ class Login:
                 time.sleep(2)
                 if '秒后再试' in self.browser.page_source:
                     code = self.get_code(self.phone)
+                    if 'break' in code:
+                        self.browser.quit()
+                        break
                     self.browser.find_element_by_xpath('//input[@placeholder="请输入验证码"]').send_keys(code)
                     time.sleep(2)
                     self.browser.find_element_by_xpath('//div[@class="login_button active"]').click()
@@ -141,15 +146,21 @@ class Login:
                     cookie_str = '; '.join(lst)
                     last_use_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
                     cookie_dict = {'cookie': cookie_str, 'last_use_time': last_use_time}
+                    r.rpush('che300_gz:cookies', str(cookie_dict).replace("'", '"').replace("\n", ''))
                     r.rpush('che300_gz:cookies_copy', str(cookie_dict).replace("'", '"').replace("\n", ''))
                     print('redis写入成功！！')
                     print(cookie_str)
                     # self.save_cookie(cookie)
+                    self.browser.close()
                     self.browser.quit()
                     break
 
 
 if __name__ == '__main__':
-    for i in range(20):
-        Login().start()
-        time.sleep(5)
+    Login().start()
+    # for i in range(20):
+    #     Login().start()
+    #     print('---------------------------------------------------------')
+    #     print(i)
+    #     print('---------------------------------------------------------')
+    #     time.sleep(5)

@@ -201,12 +201,6 @@ class SeleniumMiddleware(object):
             logging.warning('===================该cookie使用间隔小于一小时 重新放入队列尾端！=================')
             self.cookie_str = self.r.lpop("che300_gz:cookies")
             self.cookie_count = 0
-        if '异常提示' in self.browser.page_source:
-            logging.warning('=====================该cookie以达到最大请求次数 换下一个==============')
-            cookie_dict1 = {"cookie": self.cookie, "last_use_time": self.local_time}
-            r.rpush('che300_gz:cookies', str(cookie_dict1).replace("'", '"'))
-            self.cookie_count = 0
-            self.cookie_str = self.r.lpop("che300_gz:cookies")
 
     def process_request(self, request, spider):
         if spider.name in ['che300_gz']:
@@ -230,6 +224,12 @@ class SeleniumMiddleware(object):
                 self.get_cookie()
                 url = self.browser.current_url
                 body = self.browser.page_source
+                if '异常提示' in self.browser.page_source:
+                    logging.warning('=====================该cookie以达到最大请求次数 换下一个==============')
+                    cookie_dict1 = {"cookie": self.cookie, "last_use_time": self.local_time}
+                    r.rpush('che300_gz:cookies', str(cookie_dict1).replace("'", '"'))
+                    self.cookie_count = 0
+                    self.cookie_str = self.r.lpop("che300_gz:cookies")
                 return HtmlResponse(url=url, body=body, encoding="utf-8")
             except:
                 # 超时
