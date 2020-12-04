@@ -1,6 +1,6 @@
 import json
 import time
-
+from tqdm import tqdm
 from redis import Redis
 
 redis_url = 'redis://192.168.2.149:6379/8'
@@ -45,10 +45,9 @@ def get_lost():
 
 if __name__ == '__main__':
     lost_cookies = get_lost()
-    for cookie in lost_cookies:
+    for cookie in tqdm(lost_cookies):
         #     last_use_time= time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
         last_use_time = '2020-12-01 10:11:10'
         cookie_dict = {"cookie": cookie, "last_use_time": last_use_time}
         print(cookie_dict)
         r.rpush('che300_gz:cookies', str(cookie_dict).replace("'", '"').replace("\n", '"'))
-

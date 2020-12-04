@@ -21,6 +21,7 @@ from twisted.internet.error import TimeoutError
 from selenium import webdriver
 from scrapy.http import HtmlResponse
 from selenium.webdriver import FirefoxProfile
+from twisted.internet.error import TimeoutError, TCPTimedOutError
 
 redis_url = 'redis://192.168.2.149:6379/8'
 r = Redis.from_url(redis_url, decode_responses=True)
@@ -130,7 +131,7 @@ class SeleniumMiddleware(object):
     selenium 动态加载代理ip 、 cookie
     """
 
-    def __init__(self, timeout=20):
+    def __init__(self, timeout=30):
         redis_url = 'redis://192.168.2.149:6379/8'
         self.r = Redis.from_url(redis_url, decode_responses=True)
         self.cookie_count = 0
@@ -166,10 +167,10 @@ class SeleniumMiddleware(object):
         # self.browser.close()
 
     def __del__(self):
+        cookie_dict1 = {"cookie": self.cookie, "last_use_time": self.local_time}
+        r.rpush('che300_gz:cookies', str(cookie_dict1).replace("'", '"'))
         self.r.close()
         try:
-            cookie_dict1 = {"cookie": self.cookie, "last_use_time": self.local_time}
-            r.rpush('che300_gz:cookies', str(cookie_dict1).replace("'", '"'))
             self.browser.quit()
             self.browser.close()
         except:
@@ -252,10 +253,13 @@ class SeleniumMiddleware(object):
     def get_Proxy(self):
         url = 'http://192.168.2.120:5000'
         proxy = requests.get(url, auth=('admin', 'zd123456')).text[0:-6]
-        ip = proxy.split(":")[0]
-        port = proxy.split(":")[1]
-        # ip = '81.68.214.148'
-        # port = '16128'
+        try:
+            ip = proxy.split(":")[0]
+            port = proxy.split(":")[1]
+        except Exception as e:
+            logging.error('取代理时出错了，暂时将自己的代理顶上', repr(e))
+            ip = '81.68.214.148'
+            port = '16128'
         return proxy, ip, port
 
     def set_proxy(self, driver, ip='', port=0):
@@ -273,8 +277,8 @@ class SeleniumMiddleware(object):
                     '''.format(ip=ip, port=port)
         try:
             driver.execute_script(script)
-        except:
-            logging.error('设置动态代理时出错！！！')
+        except Exception as e:
+            logging.error('设置动态代理时出错！！！', repr(e))
 
 
 class Che300XcxSpiderMiddleware:
@@ -358,14 +362,10 @@ class Che300XcxDownloaderMiddleware:
         return response
 
     def process_exception(self, request, exception, spider):
-        # Called when a download handler or a process_request()
-        # (from other downloader middleware) raises an exception.
-
-        # Must either:
-        # - return None: continue processing this exception
-        # - return a Response object: stops process_exception() chain
-        # - return a Request object: stops process_exception() chain
-        pass
+        if isinstance(exception, TimeoutError):
+            return request
+        elif isinstance(exception, TCPTimedOutError):
+            return request
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)

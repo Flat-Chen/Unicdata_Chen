@@ -9,6 +9,7 @@ import scrapy
 from che300_xcx.items import Che300XcxItem
 from redis import Redis
 import io
+from PIL.PngImagePlugin import ChunkStream
 
 redis_url = 'redis://192.168.2.149:6379/8'
 r = Redis.from_url(redis_url, decode_responses=True)
@@ -42,7 +43,7 @@ class Che300GzSpider(scrapy.Spider):
         'MONGODB_PORT': 27017,
         'MONGODB_DB': 'che300',
         'MONGODB_COLLECTION': 'che300_price_daily',
-        'CONCURRENT_REQUESTS': 32,
+        'CONCURRENT_REQUESTS': 1,
         'DOWNLOAD_DELAY': 0,
         'LOG_LEVEL': 'DEBUG',
         # 'DOWNLOAD_TIMEOUT': 5,
@@ -51,7 +52,7 @@ class Che300GzSpider(scrapy.Spider):
         # 'COOKIES_ENABLED': True,
         # 'REDIS_URL': 'redis://192.168.1.241:6379/14',
         'DOWNLOADER_MIDDLEWARES': {
-            # 'che300_xcx.middlewares.Che300XcxProxyMiddleware': 400,
+            'che300_xcx.middlewares.Che300XcxDownloaderMiddleware': 400,
             # 'che300_xcx.middlewares.Che300XcxUserAgentMiddleware': 100,
             'che300_xcx.middlewares.SeleniumMiddleware': 100,
         },
