@@ -176,7 +176,7 @@ class SeleniumMiddleware(object):
         except:
             pass
 
-    def get_cookie(self):
+    def get_cookie(self, driver):
         cookie_json = json.loads(self.cookie_str)
         self.cookie = cookie_json['cookie'].replace('\n', '')
         last_use_time = cookie_json['last_use_time']
@@ -192,7 +192,7 @@ class SeleniumMiddleware(object):
                 cookie_split = self.cookie.split('; ')
                 for i in cookie_split:
                     # print({'name': i.split('=')[0], 'value': i.split('=')[1]})
-                    self.browser.add_cookie(
+                    driver.add_cookie(
                         cookie_dict={'name': i.split('=')[0].strip(), 'value': i.split('=')[1].strip()})
             self.cookie_count = self.cookie_count + 1
             logging.info('========================该cookie使用次数:{}===================='.format(self.cookie_count))
@@ -206,7 +206,7 @@ class SeleniumMiddleware(object):
     def process_request(self, request, spider):
         if spider.name in ['che300_gz']:
             proxy, ip, port = self.get_Proxy()
-            self.set_proxy(ip=ip, port=port)
+            self.set_proxy(self.browser, ip=ip, port=port)
             main_win = self.browser.current_window_handle  # 记录当前窗口的句柄
             all_win = self.browser.window_handles
             try:
@@ -221,20 +221,17 @@ class SeleniumMiddleware(object):
                             self.browser.switch_to.window(main_win)
 
                 # 此处访问要请求的url
-                try:
-                    self.browser.get(request.url)
-                    self.get_cookie()
-                    url = self.browser.current_url
-                    body = self.browser.page_source
-                    if '异常提示' in self.browser.page_source:
-                        logging.warning('=====================该cookie以达到最大请求次数 换下一个==============')
-                        cookie_dict1 = {"cookie": self.cookie, "last_use_time": self.local_time}
-                        r.rpush('che300_gz:cookies', str(cookie_dict1).replace("'", '"'))
-                        self.cookie_count = 0
-                        self.cookie_str = self.r.lpop("che300_gz:cookies")
-                    return HtmlResponse(url=url, body=body, encoding="utf-8")
-                except:
-                    return request
+                self.browser.get(request.url)
+                self.get_cookie(self.browser)
+                url = self.browser.current_url
+                body = self.browser.page_source
+                if '异常提示' in self.browser.page_source:
+                    logging.warning('=====================该cookie以达到最大请求次数 换下一个==============')
+                    cookie_dict1 = {"cookie": self.cookie, "last_use_time": self.local_time}
+                    r.rpush('che300_gz:cookies', str(cookie_dict1).replace("'", '"'))
+                    self.cookie_count = 0
+                    self.cookie_str = self.r.lpop("che300_gz:cookies")
+                return HtmlResponse(url=url, body=body, encoding="utf-8")
             except:
                 # 超时
                 logging.info("-------------------Time out-------------------")
@@ -265,8 +262,8 @@ class SeleniumMiddleware(object):
             port = '16128'
         return proxy, ip, port
 
-    def set_proxy(self, ip='', port=0):
-        self.browser.get("about:config")
+    def set_proxy(self, driver, ip='', port=0):
+        driver.get("about:config")
         script = '''var prefs = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefBranch);
                     prefs.setIntPref("network.proxy.type", 1);
                     prefs.setCharPref("network.proxy.http", "{ip}");
@@ -282,7 +279,7 @@ class SeleniumMiddleware(object):
                     prefs.setBoolPref("browser.cache.offline.enable", false);
                     '''.format(ip=ip, port=port)
         try:
-            self.browser.execute_script(script)
+            driver.execute_script(script)
         except Exception as e:
             logging.error('设置动态代理时出错！！！', repr(e))
 
