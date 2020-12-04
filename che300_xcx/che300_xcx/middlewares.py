@@ -206,7 +206,7 @@ class SeleniumMiddleware(object):
     def process_request(self, request, spider):
         if spider.name in ['che300_gz']:
             proxy, ip, port = self.get_Proxy()
-            self.set_proxy(self.browser, ip=ip, port=port)
+            self.set_proxy(ip=ip, port=port)
             main_win = self.browser.current_window_handle  # 记录当前窗口的句柄
             all_win = self.browser.window_handles
             try:
@@ -265,8 +265,8 @@ class SeleniumMiddleware(object):
             port = '16128'
         return proxy, ip, port
 
-    def set_proxy(self, driver, ip='', port=0):
-        driver.get("about:config")
+    def set_proxy(self, ip='', port=0):
+        self.browser.get("about:config")
         script = '''var prefs = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefBranch);
                     prefs.setIntPref("network.proxy.type", 1);
                     prefs.setCharPref("network.proxy.http", "{ip}");
@@ -282,7 +282,7 @@ class SeleniumMiddleware(object):
                     prefs.setBoolPref("browser.cache.offline.enable", false);
                     '''.format(ip=ip, port=port)
         try:
-            driver.execute_script(script)
+            self.browser.execute_script(script)
         except Exception as e:
             logging.error('设置动态代理时出错！！！', repr(e))
 
