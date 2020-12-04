@@ -223,19 +223,18 @@ class SeleniumMiddleware(object):
                 # 此处访问要请求的url
                 try:
                     self.browser.get(request.url)
+                    self.get_cookie()
+                    url = self.browser.current_url
+                    body = self.browser.page_source
+                    if '异常提示' in self.browser.page_source:
+                        logging.warning('=====================该cookie以达到最大请求次数 换下一个==============')
+                        cookie_dict1 = {"cookie": self.cookie, "last_use_time": self.local_time}
+                        r.rpush('che300_gz:cookies', str(cookie_dict1).replace("'", '"'))
+                        self.cookie_count = 0
+                        self.cookie_str = self.r.lpop("che300_gz:cookies")
+                    return HtmlResponse(url=url, body=body, encoding="utf-8")
                 except:
-                    js = 'window.open("{}");'.format(request.url)
-                    self.browser.execute_script(js)
-                self.get_cookie()
-                url = self.browser.current_url
-                body = self.browser.page_source
-                if '异常提示' in self.browser.page_source:
-                    logging.warning('=====================该cookie以达到最大请求次数 换下一个==============')
-                    cookie_dict1 = {"cookie": self.cookie, "last_use_time": self.local_time}
-                    r.rpush('che300_gz:cookies', str(cookie_dict1).replace("'", '"'))
-                    self.cookie_count = 0
-                    self.cookie_str = self.r.lpop("che300_gz:cookies")
-                return HtmlResponse(url=url, body=body, encoding="utf-8")
+                    return request
             except:
                 # 超时
                 logging.info("-------------------Time out-------------------")
