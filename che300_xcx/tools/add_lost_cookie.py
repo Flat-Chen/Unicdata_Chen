@@ -21,7 +21,7 @@ def list_iter(name):
 def get_rest():
     cookie_rest = []
     for item in list_iter('che300_gz:cookies'):  # 遍历这个列表
-        cook = json.loads(item)['cookie']
+        cook = json.loads(item)['cookie'].replace("\n", '"')
         cookie_rest.append(cook)
     return cookie_rest
 
@@ -31,7 +31,7 @@ def all_cookie():
     for item in list_iter('che300_gz:cookies_copy'):  # 遍历这个列表
         item = item.replace("'", '"')
         json_data = json.loads(item)
-        cookie = json_data['cookie']
+        cookie = json_data['cookie'].replace("\n", '"')
         cookie_list.append(cookie)
     return cookie_list
 
