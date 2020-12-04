@@ -52,7 +52,7 @@ class Che300GzSpider(scrapy.Spider):
         # 'COOKIES_ENABLED': True,
         # 'REDIS_URL': 'redis://192.168.1.241:6379/14',
         'DOWNLOADER_MIDDLEWARES': {
-            'che300_xcx.middlewares.Che300XcxDownloaderMiddleware': 400,
+            # 'che300_xcx.middlewares.Che300XcxDownloaderMiddleware': 400,
             # 'che300_xcx.middlewares.Che300XcxUserAgentMiddleware': 100,
             'che300_xcx.middlewares.SeleniumMiddleware': 100,
         },

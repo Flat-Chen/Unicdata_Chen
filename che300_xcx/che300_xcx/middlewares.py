@@ -272,8 +272,11 @@ class SeleniumMiddleware(object):
                     prefs.setIntPref("network.proxy.ssl_port", "{port}");
                     prefs.setCharPref("network.proxy.ftp", "{ip}");
                     prefs.setIntPref("network.proxy.ftp_port", "{port}");
-        　　　　　　　 prefs.setBoolPref("general.useragent.site_specific_overrides",true);
-        　　　　　　　 prefs.setBoolPref("general.useragent.updates.enabled",true);
+        　　　　　　 prefs.setBoolPref("general.useragent.site_specific_overrides",true);
+        　　　　　　 prefs.setBoolPref("general.useragent.updates.enabled",true);
+                    prefs.setBoolPref("browser.cache.disk.enable", false);
+                    prefs.setBoolPref("browser.cache.memory.enable", false);
+                    prefs.setBoolPref("browser.cache.offline.enable", false);
                     '''.format(ip=ip, port=port)
         try:
             driver.execute_script(script)
