@@ -168,6 +168,8 @@ class SeleniumMiddleware(object):
     def __del__(self):
         self.r.close()
         try:
+            cookie_dict1 = {"cookie": self.cookie, "last_use_time": self.local_time}
+            r.rpush('che300_gz:cookies', str(cookie_dict1).replace("'", '"'))
             self.browser.quit()
             self.browser.close()
         except:

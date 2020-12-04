@@ -53,5 +53,5 @@ if __name__ == '__main__':
             last_use_time = '2020-12-01 10:11:10'
             cookie_dict = {"cookie": cookie, "last_use_time": last_use_time}
             print(cookie_dict)
-            r1.rpush('che300_gz:cookies', str(cookie_dict).replace("'", '"'))
+            r1.rpush('che300_gz:cookies', str(cookie_dict).replace("'", '"').replace("\n", '"'))
         time.sleep(600)
