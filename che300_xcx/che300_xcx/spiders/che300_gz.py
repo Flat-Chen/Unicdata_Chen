@@ -42,7 +42,7 @@ class Che300GzSpider(scrapy.Spider):
         'MONGODB_PORT': 27017,
         'MONGODB_DB': 'che300',
         'MONGODB_COLLECTION': 'che300_price_daily',
-        'CONCURRENT_REQUESTS': 1,
+        'CONCURRENT_REQUESTS': 32,
         'DOWNLOAD_DELAY': 0,
         'LOG_LEVEL': 'DEBUG',
         # 'DOWNLOAD_TIMEOUT': 5,

@@ -130,7 +130,7 @@ class SeleniumMiddleware(object):
     selenium 动态加载代理ip 、 cookie
     """
 
-    def __init__(self, timeout=30):
+    def __init__(self, timeout=20):
         redis_url = 'redis://192.168.2.149:6379/8'
         self.r = Redis.from_url(redis_url, decode_responses=True)
         self.cookie_count = 0
@@ -189,7 +189,8 @@ class SeleniumMiddleware(object):
                 cookie_split = self.cookie.split('; ')
                 for i in cookie_split:
                     # print({'name': i.split('=')[0], 'value': i.split('=')[1]})
-                    self.browser.add_cookie(cookie_dict={'name': i.split('=')[0].strip(), 'value': i.split('=')[1].strip()})
+                    self.browser.add_cookie(
+                        cookie_dict={'name': i.split('=')[0].strip(), 'value': i.split('=')[1].strip()})
             self.cookie_count = self.cookie_count + 1
             logging.info('========================该cookie使用次数:{}===================='.format(self.cookie_count))
         else:
@@ -268,7 +269,10 @@ class SeleniumMiddleware(object):
         　　　　　　　 prefs.setBoolPref("general.useragent.site_specific_overrides",true);
         　　　　　　　 prefs.setBoolPref("general.useragent.updates.enabled",true);
                     '''.format(ip=ip, port=port)
-        driver.execute_script(script)
+        try:
+            driver.execute_script(script)
+        except:
+            logging.error('设置动态代理时出错！！！')
 
 
 class Che300XcxSpiderMiddleware:
