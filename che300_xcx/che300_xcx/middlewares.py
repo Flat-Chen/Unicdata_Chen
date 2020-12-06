@@ -17,6 +17,7 @@ from scrapy import signals
 from scrapy.downloadermiddlewares.useragent import UserAgentMiddleware
 from redis import Redis
 from scrapy import signals
+from selenium.webdriver.support.wait import WebDriverWait
 from twisted.internet.error import TimeoutError
 from selenium import webdriver
 from scrapy.http import HtmlResponse
@@ -139,7 +140,7 @@ class SeleniumMiddleware(object):
 
         profile = FirefoxProfile()
         options = webdriver.FirefoxOptions()
-        options.add_argument('--headless')
+        # options.add_argument('--headless')
         # 去掉提示：Chrome正收到自动测试软件的控制
         options.add_argument('disable-infobars')
         # 禁止加载照片
@@ -159,12 +160,15 @@ class SeleniumMiddleware(object):
         # self.browser.maximize_window()
         self.browser.set_page_load_timeout(self.timeout)  # 设置页面加载超时
         self.browser.set_script_timeout(self.timeout)  # 设置页面异步js执行超时
-        # self.wait = WebDriverWait(self.browser, self.timeout, poll_frequency=0.5)
+        self.wait = WebDriverWait(self.browser, self.timeout, poll_frequency=0.5)
 
     def close_spider(self, spider):
         self.r.close()
-        self.browser.quit()
-        # self.browser.close()
+        try:
+            self.browser.quit()
+            self.browser.close()
+        except:
+            pass
 
     def __del__(self):
         cookie_dict1 = {"cookie": self.cookie, "last_use_time": self.local_time}
