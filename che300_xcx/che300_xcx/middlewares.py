@@ -160,7 +160,7 @@ class SeleniumMiddleware(object):
         # self.browser.maximize_window()
         self.browser.set_page_load_timeout(self.timeout)  # 设置页面加载超时
         self.browser.set_script_timeout(self.timeout)  # 设置页面异步js执行超时
-        self.wait = WebDriverWait(self.browser, self.timeout, poll_frequency=0.5)
+        # self.wait = WebDriverWait(self.browser, self.timeout, poll_frequency=0.5)
 
     def close_spider(self, spider):
         self.r.close()
