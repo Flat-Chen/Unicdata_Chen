@@ -243,10 +243,10 @@ class SeleniumMiddleware(object):
                 # 此处访问要请求的url
                 try:
                     self.browser.get(request.url)
+                    self.get_cookie(self.browser)
                 except:
-                    print("加载页面太慢，停止加载，继续下一步操作")
+                    logging.error("加载页面太慢，停止加载，继续下一步操作")
                     self.browser.execute_script("window.stop()")
-                self.get_cookie(self.browser)
                 url = self.browser.current_url
                 body = self.browser.page_source
 
@@ -285,7 +285,7 @@ class SeleniumMiddleware(object):
         try:
             driver.get("about:config")
         except:
-            print("动态加载IP时，页面加载页面太慢，停止加载，继续下一步操作")
+            logging.error("动态加载IP时，页面加载页面太慢，停止加载，继续下一步操作")
             self.browser.execute_script("window.stop()")
         script = '''var prefs = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefBranch);
                     prefs.setIntPref("network.proxy.type", 1);
