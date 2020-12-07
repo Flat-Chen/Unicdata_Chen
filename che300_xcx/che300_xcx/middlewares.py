@@ -140,7 +140,7 @@ class SeleniumMiddleware(object):
 
         profile = FirefoxProfile()
         options = webdriver.FirefoxOptions()
-        # options.add_argument('--headless')
+        options.add_argument('--headless')
         # 去掉提示：Chrome正收到自动测试软件的控制
         options.add_argument('disable-infobars')
         # 禁止加载照片
@@ -171,8 +171,7 @@ class SeleniumMiddleware(object):
             pass
 
     def __del__(self):
-        cookie_dict1 = {"cookie": self.cookie, "last_use_time": self.local_time}
-        r.rpush('che300_gz:cookies', str(cookie_dict1).replace("'", '"'))
+        r.rpush('che300_gz:cookies', self.cookie_str)
         self.r.close()
         try:
             self.browser.quit()
