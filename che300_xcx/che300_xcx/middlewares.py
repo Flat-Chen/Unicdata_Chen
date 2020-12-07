@@ -217,11 +217,21 @@ class SeleniumMiddleware(object):
                 self.cookie_count = 0
                 self.cookie_str = self.r.lpop("che300_gz:cookies")
         else:
-            # 间隔小于一小时 重新放入队列尾端
-            self.r.rpush('che300_gz:cookies', self.cookie_str)
-            logging.warning('===================该cookie使用间隔小于一小时 重新放入队列尾端！=================')
-            self.cookie_str = self.r.lpop("che300_gz:cookies")
-            self.cookie_count = 0
+            while 1:
+                # 间隔小于一小时 重新放入队列尾端
+                self.r.rpush('che300_gz:cookies', self.cookie_str)
+                logging.warning('===================该cookie使用间隔小于一小时 重新放入队列尾端！=================')
+                self.cookie_str = self.r.lpop("che300_gz:cookies")
+                self.cookie_count = 0
+                cookie_json = json.loads(self.cookie_str)
+                self.cookie = cookie_json['cookie'].replace('\n', '')
+                last_use_time = cookie_json['last_use_time']
+                time1 = time.mktime(time.strptime(last_use_time, "%Y-%m-%d %H:%M:%S"))
+                self.local_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+                time2 = time.mktime(time.strptime(self.local_time, "%Y-%m-%d %H:%M:%S"))
+                hoursCount = (time2 - time1)
+                if hoursCount >= 3600:
+                    break
 
     def process_request(self, request, spider):
         if spider.name in ['che300_gz']:
