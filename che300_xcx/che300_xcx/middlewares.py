@@ -141,7 +141,7 @@ class SeleniumMiddleware(object):
 
         profile = FirefoxProfile()
         options = webdriver.FirefoxOptions()
-        # options.add_argument('--headless')
+        options.add_argument('--headless')
         # 去掉提示：Chrome正收到自动测试软件的控制
         options.add_argument('disable-infobars')
 
