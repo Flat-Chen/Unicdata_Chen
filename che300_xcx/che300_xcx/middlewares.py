@@ -22,6 +22,7 @@ from twisted.internet.error import TimeoutError
 from selenium import webdriver
 from scrapy.http import HtmlResponse
 from selenium.webdriver import FirefoxProfile
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from twisted.internet.error import TimeoutError, TCPTimedOutError
 
 redis_url = 'redis://192.168.2.149:6379/8'
@@ -140,7 +141,7 @@ class SeleniumMiddleware(object):
 
         profile = FirefoxProfile()
         options = webdriver.FirefoxOptions()
-        options.add_argument('--headless')
+        # options.add_argument('--headless')
         # 去掉提示：Chrome正收到自动测试软件的控制
         options.add_argument('disable-infobars')
 
@@ -152,12 +153,14 @@ class SeleniumMiddleware(object):
         # profile.set_preference('network.proxy.ssl_port', 16128)
 
         # 禁止加载照片
-        # profile.set_preference('permissions.default.image', 2)
+        profile.set_preference('permissions.default.image', 2)
         # 禁止加载css样式表
         profile.set_preference('permissions.default.stylesheet', 2)
         options.set_preference("dom.webnotifications.enabled", False)
         # 修改页面加载策略
         # none表示将br.get方法改为非阻塞模式，在页面加载过程中也可以给br发送指令，如获取url，pagesource等资源。
+        # desired_capabilities = DesiredCapabilities.FIREFOX  # 修改页面加载策略页面加载策略
+        # desired_capabilities["pageLoadStrategy"] = "none"
 
         # self.browser = webdriver.Firefox(firefox_profile=profile, firefox_options=options,
         #                                  executable_path='/usr/bin/firefox')
@@ -238,7 +241,11 @@ class SeleniumMiddleware(object):
                             self.browser.switch_to.window(main_win)
 
                 # 此处访问要请求的url
-                self.browser.get(request.url)
+                try:
+                    self.browser.get(request.url)
+                except:
+                    print("加载页面太慢，停止加载，继续下一步操作")
+                    self.browser.execute_script("window.stop()")
                 self.get_cookie(self.browser)
                 url = self.browser.current_url
                 body = self.browser.page_source
@@ -275,7 +282,11 @@ class SeleniumMiddleware(object):
         return proxy, ip, port
 
     def set_proxy(self, driver, ip='', port=0):
-        driver.get("about:config")
+        try:
+            driver.get("about:config")
+        except:
+            print("动态加载IP时，页面加载页面太慢，停止加载，继续下一步操作")
+            self.browser.execute_script("window.stop()")
         script = '''var prefs = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefBranch);
                     prefs.setIntPref("network.proxy.type", 1);
                     prefs.setCharPref("network.proxy.http", "{ip}");
