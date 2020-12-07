@@ -143,6 +143,14 @@ class SeleniumMiddleware(object):
         options.add_argument('--headless')
         # 去掉提示：Chrome正收到自动测试软件的控制
         options.add_argument('disable-infobars')
+
+        # 设置代理
+        # profile.set_preference('network.proxy.type', 1)
+        # profile.set_preference('network.proxy.http', '81.68.214.148')
+        # profile.set_preference('network.proxy.http_port', 16128)
+        # profile.set_preference('network.proxy.ssl', '81.68.214.148')
+        # profile.set_preference('network.proxy.ssl_port', 16128)
+
         # 禁止加载照片
         # profile.set_preference('permissions.default.image', 2)
         # 禁止加载css样式表
@@ -180,6 +188,12 @@ class SeleniumMiddleware(object):
             pass
 
     def get_cookie(self, driver):
+        if '异常提示' in self.browser.page_source:
+            logging.warning('=====================该cookie以达到最大请求次数 换下一个==============')
+            cookie_dict1 = {"cookie": self.cookie, "last_use_time": self.local_time}
+            r.rpush('che300_gz:cookies', str(cookie_dict1).replace("'", '"'))
+            self.cookie_count = 0
+            self.cookie_str = self.r.lpop("che300_gz:cookies")
         cookie_json = json.loads(self.cookie_str)
         self.cookie = cookie_json['cookie'].replace('\n', '')
         last_use_time = cookie_json['last_use_time']
@@ -228,12 +242,7 @@ class SeleniumMiddleware(object):
                 self.get_cookie(self.browser)
                 url = self.browser.current_url
                 body = self.browser.page_source
-                if '异常提示' in self.browser.page_source:
-                    logging.warning('=====================该cookie以达到最大请求次数 换下一个==============')
-                    cookie_dict1 = {"cookie": self.cookie, "last_use_time": self.local_time}
-                    r.rpush('che300_gz:cookies', str(cookie_dict1).replace("'", '"'))
-                    self.cookie_count = 0
-                    self.cookie_str = self.r.lpop("che300_gz:cookies")
+
                 return HtmlResponse(url=url, body=body, encoding="utf-8")
             except:
                 # 超时
