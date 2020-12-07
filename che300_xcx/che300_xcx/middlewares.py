@@ -191,12 +191,6 @@ class SeleniumMiddleware(object):
             pass
 
     def get_cookie(self, driver):
-        if '异常提示' in self.browser.page_source:
-            logging.warning('=====================该cookie以达到最大请求次数 换下一个==============')
-            cookie_dict1 = {"cookie": self.cookie, "last_use_time": self.local_time}
-            r.rpush('che300_gz:cookies', str(cookie_dict1).replace("'", '"'))
-            self.cookie_count = 0
-            self.cookie_str = self.r.lpop("che300_gz:cookies")
         cookie_json = json.loads(self.cookie_str)
         self.cookie = cookie_json['cookie'].replace('\n', '')
         last_use_time = cookie_json['last_use_time']
@@ -216,6 +210,12 @@ class SeleniumMiddleware(object):
                         cookie_dict={'name': i.split('=')[0].strip(), 'value': i.split('=')[1].strip()})
             self.cookie_count = self.cookie_count + 1
             logging.info('========================该cookie使用次数:{}===================='.format(self.cookie_count))
+            if '异常提示' in self.browser.page_source:
+                logging.warning('=====================该cookie以达到最大请求次数 换下一个==============')
+                cookie_dict1 = {"cookie": self.cookie, "last_use_time": self.local_time}
+                r.rpush('che300_gz:cookies', str(cookie_dict1).replace("'", '"'))
+                self.cookie_count = 0
+                self.cookie_str = self.r.lpop("che300_gz:cookies")
         else:
             # 间隔小于一小时 重新放入队列尾端
             self.r.rpush('che300_gz:cookies', self.cookie_str)
