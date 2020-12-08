@@ -202,7 +202,7 @@ class SeleniumMiddleware(object):
         if hoursCount >= 3600:
             # 第一次使用add cookie 后面直接请求不用再add
             if self.cookie_count == 0:
-                # self.browser.get('http://m.che300.com/estimate/result/3/3/12/209/32814/2019-12/2/1/null/2016/2019')
+                driver.get('http://m.che300.com/estimate/result/3/3/12/209/32814/2019-12/2/1/null/2016/2019')
                 cookie_split = self.cookie.split('; ')
                 for i in cookie_split:
                     # print({'name': i.split('=')[0], 'value': i.split('=')[1]})
@@ -210,12 +210,6 @@ class SeleniumMiddleware(object):
                         cookie_dict={'name': i.split('=')[0].strip(), 'value': i.split('=')[1].strip()})
             self.cookie_count = self.cookie_count + 1
             logging.info('========================该cookie使用次数:{}===================='.format(self.cookie_count))
-            if '异常提示' in self.browser.page_source:
-                logging.warning('=====================该cookie以达到最大请求次数 换下一个==============')
-                cookie_dict1 = {"cookie": self.cookie, "last_use_time": self.local_time}
-                r.rpush('che300_gz:cookies', str(cookie_dict1).replace("'", '"'))
-                self.cookie_count = 0
-                self.cookie_str = self.r.lpop("che300_gz:cookies")
         else:
             while 1:
                 # 间隔小于一小时 重新放入队列尾端
@@ -252,8 +246,14 @@ class SeleniumMiddleware(object):
 
                 # 此处访问要请求的url
                 try:
-                    self.browser.get(request.url)
                     self.get_cookie(self.browser)
+                    self.browser.get(request.url)
+                    if '异常提示' in self.browser.page_source:
+                        logging.warning('=====================该cookie以达到最大请求次数 换下一个==============')
+                        cookie_dict1 = {"cookie": self.cookie, "last_use_time": self.local_time}
+                        r.rpush('che300_gz:cookies', str(cookie_dict1).replace("'", '"'))
+                        self.cookie_count = 0
+                        self.cookie_str = self.r.lpop("che300_gz:cookies")
                 except:
                     logging.error("加载页面太慢，停止加载，继续下一步操作")
                     self.browser.execute_script("window.stop()")
@@ -298,19 +298,19 @@ class SeleniumMiddleware(object):
             logging.error("动态加载IP时，页面加载页面太慢，停止加载，继续下一步操作")
             self.browser.execute_script("window.stop()")
         script = '''var prefs = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefBranch);
-                    prefs.setIntPref("network.proxy.type", 1);
-                    prefs.setCharPref("network.proxy.http", "{ip}");
-                    prefs.setIntPref("network.proxy.http_port", "{port}");
-                    prefs.setCharPref("network.proxy.ssl", "{ip}");
-                    prefs.setIntPref("network.proxy.ssl_port", "{port}");
-                    prefs.setCharPref("network.proxy.ftp", "{ip}");
-                    prefs.setIntPref("network.proxy.ftp_port", "{port}");
-        　　　　　　 prefs.setBoolPref("general.useragent.site_specific_overrides",true);
-        　　　　　　 prefs.setBoolPref("general.useragent.updates.enabled",true);
-                    prefs.setBoolPref("browser.cache.disk.enable", false);
-                    prefs.setBoolPref("browser.cache.memory.enable", false);
-                    prefs.setBoolPref("browser.cache.offline.enable", false);
-                    '''.format(ip=ip, port=port)
+                        prefs.setIntPref("network.proxy.type", 1);
+                        prefs.setCharPref("network.proxy.http", "{ip}");
+                        prefs.setIntPref("network.proxy.http_port", "{port}");
+                        prefs.setCharPref("network.proxy.ssl", "{ip}");
+                        prefs.setIntPref("network.proxy.ssl_port", "{port}");
+                        prefs.setCharPref("network.proxy.ftp", "{ip}");
+                        prefs.setIntPref("network.proxy.ftp_port", "{port}");
+            　　　　　　 prefs.setBoolPref("general.useragent.site_specific_overrides",true);
+            　　　　　　 prefs.setBoolPref("general.useragent.updates.enabled",true);
+                        prefs.setBoolPref("browser.cache.disk.enable", false);
+                        prefs.setBoolPref("browser.cache.memory.enable", false);
+                        prefs.setBoolPref("browser.cache.offline.enable", false);
+                '''.format(ip=ip, port=port)
         try:
             driver.execute_script(script)
         except Exception as e:
