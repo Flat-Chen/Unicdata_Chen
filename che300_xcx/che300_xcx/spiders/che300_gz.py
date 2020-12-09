@@ -59,8 +59,8 @@ class Che300GzSpider(scrapy.Spider):
     }
 
     def start_requests(self):
-        url = r.blpop('che300_gz:start_urls')
-        yield scrapy.Request(url=url, meta={'url': url})
+        url = r.blpop('che300_gz:start_urls')[1]
+        yield scrapy.Request(url=url, meta={'url': url}, dont_filter=True)
 
     def parse(self, response):
         url = response.meta['url']
@@ -98,4 +98,4 @@ class Che300GzSpider(scrapy.Spider):
         next_url = r.blpop('che300_gz:start_urls')
         if next_url:
             start_url = next_url[1]
-            yield scrapy.Request(url=start_url, meta={'url': start_url}, callback=self.parse)
+            yield scrapy.Request(url=start_url, meta={'url': start_url}, callback=self.parse, dont_filter=True)

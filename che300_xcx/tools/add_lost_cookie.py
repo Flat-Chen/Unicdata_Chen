@@ -48,7 +48,7 @@ if __name__ == '__main__':
     lost_cookies = get_lost()
     for cookie in tqdm(lost_cookies):
         #     last_use_time= time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
-        last_use_time = '2020-12-07 20:11:10'
+        last_use_time = '2020-12-09 16:11:10'
         cookie_dict = {"cookie": cookie, "last_use_time": last_use_time}
         # print(cookie_dict)
         r.rpush('che300_gz:cookies', str(cookie_dict).replace("'", '"').replace("\n", '"'))
