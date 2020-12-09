@@ -137,7 +137,7 @@ class SeleniumMiddleware(object):
         redis_url = 'redis://192.168.2.149:6379/8'
         self.r = Redis.from_url(redis_url, decode_responses=True)
         self.cookie_count = 0
-        self.cookie_str = self.r.lpop("che300_gz:cookies")
+        self.cookie_str = self.r.blpop("che300_gz:cookies")
 
         profile = FirefoxProfile()
         options = webdriver.FirefoxOptions()
@@ -215,7 +215,7 @@ class SeleniumMiddleware(object):
                 # 间隔小于一小时 重新放入队列尾端
                 self.r.rpush('che300_gz:cookies', self.cookie_str)
                 logging.warning('===================该cookie使用间隔小于一小时 重新放入队列尾端！=================')
-                self.cookie_str = self.r.lpop("che300_gz:cookies")
+                self.cookie_str = self.r.blpop("che300_gz:cookies")
                 self.cookie_count = 0
                 cookie_json = json.loads(self.cookie_str)
                 self.cookie = cookie_json['cookie'].replace('\n', '')
@@ -253,7 +253,7 @@ class SeleniumMiddleware(object):
                         cookie_dict1 = {"cookie": self.cookie, "last_use_time": self.local_time}
                         r.rpush('che300_gz:cookies', str(cookie_dict1).replace("'", '"'))
                         self.cookie_count = 0
-                        self.cookie_str = self.r.lpop("che300_gz:cookies")
+                        self.cookie_str = self.r.blpop("che300_gz:cookies")
                 except:
                     logging.error("加载页面太慢，停止加载，继续下一步操作")
                     self.browser.execute_script("window.stop()")

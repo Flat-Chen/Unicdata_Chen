@@ -59,7 +59,7 @@ class Che300GzSpider(scrapy.Spider):
     }
 
     def start_requests(self):
-        url = r.lpop('che300_gz:start_urls')
+        url = r.blpop('che300_gz:start_urls')
         yield scrapy.Request(url=url, meta={'url': url})
 
     def parse(self, response):
