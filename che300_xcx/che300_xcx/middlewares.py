@@ -74,58 +74,29 @@ class Che300XcxUserAgentMiddleware(object):
         self.cookie_str = r.lpop("che300_gz:cookies")
 
     def process_request(self, request, spider):
-        ua = random.choice(user_agent_list)
-        request.headers.setdefault('User-Agent',
-                                   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36')
-        cookie_json = json.loads(self.cookie_str)
-        cookie = cookie_json['cookie'].replace('\n', '')
-        last_use_time = cookie_json['last_use_time']
-        time1 = time.mktime(time.strptime(last_use_time, "%Y-%m-%d %H:%M:%S"))
-        local_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-        time2 = time.mktime(time.strptime(local_time, "%Y-%m-%d %H:%M:%S"))
-        hoursCount = (time2 - time1)
-        if hoursCount >= 3600:
-            cookie_list = cookie.split('; ')
-            cookie_dict = {}
-            for i in cookie_list:
-                cookie_dict[i.split('=')[0]] = i.split('=')[1]
-                # print(cookie_dict)
-            request.cookies = cookie_dict
-            self.count = self.count + 1
-            print('====================该cookie使用次数:', self.count)
-            if self.count >= 50:
-                print('该cookie请求达到50次 换下一个')
-                cookie_dict1 = {"cookie": cookie, "last_use_time": local_time}
-                r.rpush('che300_gz:cookies', str(cookie_dict1).replace("'", '"'))
-                self.count = 0
-                self.cookie_str = r.lpop("che300_gz:cookies")
-        else:
-            # 间隔小于一小时 重新放入队列尾端
-            r.rpush('che300_gz:cookies', self.cookie_str)
-            print('该cookie使用间隔小于一小时 重新放入队列尾端！')
-            self.cookie_str = r.lpop("che300_gz:cookies")
+        ua = random.choice(self.user_agent_list)
+        request.headers.setdefault('User-Agent', ua)
 
-
-user_agent_list = [
-    "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/22.0.1207.1 Safari/537.1",
-    "Mozilla/5.0 (X11; CrOS i686 2268.111.0) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11",
-    "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.6 (KHTML, like Gecko) Chrome/20.0.1092.0 Safari/536.6",
-    "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.6 (KHTML, like Gecko) Chrome/20.0.1090.0 Safari/536.6",
-    "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/19.77.34.5 Safari/537.1",
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.9 Safari/536.5",
-    "Mozilla/5.0 (Windows NT 6.0) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.36 Safari/536.5",
-    "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1063.0 Safari/536.3",
-    "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1063.0 Safari/536.3",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_0) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1063.0 Safari/536.3",
-    "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1062.0 Safari/536.3",
-    "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1062.0 Safari/536.3",
-    "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1061.1 Safari/536.3",
-    "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1061.1 Safari/536.3",
-    "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1061.1 Safari/536.3",
-    "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1061.0 Safari/536.3",
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.24 (KHTML, like Gecko) Chrome/19.0.1055.1 Safari/535.24",
-    "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/535.24 (KHTML, like Gecko) Chrome/19.0.1055.1 Safari/535.24",
-]
+    user_agent_list = [
+        "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/22.0.1207.1 Safari/537.1",
+        "Mozilla/5.0 (X11; CrOS i686 2268.111.0) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11",
+        "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.6 (KHTML, like Gecko) Chrome/20.0.1092.0 Safari/536.6",
+        "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.6 (KHTML, like Gecko) Chrome/20.0.1090.0 Safari/536.6",
+        "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/19.77.34.5 Safari/537.1",
+        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.9 Safari/536.5",
+        "Mozilla/5.0 (Windows NT 6.0) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.36 Safari/536.5",
+        "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1063.0 Safari/536.3",
+        "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1063.0 Safari/536.3",
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_0) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1063.0 Safari/536.3",
+        "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1062.0 Safari/536.3",
+        "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1062.0 Safari/536.3",
+        "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1061.1 Safari/536.3",
+        "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1061.1 Safari/536.3",
+        "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1061.1 Safari/536.3",
+        "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1061.0 Safari/536.3",
+        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.24 (KHTML, like Gecko) Chrome/19.0.1055.1 Safari/535.24",
+        "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/535.24 (KHTML, like Gecko) Chrome/19.0.1055.1 Safari/535.24",
+    ]
 
 
 class SeleniumMiddleware(object):
@@ -199,8 +170,8 @@ class SeleniumMiddleware(object):
             self.local_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
             time2 = time.mktime(time.strptime(self.local_time, "%Y-%m-%d %H:%M:%S"))
             hoursCount = (time2 - time1)
-            # 判断距离最后一次使用是否超过一小时
-            if hoursCount >= 3600:
+            # 判断距离最后一次使用是否超过一小时 3600
+            if hoursCount >= 4000:
                 # 第一次使用add cookie 后面直接请求不用再add
                 if self.cookie_count == 0:
                     driver.get('http://m.che300.com/estimate/result/3/3/12/209/32814/2019-12/2/1/null/2016/2019')
@@ -209,6 +180,12 @@ class SeleniumMiddleware(object):
                         # print({'name': i.split('=')[0], 'value': i.split('=')[1]})
                         driver.add_cookie(
                             cookie_dict={'name': i.split('=')[0].strip(), 'value': i.split('=')[1].strip()})
+                elif self.cookie_count == 45:
+                    logging.warning('=====================该cookie以达到45次 为避免封号 换下一个==============')
+                    cookie_dict1 = {"cookie": self.cookie, "last_use_time": self.local_time}
+                    r.rpush('che300_gz:cookies', str(cookie_dict1).replace("'", '"'))
+                    self.cookie_count = 0
+                    self.cookie_str = self.r.blpop("che300_gz:cookies")[1]
                 self.cookie_count = self.cookie_count + 1
                 logging.info('========================该cookie使用次数:{}===================='.format(self.cookie_count))
                 break
@@ -241,12 +218,12 @@ class SeleniumMiddleware(object):
                 try:
                     self.get_cookie(self.browser)
                     self.browser.get(request.url)
-                    if '异常提示' in self.browser.page_source:
-                        logging.warning('=====================该cookie以达到最大请求次数 换下一个==============')
-                        cookie_dict1 = {"cookie": self.cookie, "last_use_time": self.local_time}
-                        r.rpush('che300_gz:cookies', str(cookie_dict1).replace("'", '"'))
-                        self.cookie_count = 0
-                        self.cookie_str = self.r.blpop("che300_gz:cookies")[1]
+                    # if '异常提示' in self.browser.page_source:
+                    #     logging.warning('=====================该cookie以达到最大请求次数 换下一个==============')
+                    #     cookie_dict1 = {"cookie": self.cookie, "last_use_time": self.local_time}
+                    #     r.rpush('che300_gz:cookies', str(cookie_dict1).replace("'", '"'))
+                    #     self.cookie_count = 0
+                    #     self.cookie_str = self.r.blpop("che300_gz:cookies")[1]
                 except:
                     logging.error("加载页面太慢，停止加载，继续下一步操作")
                     self.browser.execute_script("window.stop()")
