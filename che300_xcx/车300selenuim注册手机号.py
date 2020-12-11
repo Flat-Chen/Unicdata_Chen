@@ -20,8 +20,8 @@ class Login:
         self.cookie_txt = open("che300_cookies.txt", "a")
         self.chrome_options = Options()
         # self.chrome_options.add_argument('--headless')
-        self.chrome_options.add_argument('--proxy-server=' + self.getProxy())
-        # self.chrome_options.add_argument('--proxy-server=' + '81.68.214.148:16128')
+        # self.chrome_options.add_argument('--proxy-server=' + self.getProxy())
+        self.chrome_options.add_argument('--proxy-server=' + '81.68.214.148:16128')
         self.chrome_options.add_experimental_option('excludeSwitches', ['enable-automation'])
         self.chrome_options.add_argument(
             "–Referer=https://m.che300.com/estimate/result/3/3/1/1/1168837/2020-3/0.1/1/null/2020/2018")
@@ -118,6 +118,7 @@ class Login:
             print(yzm_text)
             if yzm_text is None or len(yzm_text) < 4:
                 self.browser.find_element_by_xpath('//img[@class="refresh"]').click()
+                time.sleep(1)
                 continue
             else:
                 yzm_text = yzm_text[:4]
@@ -147,10 +148,11 @@ class Login:
                     last_use_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
                     last_use_time = '2020-12-07 14:00:00'
                     cookie_dict = {'cookie': cookie_str, 'last_use_time': last_use_time}
+                    print(cookie_dict)
                     r.rpush('che300_gz:cookies', str(cookie_dict).replace("'", '"').replace("\n", ''))
                     r.rpush('che300_gz:cookies_copy', str(cookie_dict).replace("'", '"').replace("\n", ''))
                     print('redis写入成功！！')
-                    print(cookie_str)
+
                     # self.save_cookie(cookie)
                     self.browser.close()
                     self.browser.quit()

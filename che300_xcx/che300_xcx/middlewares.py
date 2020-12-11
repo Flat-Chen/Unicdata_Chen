@@ -218,12 +218,12 @@ class SeleniumMiddleware(object):
                 try:
                     self.get_cookie(self.browser)
                     self.browser.get(request.url)
-                    # if '异常提示' in self.browser.page_source:
-                    #     logging.warning('=====================该cookie以达到最大请求次数 换下一个==============')
-                    #     cookie_dict1 = {"cookie": self.cookie, "last_use_time": self.local_time}
-                    #     r.rpush('che300_gz:cookies', str(cookie_dict1).replace("'", '"'))
-                    #     self.cookie_count = 0
-                    #     self.cookie_str = self.r.blpop("che300_gz:cookies")[1]
+                    if '异常提示' in self.browser.page_source:
+                        logging.warning('=====================该cookie以达到最大请求次数 换下一个==============')
+                        cookie_dict1 = {"cookie": self.cookie, "last_use_time": self.local_time}
+                        r.rpush('che300_gz:cookies', str(cookie_dict1).replace("'", '"'))
+                        self.cookie_count = 0
+                        self.cookie_str = self.r.blpop("che300_gz:cookies")[1]
                 except:
                     logging.error("加载页面太慢，停止加载，继续下一步操作")
                     self.browser.execute_script("window.stop()")
