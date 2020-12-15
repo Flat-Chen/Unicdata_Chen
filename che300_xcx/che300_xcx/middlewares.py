@@ -171,7 +171,7 @@ class SeleniumMiddleware(object):
             time2 = time.mktime(time.strptime(self.local_time, "%Y-%m-%d %H:%M:%S"))
             hoursCount = (time2 - time1)
             # 判断距离最后一次使用是否超过一小时 3600
-            if hoursCount >= 4000:
+            if hoursCount >= 7200:
                 # 第一次使用add cookie 后面直接请求不用再add
                 if self.cookie_count == 0:
                     driver.get('http://m.che300.com/estimate/result/3/3/12/209/32814/2019-12/2/1/null/2016/2019')
@@ -180,8 +180,8 @@ class SeleniumMiddleware(object):
                         # print({'name': i.split('=')[0], 'value': i.split('=')[1]})
                         driver.add_cookie(
                             cookie_dict={'name': i.split('=')[0].strip(), 'value': i.split('=')[1].strip()})
-                elif self.cookie_count == 45:
-                    logging.warning('=====================该cookie以达到45次 为避免封号 换下一个==============')
+                elif self.cookie_count == 10:
+                    logging.warning('=====================该cookie以达到10次 为避免封号 换下一个==============')
                     cookie_dict1 = {"cookie": self.cookie, "last_use_time": self.local_time}
                     r.rpush('che300_gz:cookies', str(cookie_dict1).replace("'", '"'))
                     self.cookie_count = 0

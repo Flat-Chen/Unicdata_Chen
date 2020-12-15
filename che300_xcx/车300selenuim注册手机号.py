@@ -17,11 +17,12 @@ r = Redis.from_url(redis_url, decode_responses=True)
 
 class Login:
     def __init__(self, **kwargs):
-        self.cookie_txt = open("che300_cookies.txt", "a")
         self.chrome_options = Options()
         # self.chrome_options.add_argument('--headless')
-        # self.chrome_options.add_argument('--proxy-server=' + self.getProxy())
-        self.chrome_options.add_argument('--proxy-server=' + '81.68.214.148:16128')
+        self.chrome_options.add_argument('--proxy-server=' + self.getProxy())
+        prefs = {"profile.managed_default_content_settings.images": 2}
+        self.chrome_options.add_experimental_option("prefs", prefs)
+        # self.chrome_options.add_argument('--proxy-server=' + '81.68.214.148:16128')
         self.chrome_options.add_experimental_option('excludeSwitches', ['enable-automation'])
         self.chrome_options.add_argument(
             "–Referer=https://m.che300.com/estimate/result/3/3/1/1/1168837/2020-3/0.1/1/null/2020/2018")
@@ -81,15 +82,6 @@ class Login:
         response = requests.get(url=lh_url)
         response.encoding = response.apparent_encoding
         print(response.text)
-
-    def save_cookie(self, cookie):
-        lst = []
-        for item in cookie:
-            nv = item['name'] + '=' + item['value']
-            lst.append(nv)
-
-        self.cookie_txt.write('; '.join(lst) + '\n')
-        print('cookie 已保存...')
 
     def start(self):
         while 1:
@@ -160,10 +152,14 @@ class Login:
 
 
 if __name__ == '__main__':
-    # Login().start()
-    for i in range(20):
-        Login().start()
-        print('---------------------------------------------------------')
-        print(i)
-        print('---------------------------------------------------------')
-        time.sleep(5)
+    Login().start()
+    # for i in range(20):
+    #     try:
+    #         Login().start()
+    #         print('---------------------------------------------------------')
+    #         print(i)
+    #         print('---------------------------------------------------------')
+    #         time.sleep(5)
+    #     except Exception as e:
+    #         print('网页初始化失败，重试', e)
+    #         continue
