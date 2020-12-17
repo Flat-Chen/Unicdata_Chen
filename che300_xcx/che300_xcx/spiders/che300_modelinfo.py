@@ -68,9 +68,10 @@ class Che300ModelinfoSpider(scrapy.Spider):
         modelInfo = json_data['success']['modelInfo']
         for i in modelInfo.keys():
             try:
-                item[i] = modelInfo[i].replace(".", "-")
+                item[i] = modelInfo[i]
             except:
                 item[i] = modelInfo[i]
         item['url'] = response.url
-        item['modelConfigure'] = str(json_data['success']['modelConfigure']).replace(".", "-")
+        item['modelConfigure'] = str(json_data['success']['modelConfigure'])
         yield item
+        # print(item)
