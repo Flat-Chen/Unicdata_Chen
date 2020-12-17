@@ -186,7 +186,7 @@ class RenameTable(object):
             count = collection1.count()
             if count:
                 print(count)
-                name = self.settings['MONGODB_COLLECTION'].strip('_update') + str(local_time)
+                name = self.settings['MONGODB_COLLECTION'].strip('_update') + '_' + str(local_time)
                 collection1.rename(name)
         except:
             pass
@@ -203,7 +203,6 @@ class RenameTable(object):
         if count:
             print(count)
             name = self.settings['MONGODB_COLLECTION'].strip('_update')
-            print('重命名：', name)
             collection2.rename(name)
         dingmessage('-{} 爬虫已运行结束-\n-共抓取{}条数据-\n-存储位置mongo-{}-{}-{}-\n-{}-'.
                     format(spider.name, count, self.settings['MONGODB_SERVER'], self.settings['MONGODB_DB'],
