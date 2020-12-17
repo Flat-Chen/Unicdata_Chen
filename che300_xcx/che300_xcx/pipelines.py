@@ -5,10 +5,13 @@
 
 
 # useful for handling different item types with a single interface
+import json
+
 import pandas as pd
 import pymongo
 import logging
 import redis
+import requests
 from pybloom_live import ScalableBloomFilter
 from hashlib import md5
 import pathlib
@@ -128,15 +131,44 @@ class Che300XcxPipeline:
         self.fa.close()
 
 
-# 爬虫开始和结束时候的重命名表
+def dingmessage(tex):
+    # 请求的URL，WebHook地址
+    # log通知群
+    webhook = "https://oapi.dingtalk.com/robot/send?access_token=19bfd85d8430457c13e778f5cc7d3ff2686914288b5b2464ce353e088206a655"
+    # 测试地址
+    # webhook = 'https://oapi.dingtalk.com/robot/send?access_token=633758ccd22b7db4d2e9655488af7d3f5d5e0b2a32c701c80fc3cd57981e73a9'
+    # 构建请求头部
+    header = {
+        "Content-Type": "application/json",
+        "Charset": "UTF-8"
+    }
+    # 构建请求数据
+    message = {
+        "msgtype": "text",
+        "text": {
+            "content": tex
+        },
+        "at": {
+            "isAtAll": False
+        }
+    }
+    # 对请求的数据进行json封装
+    message_json = json.dumps(message)
+    # 发送请求
+    info = requests.post(url=webhook, data=message_json, headers=header)
+    # 打印返回的结果
+    print(info.text)
+
+
+# 爬虫开始和结束时候的重命名表 只写了mongo的 存储表名要以_update结尾
 class RenameTable(object):
     # 爬虫开始和结束时的操作
-    def __init__(self):
-        pass
+    def __init__(self, settings):
+        self.settings = settings
 
     @classmethod
     def from_crawler(cls, crawler):
-        self = cls()
+        self = cls(crawler.settings)
         crawler.signals.connect(self.begin, signal=signals.spider_opened)  # 绑定信号发生时允许的函数
         crawler.signals.connect(self.closed, signal=signals.spider_closed)
         return self
@@ -144,16 +176,17 @@ class RenameTable(object):
     # 爬虫开始执行此函数
     def begin(self, spider):
         # 更改表名字-开始
-        print('xxx-->xxx_time')
         local_time = time.strftime('%Y-%m-%d', time.localtime())
-        connection1 = pymongo.MongoClient('192.168.1.94', 27017)
-        db1 = connection1['che300']
+        times = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        dingmessage('-{} 爬虫已启动-\n-{}-'.format(spider.name, times))
+        connection1 = pymongo.MongoClient(self.settings['MONGODB_SERVER'], self.settings['MONGODB_PORT'])
+        db1 = connection1[self.settings['MONGODB_DB']]
         try:
-            collection1 = db1['che300_app_modelinfo']
+            collection1 = db1[self.settings['MONGODB_COLLECTION'].strip('_update')]
             count = collection1.count()
             if count:
                 print(count)
-                name = 'che300_app_modelinfo_' + str(local_time)
+                name = self.settings['MONGODB_COLLECTION'].strip('_update') + str(local_time)
                 collection1.rename(name)
         except:
             pass
@@ -161,16 +194,20 @@ class RenameTable(object):
     # 爬虫结束，执行此函数
     def closed(self, spider):
         # 更改表名字-结束
-        print('xxx_update-->xxx')
         local_time = time.strftime('%Y-%m-%d', time.localtime())
-        connection2 = pymongo.MongoClient('192.168.1.94', 27017)
-        db2 = connection2['che300']
-        collection2 = db2['che300_app_modelinfo_update']
+        times = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        connection2 = pymongo.MongoClient(self.settings['MONGODB_SERVER'], self.settings['MONGODB_PORT'])
+        db2 = connection2[self.settings['MONGODB_DB']]
+        collection2 = db2[self.settings['MONGODB_COLLECTION']]
         count = collection2.count()
         if count:
             print(count)
-            name = 'che300_app_modelinfo'
+            name = self.settings['MONGODB_COLLECTION'].strip('_update')
+            print('重命名：', name)
             collection2.rename(name)
+        dingmessage('-{} 爬虫已运行结束-\n-共抓取{}条数据-\n-存储位置mongo-{}-{}-{}-\n-{}-'.
+                    format(spider.name, count, self.settings['MONGODB_SERVER'], self.settings['MONGODB_DB'],
+                           self.settings['MONGODB_COLLECTION'].strip('_update'), times))
 
 
 # 推URL到redis里面 分布式爬虫
