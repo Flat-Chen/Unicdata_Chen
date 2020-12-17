@@ -84,7 +84,7 @@ class Che300XcxPipeline:
                             level=logging.INFO)
                 return item
         # mongo不需要去重的爬虫名字写进去
-        elif spider.name in ["che300_gz", " "]:
+        elif spider.name in ["che300_gz", "che300_modelinfo"]:
             self.collection.insert(dict(item))
             logging.log(msg="Car added to MongoDB database!", level=logging.INFO)
             self.counts += 1
@@ -146,27 +146,30 @@ class RenameTable(object):
         # 更改表名字-开始
         print('xxx-->xxx_time')
         local_time = time.strftime('%Y-%m-%d', time.localtime())
-        connection1 = pymongo.MongoClient('192.168.2.149', 27017)
-        db1 = connection1['test_rename_table']
-        collection1 = db1['baidu']
-        count = collection1.count()
-        if count:
-            print(count)
-            name = 'baidu_' + str(local_time)
-            collection1.rename(name)
+        connection1 = pymongo.MongoClient('192.168.1.94', 27017)
+        db1 = connection1['che300']
+        try:
+            collection1 = db1['che300_app_modelinfo']
+            count = collection1.count()
+            if count:
+                print(count)
+                name = 'che300_app_modelinfo_' + str(local_time)
+                collection1.rename(name)
+        except:
+            pass
 
     # 爬虫结束，执行此函数
     def closed(self, spider):
         # 更改表名字-结束
         print('xxx_update-->xxx')
         local_time = time.strftime('%Y-%m-%d', time.localtime())
-        connection2 = pymongo.MongoClient('192.168.2.149', 27017)
-        db2 = connection2['test_rename_table']
-        collection2 = db2['baidu_update']
+        connection2 = pymongo.MongoClient('192.168.1.94', 27017)
+        db2 = connection2['che300']
+        collection2 = db2['che300_app_modelinfo_update']
         count = collection2.count()
         if count:
             print(count)
-            name = 'baidu'
+            name = 'che300_app_modelinfo'
             collection2.rename(name)
 
 
