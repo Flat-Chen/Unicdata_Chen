@@ -31,10 +31,10 @@ def dingmessage(tex):
 
 try:
     client = docker.from_env()
-    container = client.containers.get('autohome_koubei_0916')
+    container = client.containers.get('che300_modelinfo')
     container.start()
-    tex = '-dpcker爬虫 autohome_koubei启动成功-'
+    tex = '-144定时任务 che300_modelinfo启动成功-'
     dingmessage(tex)
 except Exception as e:
-    tex = '-docker爬虫启动出错 {}-'.format(e)
+    tex = '-定时任务 启动出错 {}-'.format(e)
     dingmessage(tex)
