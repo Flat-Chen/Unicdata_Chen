@@ -56,11 +56,12 @@ class YicheCarSpider(scrapy.Spider):
 
             yield scrapy.Request(url=family_url, callback=self.family_parse,
                                  meta={"info": (brand_id, brand, family_id, familyname)})
+            break
 
         next_url = response.xpath('//a[@class="link-btn next pg-item"]/@href').extract_first()
-        if next_url:
-            yield scrapy.Request(url=response.urljoin(next_url), callback=self.brand_parse,
-                                 meta={"info": (brand_id, brand)})
+        # if next_url:
+        #     yield scrapy.Request(url=response.urljoin(next_url), callback=self.brand_parse,
+        #                          meta={"info": (brand_id, brand)})
 
     def family_parse(self, response):
         brand_id, brand, family_id, familyname = response.meta.get('info')
@@ -68,6 +69,7 @@ class YicheCarSpider(scrapy.Spider):
         text = unquote(text)
         print(text)
         vehicle_ids = re.findall(r'"id":\s*(\d+),', text, re.S)
+        print(vehicle_ids)
         # for vehicle_id in vehicle_ids:
         #     print(vehicle_id)
     #         # vehicle_url = 'http://car.bitauto.com/quanxinaodia4l/m124251/peizhi/'
