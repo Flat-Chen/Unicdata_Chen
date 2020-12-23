@@ -86,7 +86,7 @@ class DealerPipeline:
                             level=logging.INFO)
                 return item
         # mongo不需要去重的爬虫名字写进去
-        elif spider.name in ["yiche_dealer", "pcauto_dealer"]:
+        elif spider.name in ["yiche_dealer", "pcauto_dealer", 'baidu_qiya']:
             self.collection.insert(dict(item))
             logging.log(msg="Car added to MongoDB database!", level=logging.INFO)
             self.counts += 1
