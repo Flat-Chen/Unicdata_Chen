@@ -4,6 +4,8 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/storename" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/che300_xcx" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/study/Text_select_captcha-master" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/luntan" isTestSource="false" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.7" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
