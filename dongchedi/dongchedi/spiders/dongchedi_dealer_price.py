@@ -74,27 +74,26 @@ class DongchediDealerPriceSpider(scrapy.Spider):
     }
 
     def start_requests(self):
-        connection = pymongo.MongoClient('192.168.1.94', 27017)
-        db = connection["newcar"]
-        collection = db["dongchedi_car"]
-        model_data = collection.find({}, {"car_id": 1, "_id": 0})
+        connection = pymongo.MongoClient('192.168.2.149', 27017)
+        db = connection["newcar_price"]
+        self.collection = db["dongchedi_url"]
+        model_data = self.collection.find({"content": None}, {"url": 1, "car_id": 1, "city": 1, "_id": 1})
         car_msg_list = list(model_data)
-        connection.close()
         car_msg_df = DataFrame(car_msg_list)
-        car_msg_df_new = car_msg_df.drop_duplicates('car_id')
+        car_msg_df_new = car_msg_df.drop_duplicates('url')
         for index, rows in car_msg_df_new.iterrows():
+            url = rows['url']
             car_id = rows['car_id']
-            for city in self.city_list:
-                url = f'https://www.dongchedi.com/motor/dealer/m/v1/get_dealers_car_info/?car_id={car_id}&city_name={city}&sort_type=1'
-                # url = 'https://www.dongchedi.com/motor/dealer/m/v1/get_dealers_car_info/?car_id=50398&city_name=%E5%8C%97%E4%BA%AC&sort_type=1'
-                yield scrapy.Request(url, meta={'info': (car_id, city)})
+            city = rows['city']
+            _id = rows['_id']
+            yield scrapy.Request(url, meta={'info': (car_id, city, _id)})
 
     def parse(self, response):
-        print(response.text)
+        # print(response.text)
+        car_id, city, _id = response.meta.get('info')
         if r'\u6682\u65e0\u8be5\u8f66\u62a5\u4ef7' in response.text:
-            pass
+            self.collection.update({"_id": _id}, {"$set": {'content': 'None'}})
         else:
-            car_id, city = response.meta.get('info')
             item = {}
             json_data = json.loads(response.text)
             # print(json_data)
@@ -123,3 +122,6 @@ class DongchediDealerPriceSpider(scrapy.Spider):
                 # 去掉懂车帝优选
                 if item['dealer_id'] != 'dcd_1':
                     yield item
+                    self.collection.update({"_id": _id}, {"$set": {'content': 'success'}})
+                else:
+                    self.collection.update({"_id": _id}, {"$set": {'content': '懂车帝优选'}})
