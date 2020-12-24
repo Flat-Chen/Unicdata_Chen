@@ -79,7 +79,7 @@ class Che300PriceDailySpider(RedisSpider):
             # 'che300_new.middlewares.MoGuProxyMiddleware': 543,
             'che300_xcx.middlewares.Che300XcxProxyMiddleware': 400,
             'che300_xcx.middlewares.Che300XcxUserAgentMiddleware': 100,
-            'che300_new.middlewares.CaptchaMiddleware': 500,
+            'che300_xcx.middlewares.CaptchaMiddleware': 500,
         }
 
     }
@@ -146,7 +146,7 @@ class Che300PriceDailySpider(RedisSpider):
         # tmpe_file = self.string_to_file(font.content)
         # new_font_dict = self.parse_front_html(tmpe_file, response.text)
         # print(new_font_dict)
-        response_ = response.text
+        response_ = response.body
         # 替换字体
         # for k, v in new_font_dict.items():
         #     if k in response_:
@@ -177,19 +177,19 @@ class Che300PriceDailySpider(RedisSpider):
         # item["statusplus"] = response.url
         # item["status"] = item["statusplus"]
         # if item["price1"]:
-        yield item
-            # print(item)
+        # yield item
+        print(item)
         # else:
         #     self.c.rpush('che300_price_daily:start_urls', response.url)
         # print(item)
-        next_url = self.c.lpop('che300_price_daily:start_urls')
-        if next_url:
-            start_url = bytes.decode(next_url)
-            yield scrapy.Request(
-                url=start_url,
-                callback=self.parse,
-                # headers=self.headers
-            )
+        # next_url = self.c.lpop('che300_price_daily:start_urls')
+        # if next_url:
+        #     start_url = bytes.decode(next_url)
+        #     yield scrapy.Request(
+        #         url=start_url,
+        #         callback=self.parse,
+        #         # headers=self.headers
+        #     )
 
         # else:
         #     cur.execute("update che300_detection set che300_price_daily_update_test=1 WHERE che300_price_daily_update_test=0")
