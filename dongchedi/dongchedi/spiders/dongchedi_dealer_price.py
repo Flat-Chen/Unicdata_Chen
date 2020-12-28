@@ -83,14 +83,15 @@ class DongchediDealerPriceSpider(scrapy.Spider):
     }
 
     def start_requests(self):
-        start_urls = self.r.blpop('dongchedi_newcar_price:start_urls')[1]
-        start_urls = start_urls.replace("'", '"').replace('ObjectId(', '').replace(')', '')
-        start_urls = json.loads(start_urls)
-        url = start_urls['url']
-        car_id = start_urls['car_id']
-        city = start_urls['city']
-        _id = start_urls['_id']
-        yield scrapy.Request(url, meta={'info': (car_id, city, _id)})
+        while 1:
+            start_urls = self.r.blpop('dongchedi_newcar_price:start_urls')[1]
+            start_urls = start_urls.replace("'", '"').replace('ObjectId(', '').replace(')', '')
+            start_urls = json.loads(start_urls)
+            url = start_urls['url']
+            car_id = start_urls['car_id']
+            city = start_urls['city']
+            _id = start_urls['_id']
+            yield scrapy.Request(url, meta={'info': (car_id, city, _id)})
 
     def parse(self, response):
         # print(response.text)
