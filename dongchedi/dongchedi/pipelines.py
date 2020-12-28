@@ -4,7 +4,6 @@ import pathlib
 from hashlib import md5
 import pandas as pd
 import pymongo
-from itemadapter import ItemAdapter
 from pybloom_live import ScalableBloomFilter
 from scrapy.exceptions import DropItem
 from sqlalchemy import create_engine
