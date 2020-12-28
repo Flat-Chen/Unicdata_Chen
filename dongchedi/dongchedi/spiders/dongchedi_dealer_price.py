@@ -1,9 +1,11 @@
 import json
 import time
-
+from redis import Redis
 import pymongo
 import scrapy
+import json
 from pandas import DataFrame
+import logging
 
 
 class DongchediDealerPriceSpider(scrapy.Spider):
@@ -21,6 +23,13 @@ class DongchediDealerPriceSpider(scrapy.Spider):
     def __init__(self, **kwargs):
         super(DongchediDealerPriceSpider, self).__init__(**kwargs)
         self.counts = 0
+        # redis
+        redis_url = 'redis://192.168.2.149:6379/7'
+        self.r = Redis.from_url(redis_url, decode_responses=True)
+        # mongo
+        connection = pymongo.MongoClient('192.168.2.149', 27017)
+        db = connection["newcar_price"]
+        self.collection = db["dongchedi_url"]
         self.city_list = ['安阳', '鞍山', '安庆', '安康', '阿坝', '阿拉善', '阿克苏', '阿勒泰', '安顺', '澳门', '阿拉尔', '阿里', '北京', '蚌埠', '保定',
                           '本溪', '包头', '亳州', '滨州', '白城', '百色', '白山', '白银', '宝鸡', '保山', '巴彦淖尔', '巴中', '北海', '毕节', '博尔塔拉',
                           '巴音郭楞', '重庆', '成都', '长春', '长沙', '承德', '常州', '滁州', '沧州', '常德', '昌吉', '长治', '朝阳', '潮州', '郴州',
@@ -74,25 +83,24 @@ class DongchediDealerPriceSpider(scrapy.Spider):
     }
 
     def start_requests(self):
-        connection = pymongo.MongoClient('192.168.2.149', 27017)
-        db = connection["newcar_price"]
-        self.collection = db["dongchedi_url"]
-        model_data = self.collection.find({"content": None}, {"url": 1, "car_id": 1, "city": 1, "_id": 1})
-        car_msg_list = list(model_data)
-        car_msg_df = DataFrame(car_msg_list)
-        car_msg_df_new = car_msg_df.drop_duplicates('url')
-        for index, rows in car_msg_df_new.iterrows():
-            url = rows['url']
-            car_id = rows['car_id']
-            city = rows['city']
-            _id = rows['_id']
-            yield scrapy.Request(url, meta={'info': (car_id, city, _id)})
+        start_urls = self.r.blpop('dongchedi_newcar_price:start_urls')[1]
+        start_urls = start_urls.replace("'", '"').replace('ObjectId(', '').replace(')', '')
+        start_urls = json.loads(start_urls)
+        url = start_urls['url']
+        car_id = start_urls['car_id']
+        city = start_urls['city']
+        _id = start_urls['_id']
+        yield scrapy.Request(url, meta={'info': (car_id, city, _id)})
 
     def parse(self, response):
         # print(response.text)
         car_id, city, _id = response.meta.get('info')
         if r'\u6682\u65e0\u8be5\u8f66\u62a5\u4ef7' in response.text:
             self.collection.update({"_id": _id}, {"$set": {'content': 'None'}})
+            logging.info('------------content-------None---------')
+        elif r'\u61c2\u8f66\u5e1d\u4f18\u9009' in response.text:
+            self.collection.update({"_id": _id}, {"$set": {'content': '懂车帝优选'}})
+            logging.info('------------content-------懂车帝优选---------')
         else:
             item = {}
             json_data = json.loads(response.text)
@@ -103,7 +111,7 @@ class DongchediDealerPriceSpider(scrapy.Spider):
 
                 item['city'] = city
                 item['dealer_id'] = str(i['info']['dealer_id'])
-                item['dealer_name'] = i['info']['dealer_name']
+                item['dealer_name'] = i['info']['dealer_name'].strip()
 
                 item['dealer_full_name'] = i['info']['dealer_full_name']
                 item['dealer_type'] = i['info']['dealer_type']
@@ -119,9 +127,15 @@ class DongchediDealerPriceSpider(scrapy.Spider):
                 item['status'] = i['info']['dealer_name'] + '-' + item['dealer_full_name'] + '-' + str(
                     car_id) + '-' + str(item['dealer_price'])
 
-                # 去掉懂车帝优选
-                if item['dealer_id'] != 'dcd_1':
-                    yield item
-                    self.collection.update({"_id": _id}, {"$set": {'content': 'success'}})
-                else:
-                    self.collection.update({"_id": _id}, {"$set": {'content': '懂车帝优选'}})
+                yield item
+                self.collection.update({"_id": _id}, {"$set": {'content': 'success'}})
+                logging.info('------------content-------success---------')
+        next_url = self.r.blpop('dongchedi_newcar_price:start_urls')[1]
+        if next_url:
+            start_urls = next_url.replace("'", '"').replace('ObjectId(', '').replace(')', '')
+            start_urls = json.loads(start_urls)
+            url = start_urls['url']
+            car_id = start_urls['car_id']
+            city = start_urls['city']
+            _id = start_urls['_id']
+            yield scrapy.Request(url, meta={'info': (car_id, city, _id)}, callback=self.parse)
