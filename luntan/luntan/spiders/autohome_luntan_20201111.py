@@ -57,7 +57,7 @@ class AutohomeLuntan20201111Spider(scrapy.Spider):
         'MONGODB_DB': 'luntan',
         'MONGODB_COLLECTION': 'luntan_autohome_lost4',
         'CONCURRENT_REQUESTS': 1,
-        'DOWNLOAD_DELAY': 1,
+        'DOWNLOAD_DELAY': 1.5,
         'LOG_LEVEL': 'DEBUG',
         'DOWNLOAD_TIMEOUT': 10,
         # 'RETRY_ENABLED': True,
@@ -80,9 +80,15 @@ class AutohomeLuntan20201111Spider(scrapy.Spider):
         nowmonth = datetime.datetime.now().month
         nowdays = datetime.datetime.now().day
         if nowdays - 10 > 0:
-            riqi = str(nowyear) + '-' + str(nowmonth - 1) + '-' + str(nowdays - 10)
+            if nowmonth == 1:
+                riqi = str(nowyear - 1) + '-' + str(12) + '-' + str(nowdays - 10)
+            else:
+                riqi = str(nowyear) + '-' + str(nowmonth - 1) + '-' + str(nowdays - 10)
         else:
-            riqi = str(nowyear) + '-' + str(nowmonth - 2) + '-' + str(nowdays + 20)
+            if nowmonth == 1:
+                riqi = str(nowyear - 1) + '-' + str(11) + '-' + str(nowdays + 20)
+            else:
+                riqi = str(nowyear) + '-' + str(nowmonth - 2) + '-' + str(nowdays + 20)
         self.be_p1 = get_be_p1_list()
         lost_urls = self.collection.find(
             ({"$and": [{"posted_time": {'$gte': riqi}}, {"$or": [{"content": 'yzm'}, {"content": None}]},
