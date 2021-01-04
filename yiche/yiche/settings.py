@@ -52,9 +52,8 @@ COOKIES_ENABLED = True
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
-    'yiche.middlewares.YicheDownloaderMiddleware': 543,
     'yiche.middlewares.YicheProxyMiddleware': 100,
-    'yiche.middlewares.YicheUserAgentMiddleware': 101,
+    # 'yiche.middlewares.YicheUserAgentMiddleware': 101,
 }
 
 # Enable or disable extensions
@@ -89,7 +88,7 @@ ITEM_PIPELINES = {
 # HTTPCACHE_DIR = 'httpcache'
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
-RETRY_HTTP_CODES = [400, 403, 404, 408]
+RETRY_HTTP_CODES = [400, 403, 404, 408, 503]
 # 是否开启重试
 RETRY_ENABLED = True
 # 重试次数

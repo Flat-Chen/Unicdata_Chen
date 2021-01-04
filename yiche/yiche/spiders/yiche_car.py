@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
+import hashlib
 import json
 import re
 import time
-from urllib.parse import unquote
+import urllib
+from urllib.parse import unquote, quote
 
 import scrapy
 
@@ -10,7 +12,8 @@ import scrapy
 class YicheCarSpider(scrapy.Spider):
     name = 'yiche_car'
     allowed_domains = ['bitauto.com']
-    start_urls = ['http://car.bitauto.com/']
+
+    # start_urls = ['http://car.m.yiche.com/']
 
     @classmethod
     def update_settings(cls, settings):
@@ -20,6 +23,10 @@ class YicheCarSpider(scrapy.Spider):
 
     def __init__(self, **kwargs):
         super(YicheCarSpider, self).__init__(**kwargs)
+        self.web_headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/22.0.1207.1 Safari/537.1'}
+        self.wap_headers = {
+            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1'}
         self.carnum = 1000000
         self.counts = 0
         self.headers = {}
@@ -34,54 +41,90 @@ class YicheCarSpider(scrapy.Spider):
         'LOG_LEVEL': 'DEBUG',
     }
 
+    def start_requests(self):
+        yield scrapy.Request(url='http://car.m.yiche.com/', headers=self.wap_headers)
+
     def parse(self, response):
-        brand_list = response.xpath('//div[@class="brand-list"]//div[@class="item-brand"]')
-        for i in brand_list:
-            brand = i.xpath('.//div[@class="brand-name"]/@data-name').extract_first()
-            brand_id = i.xpath('.//div[@class="brand-name"]/@data-id').extract_first()
-            brand_url = f'http://car.bitauto.com/xuanchegongju/?mid={brand_id}'
-            # print(brand, brand_id)
-            yield scrapy.Request(url=brand_url, callback=self.brand_parse,
-                                 meta={"info": (brand_id, brand)})
+        dls = response.xpath('//dl[@class="brand-item"]//dd')
+        for dl in dls:
+            brand = dl.xpath('.//p[@class="brand-name"]/text()').extract_first()
+            brand_id = dl.xpath('./a/@data-id').extract_first()
+            brand_url = dl.xpath('./a/@href').extract_first()
+            yield scrapy.Request(url='http://car.yiche.com' + brand_url, headers=self.web_headers,
+                                 callback=self.family_id,
+                                 meta={"info": (brand_id, brand, brand_url)}, dont_filter=True)
             break
+
+    def family_id(self, response):
+        brand_id, brand, brand_url = response.meta.get('info')
+        family_id_item = {}
+        family_text = re.findall(r'var carList =(.*?);', response.text)[0]
+        family_json = json.loads(family_text)
+        for i in family_json['onAndWaitList'] + family_json['unAndStopList']:
+            for j in i['serialList']:
+                family_id_item[j['allSpell']] = j['id']
+        yield scrapy.Request(url='http://car.m.yiche.com' + brand_url, headers=self.wap_headers,
+                             callback=self.brand_parse,
+                             meta={"info": (brand_id, brand, family_id_item)}, dont_filter=True)
 
     def brand_parse(self, response):
-        brand_id, brand = response.meta.get('info')
-        family_list = response.xpath('//div[@class="search-result-list-item"]')
-        for i in family_list:
-            familyname = i.xpath('.//p[@class="cx-name text-hover"]/text()').extract_first()
-            family_id = i.xpath('./@data-id').extract_first()
-
-            family_url = response.urljoin(i.xpath('.//a[@target="_blank"]/@href').extract_first())
-
-            yield scrapy.Request(url=family_url, callback=self.family_parse,
-                                 meta={"info": (brand_id, brand, family_id, familyname)})
+        brand_id, brand, family_id_item = response.meta.get('info')
+        on_sale = response.xpath('//div[@class="tab-wrap-cell-wrap"]/div[@class="tab-wrap-cell"][1]/'
+                                 'div[@class="brand-list"]//div[@class="brand-item"]')
+        dis_sale = response.xpath('//div[@class="tab-wrap"]/div[@class="brand-list"]//div[@class="brand-item"]')
+        for brand_item in on_sale + dis_sale:
+            factory = brand_item.xpath('./div[@class="brand-name"]/text()').extract_first()
+            for i in brand_item.xpath('./div[@class="brand-car"]//a'):
+                family_url = i.xpath('./@href').extract_first()
+                family_name = i.xpath('.//div[@class="car-name"]/text()').extract_first(). \
+                    replace(' ', '').replace('\n', '')
+                family_id = family_id_item[family_url.strip('/')]
+                yield scrapy.Request(url='http://car.yiche.com' + family_url, headers=self.web_headers,
+                                     callback=self.family_parse,
+                                     meta={"info": (brand, brand_id, factory, family_name, family_id)},
+                                     dont_filter=True)
+                break
             break
 
-        next_url = response.xpath('//a[@class="link-btn next pg-item"]/@href').extract_first()
-        # if next_url:
-        #     yield scrapy.Request(url=response.urljoin(next_url), callback=self.brand_parse,
-        #                          meta={"info": (brand_id, brand)})
-
     def family_parse(self, response):
-        brand_id, brand, family_id, familyname = response.meta.get('info')
+        brand, brand_id, factory, family_name, family_id = response.meta.get('info')
         text = re.findall(r'carListConditionData: "(.*?)",', response.text)[0]
         text = unquote(text)
-        print(text)
         vehicle_ids = re.findall(r'"id":\s*(\d+),', text, re.S)
-        print(vehicle_ids)
-        # for vehicle_id in vehicle_ids:
-        #     print(vehicle_id)
-    #         # vehicle_url = 'http://car.bitauto.com/quanxinaodia4l/m124251/peizhi/'
-    #         vehicle_url = response.urljoin(f'm{vehicle_id}/peizhi/')
-    #         yield scrapy.Request(url=vehicle_url, callback=self.vehicle_parse,
-    #                              meta={'info': (brand_id, brand, family_id, familyname, vehicle_id)})
-    # #
-    # def vehicle_parse(self, response):
-    #     item = {}
-    #     brand_id, brand, family_id, familyname, vehicle_id = response.meta.get('info')
-    #     text = re.findall(r'var carCompareJson = \[(.*?)var optionalPackageJson', response.text, re.S)[0]
-    #     vehicle_info = text.replace(',[[', ',[[[[').split(',[[')[0][1:-1].replace('],[', ']],[[').split('],[')
+        for vehicle_id in vehicle_ids:
+            vehicle_id = '144693'
+            # print(vehicle_id)
+            # param = str({"cityId": 2401, "carId": int(vehicle_id)})
+            # print(param)
+            vehicle_url = 'http://car.yiche.com/web_api/car_model_api/api/v1/car/config_new_param?cid=508&param={"cityId":2401,"carId":"' + vehicle_id + '"}'
+
+            timestamp = int(time.time() * 1000)
+            sign = hashlib.md5((
+                        'cid=508&param={"cityId":2401,"carId":"' + vehicle_id + '"}19DDD1FBDFF065D3A4DA777D2D7A81EC' + str(
+                    timestamp)).encode(
+                'utf-8')).hexdigest()
+            headers = {
+                'Host': 'car.yiche.com',
+                'x-city-id': '201',
+                'x-platform': 'pc',
+                'x-sign': sign,
+                'x-timestamp': timestamp,
+            }
+            print(unquote(vehicle_url))
+            print(sign)
+            print(timestamp)
+            yield scrapy.Request(url=vehicle_url, callback=self.vehicle_parse, headers=headers,
+                                 meta={'info': (brand_id, brand, family_id, family_name, vehicle_id, factory)},
+                                 dont_filter=True)
+            break
+
+    def vehicle_parse(self, response):
+        item = {}
+        brand_id, brand, family_id, family_name, vehicle_id, factory = response.meta.get('info')
+        print(response.text)
+        # text = re.findall(r'var carCompareJson = \[(.*?)var optionalPackageJson', response.text, re.S)[0]
+        # vehicle_info = text.replace(',[[', ',[[[[').split(',[[')[0][1:-1].replace('],[', ']],[[').split('],[')
+        # print(vehicle_info)
     #     vehicle = vehicle_info[0][1:-1].split(',')[1].replace("'", "").replace('"', '')
     #     makeyear = vehicle_info[0][1:-1].split(',')[7].replace("'", "").replace('"', '')
     #     guide_price = vehicle_info[1][1:-1].split(',')[0].replace("'", "").replace('"', '')

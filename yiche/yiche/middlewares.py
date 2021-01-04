@@ -81,6 +81,10 @@ def getProxy():
 
 class YicheUserAgentMiddleware(UserAgentMiddleware):
     def process_request(self, request, spider):
+        # if spider.name in ['yiche_car', ]:
+        #     ua = 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1'
+        #     request.headers.setdefault('User-Agent', ua)
+        # else:
         ua = random.choice(user_agent_list)
         request.headers.setdefault('User-Agent', ua)
 
