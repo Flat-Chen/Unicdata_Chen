@@ -205,7 +205,8 @@ def getProxy():
 class ProxyMiddleware(object):
     def process_request(self, request, spider):
         if spider.name in ['jzg_price', 'autohome_error_new', 'jzg_price_sh', 'autohome_gz', 'autohome_gz_4city',
-                           'autohome_custom_price', 'autohome_error_p', 'autohome_butie', 'autohome_rank']:
+                           'autohome_custom_price', 'autohome_error_p', 'autohome_butie', 'autohome_rank',
+                           'autohome_dealer']:
             request.meta['proxy'] = "http://" + getProxy()
             # print('proxy success !')
 

@@ -11,6 +11,7 @@ autohome/spiders/__init__.py
 autohome/spiders/all_location.py
 autohome/spiders/autohome_butie.py
 autohome/spiders/autohome_custom_price.py
+autohome/spiders/autohome_dealer.py
 autohome/spiders/autohome_error_new.py
 autohome/spiders/autohome_error_p.py
 autohome/spiders/autohome_gz.py

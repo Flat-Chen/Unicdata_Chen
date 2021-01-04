@@ -68,7 +68,7 @@ class CarbuisnessNewPipeline(object):
         self.counts = 0
 
     def process_item(self, item, spider):
-        if spider.name in ["autohome_error_new", "jzg_price_master"]:
+        if spider.name in ["autohome_error_new", "jzg_price_master", 'autohome_rank']:
             # if item["newcar_bug_num"] is not None or item["oldcar_bug_num"] is not None or item["oldcar_bug_ratio"] is not None or item["newcar_bug_ratio"] is not None:
             self.collection.insert(dict(item))
             logging.log(msg="Car added to MongoDB database!", level=logging.INFO)
@@ -77,8 +77,7 @@ class CarbuisnessNewPipeline(object):
                         level=logging.INFO)
         else:
             if spider.name in ['all_location', 'jzg_price', 'jzg_price_sh', 'xiaozhu_modellist', 'xiaozhu_gz',
-                               'autohome_gz', 'autohome_gz_4city', 'jzg_modellist', 'autohome_error_p',
-                               'autohome_rank']:
+                               'autohome_gz', 'autohome_gz_4city', 'jzg_modellist', 'autohome_error_p']:
                 # print("*"*100)
                 valid = True
                 i = md5(item['status'].encode("utf8")).hexdigest()
@@ -105,7 +104,7 @@ class CarbuisnessNewPipeline(object):
 
 class MasterPipeline(object):
     def __init__(self):
-        self.redis_url = 'redis://192.168.2.149:6379/0'
+        self.redis_url = 'redis://192.168.1.241:6379/15'
         self.r = redis.Redis.from_url(self.redis_url, decode_responses=True)
 
     def process_item(self, item, spider):
