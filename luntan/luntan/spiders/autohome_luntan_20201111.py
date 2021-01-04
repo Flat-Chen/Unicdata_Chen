@@ -56,7 +56,7 @@ class AutohomeLuntan20201111Spider(scrapy.Spider):
         'MONGODB_PORT': 27017,
         'MONGODB_DB': 'luntan',
         'MONGODB_COLLECTION': 'luntan_autohome_lost4',
-        'CONCURRENT_REQUESTS': 1,
+        'CONCURRENT_REQUESTS': 8,
         'DOWNLOAD_DELAY': 1.5,
         'LOG_LEVEL': 'DEBUG',
         'DOWNLOAD_TIMEOUT': 10,

@@ -125,4 +125,5 @@ class ChaboshiGzSpider(scrapy.Spider):
         item['price_4'] = price_4
         item['url'] = response.url
         item['status'] = localyears + '-' + localmonth + '-' + response.url
-        yield item
+        # yield item
+        print(item)

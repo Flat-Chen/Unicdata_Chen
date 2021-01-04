@@ -6,6 +6,8 @@
       <sourceFolder url="file://$MODULE_DIR$/che300_xcx" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/study/Text_select_captcha-master" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/luntan" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/python socket/proxy_master/IPProxyPool" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/python socket/http_proxy" isTestSource="false" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.7" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

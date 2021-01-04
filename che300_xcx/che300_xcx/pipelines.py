@@ -87,7 +87,7 @@ class Che300XcxPipeline:
                             level=logging.INFO)
                 return item
         # mongo不需要去重的爬虫名字写进去
-        elif spider.name in ["che300_gz", "che300_modelinfo"]:
+        elif spider.name in ["che300_gz", "che300_modelinfo", 'che300_price_daily']:
             self.collection.insert(dict(item))
             logging.log(msg="Car added to MongoDB database!", level=logging.INFO)
             self.counts += 1
