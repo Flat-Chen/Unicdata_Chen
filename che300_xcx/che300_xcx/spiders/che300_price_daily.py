@@ -16,7 +16,7 @@ from fontTools.ttLib import TTFont
 from scrapy_redis.spiders import RedisSpider
 from scrapy_redis.utils import bytes_to_str
 
-pool = redis.ConnectionPool(host='192.168.2.149', port=6379, db=15)
+pool = redis.ConnectionPool(host='192.168.2.149', port=6379, db=8)
 con = redis.Redis(connection_pool=pool)
 # dbconn = pymysql.connect(host="192.168.1.94", database='for_android', user="dataUser94", password="94dataUser@2020",
 #                          port=3306, charset='utf8')
@@ -67,7 +67,7 @@ class Che300PriceDailySpider(RedisSpider):
         'CONCURRENT_REQUESTS': 1,
         'DOWNLOAD_DELAY': 0,
         'LOG_LEVEL': 'DEBUG',
-        'REDIS_URL': 'redis://192.168.2.149:6379/15',
+        'REDIS_URL': 'redis://192.168.2.149:6379/8',
         'DOWNLOAD_TIMEOUT': 5,
         'RETRY_ENABLED': False,
         'RETRY_TIMES': 1,
@@ -103,20 +103,22 @@ class Che300PriceDailySpider(RedisSpider):
     def parse(self, response):
         response_ = str(response.body)
         #
-        meta = self.structure_http(response.url)
-        item = dict()
-        item["grabtime"] = time.strftime('%Y-%m-%d %X', time.localtime())
-        item["url"] = response.url
-        item["brand"] = meta["brand"]
-        item["series"] = meta["series"]
-        item["salesdescid"] = meta["model"]
-        item["regDate"] = meta["registerDate"]
-        item["cityid"] = meta["city"]
-        item["prov"] = meta["prov"]
-        item["mile"] = meta["mile"]
-        evalResult = json.loads(re.findall(r"window.evalResult = \\\'(.*?)\\';", response_)[0])[0]
-        for k, v in evalResult.items():
-            item[k] = v
-
-        yield item
-        # print(item)
+        try:
+            meta = self.structure_http(response.url)
+            item = dict()
+            item["grabtime"] = time.strftime('%Y-%m-%d %X', time.localtime())
+            item["url"] = response.url
+            item["brand"] = meta["brand"]
+            item["series"] = meta["series"]
+            item["salesdescid"] = meta["model"]
+            item["regDate"] = meta["registerDate"]
+            item["cityid"] = meta["city"]
+            item["prov"] = meta["prov"]
+            item["mile"] = meta["mile"]
+            evalResult = json.loads(re.findall(r"window.evalResult = \\\'(.*?)\\';", response_)[0])[0]
+            for k, v in evalResult.items():
+                item[k] = v
+            yield item
+        except AttributeError:
+            con.rpush('che300_price_daily:start_urls', response.url)
+            logging.warning('==================url重新添加到redis尾部===================')

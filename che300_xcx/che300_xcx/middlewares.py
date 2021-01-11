@@ -1,15 +1,8 @@
-# Define here the models for your spider middleware
-#
-# See documentation in:
-# https://docs.scrapy.org/en/latest/topics/spider-middleware.html
-
 import logging
 import random
 import json
 import time
 import traceback
-from shutil import copyfile
-
 import cv2
 import numpy as np
 from matplotlib import pyplot as plt
@@ -18,13 +11,8 @@ import redis
 import requests
 from lxml import etree
 from scrapy.http import TextResponse
-from scrapy.http.headers import Headers
-from scrapy import signals
-from scrapy.downloadermiddlewares.useragent import UserAgentMiddleware
 from redis import Redis
 from scrapy import signals
-from selenium.webdriver.support.wait import WebDriverWait
-from twisted.internet.error import TimeoutError
 from selenium import webdriver
 from scrapy.http import HtmlResponse
 from selenium.webdriver import Chrome, ActionChains, FirefoxProfile
@@ -111,12 +99,13 @@ class CaptchaMiddleware(object):
         """
 
     def __init__(self):
-        self.count = 123
+        self.count = 0
+        self.continuous_count = 0
         chrome_options = Options()
-        # options.add_argument('--headless')
+        chrome_options.add_argument('--headless')
         # 去掉提示：Chrome正收到自动测试软件的控制
-        # options.add_argument('disable-infobars')
-        chrome_options.add_argument('--proxy-server=192.168.11.157:16128')
+        # chrome_options.add_argument('disable-infobars')
+        chrome_options.add_argument('--proxy-server=192.168.2.144:16127')
         chrome_options.add_argument('user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
                                     'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36')
 
@@ -152,18 +141,18 @@ class CaptchaMiddleware(object):
             f.write(response.content)
         f.close()
         # 保存下来做研究
-        with open(f'./img/{self.count}_slider.png', 'wb') as f:
-            f.write(response.content)
-        f.close()
+        # with open(f'./img/{self.count}_slider.png', 'wb') as f:
+        #     f.write(response.content)
+        # f.close()
         ele = driver.find_element_by_id('dx_captcha_basic_bg_1')
         ele.screenshot('yzm.png')
-        # 保存下来做研究
-        copyfile('yzm.png', f'./img/{self.count}_captcha.png')
+        # # 保存下来做研究
+        # copyfile('yzm.png', f'./img/{self.count}_captcha.png')
 
     def run(self):
         # 计算验证码缺口位置
         # parameter to seperate template area from find temple area
-        cropcol = 60
+        cropcol = 65
 
         # path2files = '/home/junyi/R/RPA/yolo/c3/'
         target_rgb_raw = cv2.imread('yzm.png')
@@ -173,9 +162,10 @@ class CaptchaMiddleware(object):
         # PART1 - find y area where figures are located, in order to crop out unnecessary parts
 
         # target: find green area with mask filter
+        target_rgb = target_rgb_raw[:, :cropcol, :]
         hsv = cv2.cvtColor(target_rgb, cv2.COLOR_BGR2HSV)
-        lower_green = np.array([50, 60, 60])
-        upper_green = np.array([90, 255, 255])
+        lower_green = np.array([30, 60, 60])
+        upper_green = np.array([78, 255, 255])
         mask = cv2.inRange(hsv, lower_green, upper_green)
 
         # target: do erode+dilate in order to delete noise
@@ -190,7 +180,8 @@ class CaptchaMiddleware(object):
             maskm = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
 
         # if second fail, do not run any erode+dilate
-        if np.min(np.where(maskm.sum(1) > 0)) >= 118:
+        if np.min(np.where(maskm.sum(1) > 0)) >= 118 or len(np.where(maskm.sum(1) > 0)[0]) <= 25:
+            # if np.min(np.where(maskm.sum(1)>0))>=118:
             maskm = mask
 
         # define y area where figures are located
@@ -236,8 +227,10 @@ class CaptchaMiddleware(object):
         ret, threshed0 = cv2.threshold(target_gray, 50, 255, cv2.THRESH_TOZERO)
         ret, threshed0 = cv2.threshold(threshed0, 55, 60, cv2.THRESH_TOZERO)
         thresh = cv2.adaptiveThreshold(threshed0, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 21, 6)
+        th3 = cv2.adaptiveThreshold(threshed0, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 11)
 
         # PART4 - match target contours with template contours
+
         df = pd.DataFrame()
 
         # run 4 models
@@ -261,10 +254,22 @@ class CaptchaMiddleware(object):
         df = df.append(pd.Series([min_val] + list(min_loc)), ignore_index=True)
         df = df.append(pd.Series([max_val] + list(max_loc)), ignore_index=True)
 
+        res2 = cv2.matchTemplate(th3, edges, cv2.TM_CCOEFF)
+        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res2)
+        df = df.append(pd.Series([min_val] + list(min_loc)), ignore_index=True)
+        df = df.append(pd.Series([max_val] + list(max_loc)), ignore_index=True)
+
+        res2 = cv2.matchTemplate(th3, edges1, cv2.TM_CCOEFF)
+        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res2)
+        df = df.append(pd.Series([min_val] + list(min_loc)), ignore_index=True)
+        df = df.append(pd.Series([max_val] + list(max_loc)), ignore_index=True)
+
         # select top result based on correlation coef and topleft point location
         df.columns = ['coef', 'x', 'y']
         df['coef_abs'] = df.coef.abs()
 
+        if df.coef_abs.max() >= 4e6:
+            df = df[df.coef_abs >= 4e6]
         if (df.y > 0).sum():
             df = df[df.y > 0]
         if (df.y > 7).sum():
@@ -280,16 +285,12 @@ class CaptchaMiddleware(object):
         distance = top_left[0]
 
         # plot debug
-        bottom_right = (top_left[0] + w, top_left[1] + h)
-        cv2.rectangle(target_gray, top_left, bottom_right, 255, 2)
-        x = [distance + (w / 2)]
-        plt.subplot(211), plt.imshow(template_gray)
-        plt.subplot(212), plt.imshow(target_gray), plt.plot(x, 30, '*', linewidth=5000, color='firebrick')
-        plt.savefig(f'./img/{self.count - 1}_plt.png')
-        # plt.show()
-        # print(df)
-
-        return (distance + 45)
+        # bottom_right = (top_left[0] + w, top_left[1] + h)
+        # cv2.rectangle(target_gray, top_left, bottom_right, 255, 2)
+        # x = [distance + (w / 2)]
+        # plt.subplot(211), plt.imshow(template_gray)
+        # plt.subplot(212), plt.imshow(target_gray), plt.plot(x, 30, '*', linewidth=5000, color='firebrick')
+        return (distance + 50)
 
     def get_removing(self, removing):
         list_ren1 = [(0, 0), (4, 0), (8, 1), (13, 1), (20, 2), (29, 2), (37, 2), (45, 2), (58, 3), (66, 3), (73, 3),
@@ -344,23 +345,32 @@ class CaptchaMiddleware(object):
         mouse_action.release().perform()
 
     def process_request(self, request, spider):
-        if 'forbidden' in request.url:
-            logging.warning('！！！！！！出现验证码 进入中间件处理！！！！！')
-            # 此处访问要请求的url
-            try:
-                self.browser.get(request.url)
-                time.sleep(3)
+        # if 'forbidden' in request.url:
+        #     logging.warning('！！！！！！出现验证码 进入中间件处理！！！！！')
+        #     # 此处访问要请求的url
+        try:
+            self.browser.get(request.url)
+            # time.sleep(0.1)
+            if 'forbidden' in self.browser.current_url:
+                self.continuous_count = 0
+                logging.warning('·····················出现验证码，开始处理滑块！··············')
                 for i in range(10):
+                    if '价格区间分布' in self.browser.page_source:
+                        logging.info('===============滑块通过成功==============')
+                        break
                     if 'id="dx_captcha_basic_wrapper_1"' not in self.browser.page_source:
                         self.browser.refresh()
                         logging.warning('！！！！！！验证码模块未加载出来 刷新页面！！！！！')
+                        # 点完刷新按钮让他缓缓，别狂点刷新
                         time.sleep(3)
                     try:
+                        # 等待一段时间让验证码图片加载出来
+                        time.sleep(2)
                         self.get_yzm(self.browser)
-                        self.count = self.count + 1
+                        # 用来保存验证码样本的计数
+                        # self.count = self.count + 1
                     except:
                         logging.warning('！！！！！！代理过慢，验证码未加载出来！！！！！')
-                        print('代理过慢，验证码未加载出来')
                         if '加载失败' in self.browser.page_source:
                             flash = self.browser.find_element_by_xpath("//div[@id='dx_captcha_basic_state-box_1']/a")
                             ActionChains(self.browser).click(flash).perform()
@@ -375,25 +385,24 @@ class CaptchaMiddleware(object):
                         removing = self.run()
                     except ValueError:
                         logging.warning('！！！！！！未识别到缺口位置，刷新到下一张验证码重试！！！！！')
-                        print('换一张图片再识别')
                         flash = self.browser.find_element_by_id("dx_captcha_basic_btn-refresh_1")
                         ActionChains(self.browser).click(flash).perform()
                         time.sleep(1)
                         continue
                     list_moni = self.get_removing(removing)
+                    logging.warning('-------->-------->正在移动滑块<--------<--------')
                     self.move(self.browser, list_moni)
-                    time.sleep(5)
-                    if '价格区间分布' in self.browser.page_source:
-                        print('成功！！！')
-                        break
-            except:
-                logging.error("加载页面太慢，停止加载，继续下一步操作")
-                self.browser.execute_script("window.stop()")
-            url = self.browser.current_url
-            body = self.browser.page_source
-            # print(body)
+                    time.sleep(3)
+            else:
+                self.continuous_count += 1
+                logging.warning(f'**************上个验证码通过成功后，连续{self.continuous_count}个url没有出现验证码***************')
+        except:
+            logging.error("加载页面太慢，停止加载，继续下一步操作")
+            self.browser.execute_script("window.stop()")
+        url = self.browser.current_url
+        body = self.browser.page_source
 
-            return TextResponse(url=url, body=body, encoding="utf-8", request=request)
+        return TextResponse(url=url, body=body, encoding="utf-8", request=request)
 
 
 class SeleniumMiddleware(object):
