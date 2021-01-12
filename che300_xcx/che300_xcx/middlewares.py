@@ -104,7 +104,7 @@ class CaptchaMiddleware(object):
         chrome_options = Options()
         chrome_options.add_argument('--headless')
         chrome_options.add_argument('--disable-gpu')
-        chrome_options.add_argument('--disable-setuid-sandbox')
+        chrome_options.add_argument('--no-sandbox')
         # 去掉提示：Chrome正收到自动测试软件的控制
         # chrome_options.add_argument('disable-infobars')
         chrome_options.add_argument('--proxy-server=192.168.2.144:16127')
