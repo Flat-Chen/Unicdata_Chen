@@ -65,32 +65,32 @@ def getProxy():
 class Che300XcxUserAgentMiddleware(object):
     def __init__(self):
         self.count = 0
-        self.cookie_str = r.lpop("che300_gz:cookies")
 
     def process_request(self, request, spider):
-        ua = random.choice(self.user_agent_list)
+        ua = random.choice(user_agent_list)
         request.headers.setdefault('User-Agent', ua)
 
-    user_agent_list = [
-        "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/22.0.1207.1 Safari/537.1",
-        "Mozilla/5.0 (X11; CrOS i686 2268.111.0) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11",
-        "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.6 (KHTML, like Gecko) Chrome/20.0.1092.0 Safari/536.6",
-        "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.6 (KHTML, like Gecko) Chrome/20.0.1090.0 Safari/536.6",
-        "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/19.77.34.5 Safari/537.1",
-        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.9 Safari/536.5",
-        "Mozilla/5.0 (Windows NT 6.0) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.36 Safari/536.5",
-        "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1063.0 Safari/536.3",
-        "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1063.0 Safari/536.3",
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_0) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1063.0 Safari/536.3",
-        "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1062.0 Safari/536.3",
-        "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1062.0 Safari/536.3",
-        "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1061.1 Safari/536.3",
-        "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1061.1 Safari/536.3",
-        "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1061.1 Safari/536.3",
-        "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1061.0 Safari/536.3",
-        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.24 (KHTML, like Gecko) Chrome/19.0.1055.1 Safari/535.24",
-        "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/535.24 (KHTML, like Gecko) Chrome/19.0.1055.1 Safari/535.24",
-    ]
+
+user_agent_list = [
+    "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/22.0.1207.1 Safari/537.1",
+    "Mozilla/5.0 (X11; CrOS i686 2268.111.0) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11",
+    "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.6 (KHTML, like Gecko) Chrome/20.0.1092.0 Safari/536.6",
+    "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.6 (KHTML, like Gecko) Chrome/20.0.1090.0 Safari/536.6",
+    "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/19.77.34.5 Safari/537.1",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.9 Safari/536.5",
+    "Mozilla/5.0 (Windows NT 6.0) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.36 Safari/536.5",
+    "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1063.0 Safari/536.3",
+    "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1063.0 Safari/536.3",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_0) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1063.0 Safari/536.3",
+    "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1062.0 Safari/536.3",
+    "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1062.0 Safari/536.3",
+    "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1061.1 Safari/536.3",
+    "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1061.1 Safari/536.3",
+    "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1061.1 Safari/536.3",
+    "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1061.0 Safari/536.3",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.24 (KHTML, like Gecko) Chrome/19.0.1055.1 Safari/535.24",
+    "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/535.24 (KHTML, like Gecko) Chrome/19.0.1055.1 Safari/535.24",
+]
 
 
 class CaptchaMiddleware(object):
@@ -103,12 +103,20 @@ class CaptchaMiddleware(object):
         self.continuous_count = 0
         chrome_options = Options()
         chrome_options.add_argument('--headless')
+        chrome_options.add_argument('--disable-gpu')
         # 去掉提示：Chrome正收到自动测试软件的控制
         # chrome_options.add_argument('disable-infobars')
         chrome_options.add_argument('--proxy-server=192.168.2.144:16127')
-        chrome_options.add_argument('user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
-                                    'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36')
-
+        ua = random.choice(user_agent_list)
+        chrome_options.add_argument('user-agent=' + ua)
+        # prefs = {
+        #     'profile.default_content_setting_values': {
+        #         'images': 1,
+        #         'permissions.default.stylesheet': 1,
+        #         'javascript': 1
+        #     }
+        # }
+        # chrome_options.add_experimental_option('prefs', prefs)
         self.browser = Chrome(options=chrome_options)
 
         # 擦除浏览器指纹
@@ -323,7 +331,6 @@ class CaptchaMiddleware(object):
                      (141, 7), (144, 8), (147, 8), (149, 9), (150, 9), (151, 10), (153, 10), (155, 10), (157, 11),
                      (160, 11), (161, 11), (163, 11), (167, 13), (169, 13), (171, 13), (173, 13), (174, 13)]
         list_ren = random.choice([list_ren1, list_ren2, list_ren3, list_ren4])
-
         q = removing / list_ren[-1][0]
         list_moni = []
         for i in list_ren:
@@ -352,20 +359,22 @@ class CaptchaMiddleware(object):
             self.browser.get(request.url)
             # time.sleep(0.1)
             if 'forbidden' in self.browser.current_url:
+                # self.browser.delete_all_cookies()
+                # logging.info('................清除所有cookie..............')
                 self.continuous_count = 0
                 logging.warning('·····················出现验证码，开始处理滑块！··············')
+                time.sleep(15)
                 for i in range(10):
+                    time.sleep(2)
                     if '价格区间分布' in self.browser.page_source:
                         logging.info('===============滑块通过成功==============')
                         break
                     if 'id="dx_captcha_basic_wrapper_1"' not in self.browser.page_source:
                         self.browser.refresh()
                         logging.warning('！！！！！！验证码模块未加载出来 刷新页面！！！！！')
-                        # 点完刷新按钮让他缓缓，别狂点刷新
-                        time.sleep(3)
                     try:
-                        # 等待一段时间让验证码图片加载出来
-                        time.sleep(2)
+                        # # 等待一段时间让验证码图片加载出来
+                        # time.sleep(2)
                         self.get_yzm(self.browser)
                         # 用来保存验证码样本的计数
                         # self.count = self.count + 1
@@ -379,7 +388,7 @@ class CaptchaMiddleware(object):
                         elif '该网页无法正常运作' in self.browser.page_source:
                             self.browser.refresh()
                             logging.warning('！！！！！！网页崩溃，刷新页面！！！！！')
-                        time.sleep(2)
+                        # time.sleep(2)
                         continue
                     try:
                         removing = self.run()
@@ -387,15 +396,15 @@ class CaptchaMiddleware(object):
                         logging.warning('！！！！！！未识别到缺口位置，刷新到下一张验证码重试！！！！！')
                         flash = self.browser.find_element_by_id("dx_captcha_basic_btn-refresh_1")
                         ActionChains(self.browser).click(flash).perform()
-                        time.sleep(1)
+                        # time.sleep(1)
                         continue
                     list_moni = self.get_removing(removing)
-                    logging.warning('-------->-------->正在移动滑块<--------<--------')
+                    logging.info('-------->-------->正在移动滑块<--------<--------')
                     self.move(self.browser, list_moni)
-                    time.sleep(3)
+                    # time.sleep(3)
             else:
                 self.continuous_count += 1
-                logging.warning(f'**************上个验证码通过成功后，连续{self.continuous_count}个url没有出现验证码***************')
+                logging.info(f'**************上个验证码通过成功后，连续{self.continuous_count}个url没有出现验证码***************')
         except:
             logging.error("加载页面太慢，停止加载，继续下一步操作")
             self.browser.execute_script("window.stop()")

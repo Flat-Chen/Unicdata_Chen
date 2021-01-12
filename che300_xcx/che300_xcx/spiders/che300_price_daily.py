@@ -119,6 +119,7 @@ class Che300PriceDailySpider(RedisSpider):
             for k, v in evalResult.items():
                 item[k] = v
             yield item
-        except AttributeError:
+        except Exception as e:
+            logging.error('解析数据出错', e)
             con.rpush('che300_price_daily:start_urls', response.url)
             logging.warning('==================url重新添加到redis尾部===================')
