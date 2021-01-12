@@ -406,11 +406,13 @@ class CaptchaMiddleware(object):
             else:
                 self.continuous_count += 1
                 logging.info(f'**************上个验证码通过成功后，连续{self.continuous_count}个url没有出现验证码***************')
+            url = self.browser.current_url
+            body = self.browser.page_source
         except:
             logging.error("加载页面太慢，停止加载，继续下一步操作")
             self.browser.execute_script("window.stop()")
-        url = self.browser.current_url
-        body = self.browser.page_source
+            url = request.url
+            body = self.browser.page_source
 
         return TextResponse(url=url, body=body, encoding="utf-8", request=request)
 
