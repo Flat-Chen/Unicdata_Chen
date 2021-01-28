@@ -61,9 +61,9 @@ class Che300PriceDailySpider(RedisSpider):
         'MYSQL_DB': 'che300',
         'MYSQL_TABLE': 'che300_price_daily',
         'MYSQL_PWD': 'Datauser@2020',
-        'MONGODB_SERVER': '192.168.1.94',
+        'MONGODB_SERVER': '192.168.2.149',
         'MONGODB_DB': 'che300',
-        'MONGODB_COLLECTION': 'che300_price_daily_old',
+        'MONGODB_COLLECTION': 'che300_price_daily',
         'CONCURRENT_REQUESTS': 1,
         'DOWNLOAD_DELAY': 0,
         'LOG_LEVEL': 'DEBUG',
@@ -78,7 +78,6 @@ class Che300PriceDailySpider(RedisSpider):
             'che300_xcx.middlewares.Che300XcxUserAgentMiddleware': 200,
             'che300_xcx.middlewares.CaptchaMiddleware': 100,
         }
-
     }
 
     def structure_http(self, result):
