@@ -57,7 +57,7 @@ class AutohomeLuntan20201111Spider(scrapy.Spider):
         'MONGODB_DB': 'luntan',
         'MONGODB_COLLECTION': 'luntan_autohome_lost4',
         'CONCURRENT_REQUESTS': 8,
-        'DOWNLOAD_DELAY': 1.5,
+        'DOWNLOAD_DELAY': 0,
         'LOG_LEVEL': 'DEBUG',
         'DOWNLOAD_TIMEOUT': 10,
         # 'RETRY_ENABLED': True,
@@ -89,11 +89,19 @@ class AutohomeLuntan20201111Spider(scrapy.Spider):
                 riqi = str(nowyear - 1) + '-' + str(11) + '-' + str(nowdays + 20)
             else:
                 riqi = str(nowyear) + '-' + str(nowmonth - 2) + '-' + str(nowdays + 20)
+        riqi = riqi.split('-')
+        riqi[1] = '0'+riqi[1] if int(riqi[1]) < 10 else riqi[1]
+        riqi[2] = '0' + riqi[2] if int(riqi[2]) < 10 else riqi[2]
+        riqi = riqi[0] + '-' + riqi[1] + '-' + riqi[2]
+        print(riqi)
         self.be_p1 = get_be_p1_list()
         lost_urls = self.collection.find(
             ({"$and": [{"posted_time": {'$gte': riqi}}, {"$or": [{"content": 'yzm'}, {"content": None}]},
                        {"isvideo": 0}]}))
         lost_urls_list = list(lost_urls)
+        print(riqi)
+        print(len(lost_urls_list))
+        print('111111111111111111111111111111')
         for lost_url in lost_urls_list:
             url = lost_url['url']
             meta = {'brand': lost_url['brand'], 'factory': lost_url['factory'], 'url': url, '_id': lost_url['_id']}

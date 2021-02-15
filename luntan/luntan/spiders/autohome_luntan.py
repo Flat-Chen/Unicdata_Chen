@@ -133,8 +133,11 @@ class AutohomeLuntanSpider(scrapy.Spider):
                 # 就是要把这个tiezi_url存起来 进行比对
             # 只爬当前月份和前一个月份的帖子
             # 如当前页 最后一条的帖子的发帖时间是两个月前的则不再进行翻页
-            nowmonth = datetime.datetime.now().month
-            if int(pinglun_url_dict["result"]["list"][-1]['postdate'].split('-')[1]) > int(nowmonth - 4):
+            ctime = time.strptime(pinglun_url_dict["result"]["list"][-1]['postdate'], "%Y-%m-%d %H:%M:%S")
+            timeStamp = time.mktime(ctime)
+            now_time = time.time()
+
+            if (now_time - timeStamp) / 60 / 60 / 24 < 60:
                 url = "https://club.autohome.com.cn/frontapi/topics/getByBbsId?pageindex={}&pagesize=100&bbs=c&bbsid={}&fields=topicid%2Ctitle%2Cpost_memberid%2Cpost_membername%2Cpostdate%2Cispoll%2Cispic%2Cisrefine%2Creplycount%2Cviewcount%2Cvideoid%2Cisvideo%2Cvideoinfo%2Cqainfo%2Ctags%2Ctopictype%2Cimgs%2Cjximgs%2Curl%2Cpiccount%2Cisjingxuan%2Cissolve%2Cliveid%2Clivecover%2Ctopicimgs&orderby=topicid-"
                 response.meta["page"] = response.meta["page"] + 1
                 url = url.format(response.meta["page"], response.meta["id"], )
