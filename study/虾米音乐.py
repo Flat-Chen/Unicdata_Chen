@@ -6,7 +6,7 @@ import re
 import json
 import hashlib
 
-cookie = input('输入口令：')
+cookie = 'xm_sg_tk=9d7a23c4e2e396d69568c0532163738b_1611039889329; xm_sg_tk.sig=4GUo_KTkvzJr2OcRwHKojH7-Hm5vIvcvJUIQHD-Blvg;'
 serch = input('输入搜索关键字：')
 headers = {
     'cookie': cookie,

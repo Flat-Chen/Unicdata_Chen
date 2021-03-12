@@ -34,7 +34,7 @@ def start_driver():
     chrome_options = Options()
     # chrome_options.add_argument("--headless")
     ip = getProxy()
-    # ip = '81.68.214.148:16128'
+    ip = '81.68.214.148:16128'
     chrome_options.add_argument(('--proxy-server=' + ip))
     chrome_options.add_argument(
         'user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36')

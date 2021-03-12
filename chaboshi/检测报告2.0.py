@@ -138,12 +138,12 @@ def jiancebaogao2(url):
 
 
 url_list = [
-    'https://m.chaboshi.cn/wap/findShareDetection?orderno=ec590488fc4f4187871f1425551d02be'
+    'http://m.chaboshi.cn/web/pcInsuranceReportV2?orderno=52f22e411393413aac50c20a1a6ca46d&showQ=-1'
 ]
 
 connection = pymongo.MongoClient("192.168.2.149", 27017)
 db = connection['chaboshi']
-collection = db['report6.0']
+collection = db['report8.0']
 for url in url_list:
     item = {}
     meta = jiancebaogao2(url)

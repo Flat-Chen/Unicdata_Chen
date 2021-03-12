@@ -58,7 +58,7 @@ class AutohomeLuntanSpider(scrapy.Spider):
         'MONGODB_PORT': 27017,
         'MONGODB_DB': 'luntan',
         'MONGODB_COLLECTION': 'autohome_luntan_url_2020_11',
-        'CONCURRENT_REQUESTS': 8,
+        'CONCURRENT_REQUESTS': 36,
         'DOWNLOAD_DELAY': 0,
         'LOG_LEVEL': 'DEBUG',
         'DOWNLOAD_TIMEOUT': 15,
@@ -98,7 +98,7 @@ class AutohomeLuntanSpider(scrapy.Spider):
                         meta = {"id": car_id, "user_car": user_car, "page": 1, "brand": brand,
                                 'factory': self.factory[brand]}
                         # print(meta)
-                        url = "https://club.autohome.com.cn/frontapi/topics/getByBbsId?pageindex=1&pagesize=100&bbs=c&bbsid={}&fields=topicid%2Ctitle%2Cpost_memberid%2Cpost_membername%2Cpostdate%2Cispoll%2Cispic%2Cisrefine%2Creplycount%2Cviewcount%2Cvideoid%2Cisvideo%2Cvideoinfo%2Cqainfo%2Ctags%2Ctopictype%2Cimgs%2Cjximgs%2Curl%2Cpiccount%2Cisjingxuan%2Cissolve%2Cliveid%2Clivecover%2Ctopicimgs&orderby=topicid-".format(
+                        url = "https://club.autohome.com.cn/frontapi/data/page/club_get_topics_list?page_num=1&page_size=10000&club_bbs_id={}".format(
                             car_id)
                         yield scrapy.Request(url=url, callback=self.page_turning,
                                              meta=meta,
@@ -118,30 +118,31 @@ class AutohomeLuntanSpider(scrapy.Spider):
         if pinglun_url_dict["returncode"] != 0:
             return
         else:
-            for pinglun_url in pinglun_url_dict["result"]["list"]:
+            for pinglun_url in pinglun_url_dict["result"]["items"]:
                 item["grabtime"] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-                item['posted_time'] = pinglun_url['postdate']
-                item["isvideo"] = pinglun_url['isvideo']
+                item['posted_time'] = pinglun_url['publish_time']
+                item["isvideo"] = 0
+                # item["isvideo"] = pinglun_url['club_is_video']
                 item["car_id"] = meta['id']
                 item['user_car'] = meta['user_car']
                 item['page'] = meta['page']
                 item['brand'] = meta['brand']
                 item['factory'] = meta['factory']
-                item['url'] = pinglun_url["url"]
-                item['status'] = pinglun_url["url"]
+                item['url'] = pinglun_url["pc_url"]
+                item['status'] = pinglun_url["pc_url"]
                 yield item
                 # 就是要把这个tiezi_url存起来 进行比对
-            # 只爬当前月份和前一个月份的帖子
-            # 如当前页 最后一条的帖子的发帖时间是两个月前的则不再进行翻页
-            ctime = time.strptime(pinglun_url_dict["result"]["list"][-1]['postdate'], "%Y-%m-%d %H:%M:%S")
-            timeStamp = time.mktime(ctime)
-            now_time = time.time()
-
-            if (now_time - timeStamp) / 60 / 60 / 24 < 60:
-                url = "https://club.autohome.com.cn/frontapi/topics/getByBbsId?pageindex={}&pagesize=100&bbs=c&bbsid={}&fields=topicid%2Ctitle%2Cpost_memberid%2Cpost_membername%2Cpostdate%2Cispoll%2Cispic%2Cisrefine%2Creplycount%2Cviewcount%2Cvideoid%2Cisvideo%2Cvideoinfo%2Cqainfo%2Ctags%2Ctopictype%2Cimgs%2Cjximgs%2Curl%2Cpiccount%2Cisjingxuan%2Cissolve%2Cliveid%2Clivecover%2Ctopicimgs&orderby=topicid-"
-                response.meta["page"] = response.meta["page"] + 1
-                url = url.format(response.meta["page"], response.meta["id"], )
-                yield scrapy.Request(url=url,
-                                     callback=self.page_turning, meta=response.meta, headers=self.headers,
-                                     dont_filter=True)
-                print(response.meta["page"])
+            # # 只爬当前月份和前一个月份的帖子
+            # # 如当前页 最后一条的帖子的发帖时间是两个月前的则不再进行翻页
+            # ctime = time.strptime(pinglun_url_dict["result"]["list"][-1]['postdate'], "%Y-%m-%d %H:%M:%S")
+            # timeStamp = time.mktime(ctime)
+            # now_time = time.time()
+            #
+            # if (now_time - timeStamp) / 60 / 60 / 24 < 60:
+            #     url = "https://club.autohome.com.cn/frontapi/topics/getByBbsId?pageindex={}&pagesize=100&bbs=c&bbsid={}&fields=topicid%2Ctitle%2Cpost_memberid%2Cpost_membername%2Cpostdate%2Cispoll%2Cispic%2Cisrefine%2Creplycount%2Cviewcount%2Cvideoid%2Cisvideo%2Cvideoinfo%2Cqainfo%2Ctags%2Ctopictype%2Cimgs%2Cjximgs%2Curl%2Cpiccount%2Cisjingxuan%2Cissolve%2Cliveid%2Clivecover%2Ctopicimgs&orderby=topicid-"
+            #     response.meta["page"] = response.meta["page"] + 1
+            #     url = url.format(response.meta["page"], response.meta["id"], )
+            #     yield scrapy.Request(url=url,
+            #                          callback=self.page_turning, meta=response.meta, headers=self.headers,
+            #                          dont_filter=True)
+            #     print(response.meta["page"])
