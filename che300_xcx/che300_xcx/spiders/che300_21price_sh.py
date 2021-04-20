@@ -72,12 +72,12 @@ class Che30021PriceShSpider(scrapy.Spider):
         'REDIS_URL': 'redis://192.168.2.149:6379/8',
         'DOWNLOAD_TIMEOUT': 8,
         'RETRY_ENABLED': True,
-        'RETRY_TIMES': 1,
+        'RETRY_TIMES': 5,
         'DOWNLOADER_MIDDLEWARES': {
             'che300_xcx.middlewares.Che300XcxUserAgentMiddleware': 543,
             'che300_xcx.middlewares.Che300XcxProxyMiddleware': 400,
             # 'che300_new.middlewares.Che300NewUserAgentMiddleware': 100,
-            # 'che300_xcx.middlewares.Captcha21Middleware': 500,
+            'che300_xcx.middlewares.Captcha21Middleware': 500,
         }
 
     }
@@ -139,81 +139,89 @@ class Che30021PriceShSpider(scrapy.Spider):
             con.rpush('che300_21price:start_urls', response.meta['requests_url'])
             logging.warning('出现验证码了，重新将URL加入到redis队列尾部')
         else:
-            font_url = re.findall('url\("(.*?)"\) format\("woff"\);', response.text, re.M)[0]
-            font = requests.get(font_url, headers=self.headers)
-            tmpe_file = self.string_to_file(font.content)
-            new_font_dict = self.parse_front_html(tmpe_file, response.text)
-            # print(new_font_dict)
+            try:
+                font_url = re.findall('url\("(.*?)"\) format\("woff"\);', response.text, re.M)[0]
+                font = requests.get(font_url, headers=self.headers)
+                tmpe_file = self.string_to_file(font.content)
+                new_font_dict = self.parse_front_html(tmpe_file, response.text)
+                # print(new_font_dict)
 
-            response_ = response.text
-            # 替换字体
-            for k, v in new_font_dict.items():
-                if k in response_:
-                    response_ = response_.replace(k, str(v))
-            html = etree.HTML(response_)
-            meta = self.structure_http(response.url)
-            item = dict()
-            item["grabtime"] = time.strftime('%Y-%m-%d %X', time.localtime())
-            item["url"] = response.url
-            item["normal_price1"] = \
-                html.xpath("//div[@id='car-normal']//li[@class='dealer_low_buy_price stonefont']/text()")[0]
-            item["normal_price2"] = \
-                html.xpath("//div[@id='car-normal']//div[@class='dealer_buy_price stonefont']/text()")[0]
-            item["normal_price3"] = \
-                html.xpath("//div[@id='car-normal']//li[@class='individual_low_sold_price stonefont']/text()")[0]
-            item["normal_price4"] = \
-                html.xpath("//div[@id='car-normal']//div[@class='individual_price stonefont']/text()")[0]
-            item["normal_price5"] = \
-                html.xpath("//div[@id='car-normal']//li[@class='dealer_low_sold_price stonefont']/text()")[0]
-            item["normal_price6"] = html.xpath("//div[@id='car-normal']//div[@class='dealer_price stonefont']/text()")[
-                0]
-            item["normal_price7"] = \
-                html.xpath("//div[@id='car-normal']//li[@class='dealer_high_sold_price stonefont']/text()")[0]
+                response_ = response.text
+                # 替换字体
+                for k, v in new_font_dict.items():
+                    if k in response_:
+                        response_ = response_.replace(k, str(v))
+                html = etree.HTML(response_)
+                meta = self.structure_http(response.url)
+                item = dict()
+                item["grabtime"] = time.strftime('%Y-%m-%d %X', time.localtime())
+                item["url"] = response.url
+                item["normal_price1"] = \
+                    html.xpath("//div[@id='car-normal']//li[@class='dealer_low_buy_price stonefont']/text()")[0]
+                item["normal_price2"] = \
+                    html.xpath("//div[@id='car-normal']//div[@class='dealer_buy_price stonefont']/text()")[0]
+                item["normal_price3"] = \
+                    html.xpath("//div[@id='car-normal']//li[@class='individual_low_sold_price stonefont']/text()")[0]
+                item["normal_price4"] = \
+                    html.xpath("//div[@id='car-normal']//div[@class='individual_price stonefont']/text()")[0]
+                item["normal_price5"] = \
+                    html.xpath("//div[@id='car-normal']//li[@class='dealer_low_sold_price stonefont']/text()")[0]
+                item["normal_price6"] = html.xpath("//div[@id='car-normal']//div[@class='dealer_price stonefont']/text()")[
+                    0]
+                item["normal_price7"] = \
+                    html.xpath("//div[@id='car-normal']//li[@class='dealer_high_sold_price stonefont']/text()")[0]
 
-            item["good_price1"] = \
-                html.xpath("//div[@id='car-good']//li[@class='dealer_low_buy_price stonefont']/text()")[0]
-            item["good_price2"] = html.xpath("//div[@id='car-good']//div[@class='dealer_buy_price stonefont']/text()")[
-                0]
-            item["good_price3"] = \
-                html.xpath("//div[@id='car-good']//li[@class='individual_low_sold_price stonefont']/text()")[0]
-            item["good_price4"] = html.xpath("//div[@id='car-good']//div[@class='individual_price stonefont']/text()")[
-                0]
-            item["good_price5"] = \
-                html.xpath("//div[@id='car-good']//li[@class='dealer_low_sold_price stonefont']/text()")[0]
-            item["good_price6"] = html.xpath("//div[@id='car-good']//div[@class='dealer_price stonefont']/text()")[0]
-            item["good_price7"] = \
-                html.xpath("//div[@id='car-good']//li[@class='dealer_high_sold_price stonefont']/text()")[0]
+                item["good_price1"] = \
+                    html.xpath("//div[@id='car-good']//li[@class='dealer_low_buy_price stonefont']/text()")[0]
+                item["good_price2"] = html.xpath("//div[@id='car-good']//div[@class='dealer_buy_price stonefont']/text()")[
+                    0]
+                item["good_price3"] = \
+                    html.xpath("//div[@id='car-good']//li[@class='individual_low_sold_price stonefont']/text()")[0]
+                item["good_price4"] = html.xpath("//div[@id='car-good']//div[@class='individual_price stonefont']/text()")[
+                    0]
+                item["good_price5"] = \
+                    html.xpath("//div[@id='car-good']//li[@class='dealer_low_sold_price stonefont']/text()")[0]
+                item["good_price6"] = html.xpath("//div[@id='car-good']//div[@class='dealer_price stonefont']/text()")[0]
+                item["good_price7"] = \
+                    html.xpath("//div[@id='car-good']//li[@class='dealer_high_sold_price stonefont']/text()")[0]
 
-            item["excellent_price1"] = \
-                html.xpath("//div[@id='car-excellent']//li[@class='dealer_low_buy_price stonefont']/text()")[0]
-            item["excellent_price2"] = \
-                html.xpath("//div[@id='car-excellent']//div[@class='dealer_buy_price stonefont']/text()")[0]
-            item["excellent_price3"] = \
-                html.xpath("//div[@id='car-excellent']//li[@class='individual_low_sold_price stonefont']/text()")[0]
-            item["excellent_price4"] = \
-                html.xpath("//div[@id='car-excellent']//div[@class='individual_price stonefont']/text()")[0]
-            item["excellent_price5"] = \
-                html.xpath("//div[@id='car-excellent']//li[@class='dealer_low_sold_price stonefont']/text()")[0]
-            item["excellent_price6"] = \
-                html.xpath("//div[@id='car-excellent']//div[@class='dealer_price stonefont']/text()")[0]
-            item["excellent_price7"] = \
-                html.xpath("//div[@id='car-excellent']//li[@class='dealer_high_sold_price stonefont']/text()")[0]
+                item["excellent_price1"] = \
+                    html.xpath("//div[@id='car-excellent']//li[@class='dealer_low_buy_price stonefont']/text()")[0]
+                item["excellent_price2"] = \
+                    html.xpath("//div[@id='car-excellent']//div[@class='dealer_buy_price stonefont']/text()")[0]
+                item["excellent_price3"] = \
+                    html.xpath("//div[@id='car-excellent']//li[@class='individual_low_sold_price stonefont']/text()")[0]
+                item["excellent_price4"] = \
+                    html.xpath("//div[@id='car-excellent']//div[@class='individual_price stonefont']/text()")[0]
+                item["excellent_price5"] = \
+                    html.xpath("//div[@id='car-excellent']//li[@class='dealer_low_sold_price stonefont']/text()")[0]
+                item["excellent_price6"] = \
+                    html.xpath("//div[@id='car-excellent']//div[@class='dealer_price stonefont']/text()")[0]
+                item["excellent_price7"] = \
+                    html.xpath("//div[@id='car-excellent']//li[@class='dealer_high_sold_price stonefont']/text()")[0]
 
-            # item["evalResult"] = str(re.findall("evalResult='(.*?)';", response_.replace(' ', ''))[0])
-            item["evalResult"] = json.dumps(
-                (json.loads(re.findall("evalResult='(.*?)';", response_.replace(' ', ''))[0])), ensure_ascii=False)
+                # item["evalResult"] = str(re.findall("evalResult='(.*?)';", response_.replace(' ', ''))[0])
+                item["evalResult"] = json.dumps(
+                    (json.loads(re.findall("evalResult='(.*?)';", response_.replace(' ', ''))[0])), ensure_ascii=False)
 
-            item["brand"] = meta["brand"]
-            item["series"] = meta["series"]
-            item["salesdescid"] = meta["model"]
-            item["regDate"] = meta["registerDate"]
-            item["cityid"] = meta["city"]
-            item["prov"] = meta["prov"]
-            item["mile"] = meta["mile"]
-            # item["statusplus"] = response.url
-            # item["status"] = item["statusplus"]
-            # print(item)
-            yield item
+                item["brand"] = meta["brand"]
+                item["series"] = meta["series"]
+                item["salesdescid"] = meta["model"]
+                item["regDate"] = meta["registerDate"]
+                item["cityid"] = meta["city"]
+                item["prov"] = meta["prov"]
+                item["mile"] = meta["mile"]
+                # item["statusplus"] = response.url
+                # item["status"] = item["statusplus"]
+                # print(item)
+                if r'\u' not in str(item):
+                    yield item
+                else:
+                    logging.warning('验证码过去了，价格是乱码，舍弃，不存')
+                    con.rpush('che300_21price:start_urls', response.url)
+            except:
+                con.rpush('che300_21price:start_urls', response.meta['requests_url'])
+                logging.warning('页面出现错误，重新将URL加入到redis队列尾部')
 
         next_url = con.lpop('che300_21price:start_urls')
         url = bytes.decode(next_url)

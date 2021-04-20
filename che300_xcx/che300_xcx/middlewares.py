@@ -29,12 +29,12 @@ class Che300XcxProxyMiddleware(object):
         self.count = 0
         self.proxy = "http://" + getProxy()
 
-    def process_exception(self, request, exception, spider):
-        if isinstance(exception, TimeoutError):
-            self.proxy = "http://" + getProxy()
-            request.meta['proxy'] = self.proxy
-            print(f'Get a new ip {self.proxy}!')
-            return request
+    # def process_exception(self, request, exception, spider):
+    #     if isinstance(exception, TimeoutError):
+    #         self.proxy = "http://" + getProxy()
+    #         request.meta['proxy'] = self.proxy
+    #         print(f'Get a new ip {self.proxy}!')
+    #         # return requestz
 
     def process_request(self, request, spider):
         # 要使用代理的爬虫名字写进去
@@ -44,10 +44,10 @@ class Che300XcxProxyMiddleware(object):
         proxy = getProxy()
         request.meta['proxy'] = "http://" + proxy
 
-    def process_response(self, request, response, spider):
-        if response.status in [500]:
-            print(response.url)
-        return response
+    # def process_response(self, request, response, spider):
+    #     if response.status in [500]:
+    #         print(response.url)
+    #     return response
 
 
 def getProxy():
@@ -68,6 +68,7 @@ class Che300XcxUserAgentMiddleware(object):
 
     def process_request(self, request, spider):
         ua = random.choice(user_agent_list)
+        ua = 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1'
         request.headers.setdefault('User-Agent', ua)
 
 
@@ -102,7 +103,7 @@ class CaptchaMiddleware(object):
         self.count = 0
         self.continuous_count = 0
         chrome_options = Options()
-        chrome_options.add_argument('--headless')
+        # chrome_options.add_argument('--headless')
         chrome_options.add_argument('--disable-gpu')
         chrome_options.add_argument('--no-sandbox')
         # 去掉提示：Chrome正收到自动测试软件的控制
@@ -357,11 +358,15 @@ class CaptchaMiddleware(object):
         #     logging.warning('！！！！！！出现验证码 进入中间件处理！！！！！')
         #     # 此处访问要请求的url
         try:
+            # # 清除cookie
+            # cookies = self.browser.get_cookies()
+            # print(f"main: cookies = {cookies}")
+            # self.browser.delete_all_cookies()
             self.browser.get(request.url)
             # time.sleep(0.1)
             if 'forbidden' in self.browser.current_url:
-                # self.browser.delete_all_cookies()
-                # logging.info('................清除所有cookie..............')
+                self.browser.delete_all_cookies()
+                logging.info('................清除所有cookie..............')
                 self.continuous_count = 0
                 logging.warning('·····················出现验证码，开始处理滑块！··············')
                 time.sleep(15)
@@ -414,7 +419,7 @@ class CaptchaMiddleware(object):
             url = request.url
             body = self.browser.page_source
 
-        return TextResponse(url=url, body=body, encoding="utf-8", request=request)
+        # return TextResponse(url=url, body=body, encoding="utf-8", request=request)
 
 
 class Captcha21Middleware(object):
@@ -680,7 +685,7 @@ class Captcha21Middleware(object):
                     # logging.info('................清除所有cookie..............')
                     self.continuous_count = 0
                     logging.warning('·····················出现验证码，开始处理滑块！··············')
-                    time.sleep(15)
+                    time.sleep(2)
                     for i in range(10):
                         time.sleep(2)
                         if '价格区间分布' in self.browser.page_source:
@@ -718,8 +723,33 @@ class Captcha21Middleware(object):
                             continue
                         list_moni = self.get_removing(removing)
                         logging.info('-------->-------->正在移动滑块<--------<--------')
-                        # self.move(self.browser, list_moni)
-                        time.sleep(15)
+                        self.move(self.browser, list_moni)
+                        time.sleep(2)
+                        if 'id="dx_captcha_clickword_hits_2"' in self.browser.page_source:
+                            try:
+                                self.browser.quit()
+                                self.browser.close()
+                            except:
+                                pass
+                            chrome_options = Options()
+                            # chrome_options.add_argument('--headless')
+                            chrome_options.add_argument('--disable-gpu')
+                            chrome_options.add_argument('--no-sandbox')
+                            # 去掉提示：Chrome正收到自动测试软件的控制
+                            # chrome_options.add_argument('disable-infobars')
+                            chrome_options.add_argument('--proxy-server=192.168.2.144:16127')
+                            ua = 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1'
+                            chrome_options.add_argument('user-agent=' + ua)
+                            self.browser = Chrome(options=chrome_options)
+
+                            # 擦除浏览器指纹
+                            with open('stealth.min.js') as f:
+                                self.clean_js = f.read()
+
+                            self.browser.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
+                                "source": self.clean_js
+                            })
+                        # time.sleep(15)
 
                 else:
                     self.continuous_count += 1
