@@ -731,6 +731,7 @@ class Captcha21Middleware(object):
                                 self.browser.close()
                             except:
                                 pass
+                            logging.warning('出现第二道验证码，重启浏览器！')
                             chrome_options = Options()
                             # chrome_options.add_argument('--headless')
                             chrome_options.add_argument('--disable-gpu')
