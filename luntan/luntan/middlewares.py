@@ -51,7 +51,7 @@ class LuntanProxyMiddleware(object):
 def getProxy():
     s = requests.session()
     s.keep_alive = False
-    url_list = ['http://192.168.2.120:5000']
+    url_list = ['http://120.27.216.150:5000']
     # random.shuffle(url_list)
     url = url_list[0]
     headers = {

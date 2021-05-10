@@ -55,6 +55,18 @@ DOWNLOADER_MIDDLEWARES = {
     'luntan.middlewares.LuntanUserAgentMiddleware': 101,
 }
 
+# 不验证SSL证书
+# DOWNLOAD_HANDLERS_BASE = {
+#     'file': 'scrapy.core.downloader.handlers.file.FileDownloadHandler',
+#     'http': 'scrapy.core.downloader.handlers.http.HttpDownloadHandler',
+#     'https': 'scrapy.core.downloader.handlers.http.HttpDownloadHandler',
+#     's3': 'scrapy.core.downloader.handlers.s3.S3DownloadHandler',
+# }
+# DOWNLOAD_HANDLERS = {
+#     'https': 'luntan.custom.downloader.handler.https.HttpsDownloaderIgnoreCNError',
+# }
+
+
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
 # EXTENSIONS = {
@@ -92,4 +104,4 @@ ITEM_PIPELINES = {
 # 是否开启重试
 RETRY_ENABLED = True
 # 重试次数
-RETRY_TIMES = 30
+RETRY_TIMES = 5

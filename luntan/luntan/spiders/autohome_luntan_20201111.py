@@ -90,7 +90,7 @@ class AutohomeLuntan20201111Spider(scrapy.Spider):
             else:
                 riqi = str(nowyear) + '-' + str(nowmonth - 2) + '-' + str(nowdays + 20)
         riqi = riqi.split('-')
-        riqi[1] = '0'+riqi[1] if int(riqi[1]) < 10 else riqi[1]
+        riqi[1] = '0' + riqi[1] if int(riqi[1]) < 10 else riqi[1]
         riqi[2] = '0' + riqi[2] if int(riqi[2]) < 10 else riqi[2]
         riqi = riqi[0] + '-' + riqi[1] + '-' + riqi[2]
         print(riqi)
@@ -103,8 +103,9 @@ class AutohomeLuntan20201111Spider(scrapy.Spider):
         print(len(lost_urls_list))
         print('111111111111111111111111111111')
         for lost_url in lost_urls_list:
-            url = lost_url['url']
-            meta = {'brand': lost_url['brand'], 'factory': lost_url['factory'], 'url': url, '_id': lost_url['_id']}
+            url = lost_url["url"].replace('https', 'http').replace('http', 'https')
+            meta = {'brand': lost_url['brand'], 'factory': lost_url['factory'], 'url': url, '_id': lost_url['_id'],
+                    'user_car': lost_url['user_car']}
             yield scrapy.Request(url=url, meta=meta, headers=self.headers, dont_filter=True)
             # break
 
@@ -164,17 +165,18 @@ class AutohomeLuntan20201111Spider(scrapy.Spider):
             item["url"] = response.url
             item["posted_time"] = response.xpath('//span[@class="post-handle-publish"]/strong/text()').extract_first()
             try:
+                item['user_car'] = response.meta['user_car'].strip("论坛")
+            except:
+                # print(response.meta['user_car'])
                 item["user_car"] = response.xpath("//div[@class='consnav']/span[2]/a/text()").extract_first().strip(
                     "论坛")
+            try:
+                item["reply_num"] = response.xpath('//span[@class="post-handle-reply"]//text()').extract_first()
+
+                item["content_num"] = response.xpath('//span[@class="post-handle-view"]//text()').extract_first()
+                item["click_num"] = item["content_num"]
             except:
-                item["user_car"] = response.xpath(
-                    '//div[@class="toolbar-left-bbs fn-fl"]/a/text()').extract_first().strip(
-                    "论坛")
-
-            item["reply_num"] = response.xpath('//span[@class="post-handle-reply"]//text()').extract_first()
-
-            item["content_num"] = response.xpath('//span[@class="post-handle-view"]//text()').extract_first()
-            item["click_num"] = item["content_num"]
+                pass
             # print(item)
             topicMemberId = re.findall(r'topicMemberId:(.\d*),', response.text)
 
