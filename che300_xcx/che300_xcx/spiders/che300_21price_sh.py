@@ -66,7 +66,7 @@ class Che30021PriceShSpider(scrapy.Spider):
         'MONGODB_SERVER': '192.168.1.94',
         'MONGODB_DB': 'che300',
         'MONGODB_COLLECTION': 'che300_21price_sh',
-        'CONCURRENT_REQUESTS': 1,
+        'CONCURRENT_REQUESTS': 16,
         'DOWNLOAD_DELAY': 0,
         'LOG_LEVEL': 'DEBUG',
         'REDIS_URL': 'redis://192.168.2.149:6379/8',
@@ -77,15 +77,17 @@ class Che30021PriceShSpider(scrapy.Spider):
             'che300_xcx.middlewares.Che300XcxUserAgentMiddleware': 543,
             'che300_xcx.middlewares.Che300XcxProxyMiddleware': 400,
             # 'che300_new.middlewares.Che300NewUserAgentMiddleware': 100,
-            'che300_xcx.middlewares.Captcha21Middleware': 500,
+            # 'che300_xcx.middlewares.Captcha21Middleware': 500,
         }
 
     }
 
     def start_requests(self):
-        url = con.lpop('che300_21price:start_urls')
-        url = bytes.decode(url)
-        yield scrapy.Request(str(url), meta={'requests_url': url})
+        while 1:
+            url = con.lpop('che300_21price:start_urls')
+            print(url)
+            url = bytes.decode(url)
+            yield scrapy.Request(str(url), meta={'requests_url': url})
 
     def string_to_file(self, string):
         file_like_obj = tempfile.NamedTemporaryFile()
